@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "glourb_floods",
+    "section": "",
+    "text": "This study aims at showing how participatory data such as the ones collected through the Wikimedia initiative (Wikidata, Wikipedia) document environmental and historical events (floods) in a way that is complementary to a physical definition of the event.\n\n\n\n\n\nJournal open access, pile dedans pour le scope\nThe journal’s scope includes but is not limited to:\n\nDigital Tools and Methods in Humanities Research: DHQ publishes articles that showcase innovative digital tools, methods, and approaches used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.\nCritical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the implications, challenges, and limitations of using digital technologies in humanities research. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.\nInterdisciplinary Collaborations: The journal promotes interdisciplinary collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.\nDigital Pedagogy and Teaching Approaches: DHQ discusses innovative pedagogical approaches that integrate digital tools and methods into humanities teaching. This includes case studies, reviews, and discussions on the use of technology in the classroom to enhance learning experiences.\nDigital Humanities Projects and Case Studies: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.\nOpen Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to data curation, preservation, and accessibility in the context of digital humanities research."
+  },
+  {
+    "objectID": "index.html#aim-of-the-article",
+    "href": "index.html#aim-of-the-article",
+    "title": "glourb_floods",
+    "section": "",
+    "text": "This study aims at showing how participatory data such as the ones collected through the Wikimedia initiative (Wikidata, Wikipedia) document environmental and historical events (floods) in a way that is complementary to a physical definition of the event."
+  },
+  {
+    "objectID": "index.html#journaux-potentiels",
+    "href": "index.html#journaux-potentiels",
+    "title": "glourb_floods",
+    "section": "",
+    "text": "Journal open access, pile dedans pour le scope\nThe journal’s scope includes but is not limited to:\n\nDigital Tools and Methods in Humanities Research: DHQ publishes articles that showcase innovative digital tools, methods, and approaches used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.\nCritical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the implications, challenges, and limitations of using digital technologies in humanities research. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.\nInterdisciplinary Collaborations: The journal promotes interdisciplinary collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.\nDigital Pedagogy and Teaching Approaches: DHQ discusses innovative pedagogical approaches that integrate digital tools and methods into humanities teaching. This includes case studies, reviews, and discussions on the use of technology in the classroom to enhance learning experiences.\nDigital Humanities Projects and Case Studies: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.\nOpen Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to data curation, preservation, and accessibility in the context of digital humanities research."
+  },
+  {
+    "objectID": "index.html#get-coordinates-if-possible",
+    "href": "index.html#get-coordinates-if-possible",
+    "title": "glourb_floods",
+    "section": "Get coordinates if possible",
+    "text": "Get coordinates if possible\n\nGet coordinates and country of locations\nNow we try and complete geographical informations based on Wikidata. For each location identifier, we collect data about\n\ncountry of the location (country_loc)\ncoordinates of the location (coords_loc)\ntype of location (loc_type)\n\n\nget_loc_info=function(loc_id){\n  result=spq_init() %&gt;%\n    spq_set(loc=loc_id) %&gt;% \n    spq_add(\"?loc wdt:P17 ?country_loc\") %&gt;% \n    spq_add(\"?loc wdt:P625 ?coords_loc\") %&gt;% \n    spq_add(\"?loc wdt:P31 ?loc_type\") %&gt;% \n    spq_label(loc, country_loc, loc_type) %&gt;% \n    spq_select(-loc) %&gt;% \n    spq_perform()\n  result\n}\n\nWe apply this query to all locations mentioned in wd_raw:\n\nif(!file.exists(\"data/locs.RDS\")){\n  locs=wd_raw %&gt;%\n    select(loc) %&gt;% \n    unique() %&gt;% \n    na.omit() %&gt;% \n    mutate(data=purrr::map(loc,get_loc_info)) %&gt;% \n    tidyr::unnest(data)\n  saveRDS(locs, \"data/locs.RDS\")\n}\nlocs=readRDS(\"data/locs.RDS\")\n\nNow we update the data about floods taking into account that supplementary data about locations:\n\nwd_loc=wd_raw %&gt;% \n  left_join(locs,by=\"loc\") %&gt;%\n  mutate(country_label=case_when(country_label==\"\"~country_loc_label,\n                                 country_label!=\"\"~country_label)) %&gt;% \n  mutate(country=case_when(is.na(country)~country_loc,\n                           !is.na(country)~country)) %&gt;% \n  mutate(coords_from=case_when(!is.na(coords)~\"flood\",\n                               is.na(coords)~\"location\")) %&gt;% \n  mutate(country=stringr::str_replace_all(country, \"http://www.wikidata.org/entity/\", \"wd:\"))\n\nWarning in left_join(., locs, by = \"loc\"): Detected an unexpected many-to-many relationship between `x` and `y`.\nℹ Row 1 of `x` matches multiple rows in `y`.\nℹ Row 76 of `y` matches multiple rows in `x`.\nℹ If a many-to-many relationship is expected, set `relationship =\n  \"many-to-many\"` to silence this warning.\n\n\n\n\nGet coordinates of countries\nWe also want to get country coordinates\n\nget_country_info=function(country_id){\n  result=spq_init() %&gt;%\n    spq_set(country=country_id) %&gt;% \n    spq_add(\"?country wdt:P625 ?coords_country\") %&gt;%\n    spq_select(-country) %&gt;% \n    spq_perform() \n  result\n}\n\n\nif(!file.exists(\"data/countries.RDS\")){\n  countries=wd_loc %&gt;%\n    select(country) %&gt;% \n    unique() %&gt;% \n    na.omit() %&gt;% \n    mutate(data=purrr::map(country,get_country_info)) %&gt;% \n    tidyr::unnest(data)\n  saveRDS(countries, \"data/countries.RDS\")\n}\ncountries=readRDS(\"data/countries.RDS\")\n\nNow we update the data about floods taking into account that supplementary data about countries:\n\nwd_loc=wd_loc %&gt;% \n  left_join(countries,by=\"country\") %&gt;%\n  mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~\"country\",\n                               !is.na(coords_loc)~coords_loc)) %&gt;% \n  mutate(coords=case_when(is.na(coords)~coords_loc,\n                          !is.na(coords)~coords)) %&gt;%\n  mutate(coords=case_when(is.na(coords)~coords_country,\n                          !is.na(coords)~coords))"
+  },
+  {
+    "objectID": "index.html#clean-dates",
+    "href": "index.html#clean-dates",
+    "title": "glourb_floods",
+    "section": "Clean dates",
+    "text": "Clean dates\n\nwd_loc2=wd_loc %&gt;% \n  mutate(mstart=lubridate::round_date(start,\"month\"),\n         mend=lubridate::round_date(end,\"month\"),\n         mdate=lubridate::round_date(date,\"month\")) %&gt;% \n  mutate(mstart=case_when(is.na(mstart)~mdate,\n                          !is.na(mstart)~mstart)) %&gt;% \n  mutate(mend=case_when(is.na(mend)~mdate,\n                        !is.na(mend)~mend)) %&gt;% \n  group_by(mstart,mend,mdate) %&gt;% \n  tidyr::nest()# %&gt;% \n  #mutate()"
+  },
+  {
+    "objectID": "index.html#select-variables-for-comparison",
+    "href": "index.html#select-variables-for-comparison",
+    "title": "glourb_floods",
+    "section": "Select variables for comparison",
+    "text": "Select variables for comparison\n\nwd_comp=wd_loc %&gt;% \n  select(flood,flood_label,country_label,deathtoll,start,end,date,coords)\n\nIn case coords are not provided, we approximate them with location coordinates (if available)."
+  },
+  {
+    "objectID": "index.html#monthly-summary",
+    "href": "index.html#monthly-summary",
+    "title": "glourb_floods",
+    "section": "monthly summary",
+    "text": "monthly summary\n\nall_dates=tibble::tibble(date=seq(from=lubridate::ymd(\"2000-01-01\"),\n                                  to=lubridate::ymd(\"2019-01-01\"),\n                                  by=\"month\"))\nwd=wd_raw%&gt;%\n  mutate(date=lubridate::round_date(date,'month'))%&gt;%\n  filter(date&gt;lubridate::ymd(\"2000-01-01\"),\n         date&lt;lubridate::ymd(\"2019-01-01\")) %&gt;%\n  group_by(date) %&gt;%\n  summarise(n=n()) %&gt;%\n  full_join(all_dates) %&gt;%\n  mutate(n=replace_na(n,0)) %&gt;%\n  arrange(date)\n\nJoining with `by = join_by(date)`\n\n# ggplot(tibs, aes(x=date,y=n))+geom_path()\n# dim(tib)"
+  },
+  {
+    "objectID": "index.html#monthly-summary-1",
+    "href": "index.html#monthly-summary-1",
+    "title": "glourb_floods",
+    "section": "monthly summary",
+    "text": "monthly summary\n\ngfd= gfd_raw %&gt;%\n  mutate(month_began=floor_date(lubridate::mdy(dfo_began),\"month\"),\n         month_ended=ceiling_date(lubridate::mdy(dfo_ended),\"month\")) %&gt;%\n  tidyr::pivot_longer(cols=starts_with(\"month_\"),names_to=\"start_end\",values_to=\"month\")\n# \n# tt=tib_gdf %&gt;%\n#   select(index,month) %&gt;%\n#   group_by(index) %&gt;%\n#   tidyr::nest(data=month) %&gt;%\n#   mutate(month=purrr::map(.x=data, ~seq(first(.x$month),last(.x$month),\"month\"))) %&gt;%\n#   tidyr::unnest(month) %&gt;%\n#   ungroup() %&gt;%\n#   group_by(month) %&gt;%\n#   summarise(n=n())\n# ggplot(tt, aes(x=month,y=n))+geom_path()"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "This site gathers elements regarding flood events documented both through participatory data (Wikidata, Wikipedia) and physical (remote sensing) assessment. It questions the link between these data and what we can infer from them, in particular regarding the impact of floods on humans."
+  }
+]

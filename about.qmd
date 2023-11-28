@@ -2,8 +2,4 @@
 title: "About"
 ---
 
-About this site
-
-```{r}
-1 + 1
-```
+This site gathers elements regarding flood events documented both through participatory data (Wikidata, Wikipedia) and physical (remote sensing) assessment. It questions the link between these data and what we can infer from them, in particular regarding the impact of floods on humans.

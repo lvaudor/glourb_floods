@@ -10,23 +10,23 @@ This study aims at showing how participatory data such as the ones collected thr
 
 ## Journaux potentiels
 
-### Digital Humanities Quarterly: 
+### Digital Humanities Quarterly:
 
-Journal open access, pile dedans pour le scope 
+Journal open access, pile dedans pour le scope
 
 The journal's scope includes but is not limited to:
 
-- Digital Tools and Methods in Humanities Research: DHQ publishes articles that showcase innovative digital tools, methods, and approaches used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.
+-   Digital Tools and Methods in Humanities Research: DHQ publishes articles that showcase innovative digital tools, methods, and approaches used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.
 
-- Critical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the implications, challenges, and limitations of using digital technologies in humanities research. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.
+-   Critical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the implications, challenges, and limitations of using digital technologies in humanities research. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.
 
-- Interdisciplinary Collaborations: The journal promotes interdisciplinary collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.
+-   Interdisciplinary Collaborations: The journal promotes interdisciplinary collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.
 
-- Digital Pedagogy and Teaching Approaches: DHQ discusses innovative pedagogical approaches that integrate digital tools and methods into humanities teaching. This includes case studies, reviews, and discussions on the use of technology in the classroom to enhance learning experiences.
+-   Digital Pedagogy and Teaching Approaches: DHQ discusses innovative pedagogical approaches that integrate digital tools and methods into humanities teaching. This includes case studies, reviews, and discussions on the use of technology in the classroom to enhance learning experiences.
 
-- Digital Humanities Projects and Case Studies: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.
+-   Digital Humanities Projects and Case Studies: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.
 
-- Open Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to data curation, preservation, and accessibility in the context of digital humanities research.
+-   Open Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to data curation, preservation, and accessibility in the context of digital humanities research.
 
 # Collect Wikidata about floods
 
@@ -56,11 +56,11 @@ head(wd_raw)
 
 The degree of precision in the geographical location might vary. For each recorded flood event we might have access to all or part of these informations:
 
-- a **location** (`loc`) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.
-- a **country** (`country`)
-- **spatial coordinates** (`coords`)
+-   a **location** (`loc`) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.
+-   a **country** (`country`)
+-   **spatial coordinates** (`coords`)
 
-In case location is not provided, we approximate it with country (if available). 
+In case location is not provided, we approximate it with country (if available).
 
 ```{r}
 wd_raw=wd_raw %>% 
@@ -74,9 +74,9 @@ wd_raw=wd_raw %>%
 
 Now we try and complete geographical informations based on Wikidata. For each location identifier, we collect data about
 
-- country of the location (country_loc)
-- coordinates of the location (coords_loc)
-- type of location (loc_type)
+-   country of the location (country_loc)
+-   coordinates of the location (coords_loc)
+-   type of location (loc_type)
 
 ```{r def_get_loc_info}
 get_loc_info=function(loc_id){
@@ -137,7 +137,6 @@ get_country_info=function(country_id){
 }
 ```
 
-
 ```{r}
 if(!file.exists("data/countries.RDS")){
   countries=wd_loc %>%
@@ -153,7 +152,7 @@ countries=readRDS("data/countries.RDS")
 
 Now we update the data about floods taking into account that supplementary data about countries:
 
-```{r update_locs_in_wd}
+```{r update_locs_in_wd_through_countries}
 wd_loc=wd_loc %>% 
   left_join(countries,by="country") %>%
   mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~"country",
@@ -174,12 +173,11 @@ wd_loc2=wd_loc %>%
   mutate(mstart=case_when(is.na(mstart)~mdate,
                           !is.na(mstart)~mstart)) %>% 
   mutate(mend=case_when(is.na(mend)~mdate,
-                        !is.na(mend)~mend))
-  group_by(-mstart,mend,mdate) %>% 
-  tidyr::nest() %>% 
-  mutate()
+                        !is.na(mend)~mend)) %>% 
+  group_by(mstart,mend,mdate) %>% 
+  tidyr::nest()# %>% 
+  #mutate()
 ```
-
 
 ## Select variables for comparison
 
@@ -187,7 +185,6 @@ wd_loc2=wd_loc %>%
 wd_comp=wd_loc %>% 
   select(flood,flood_label,country_label,deathtoll,start,end,date,coords)
 ```
-
 
 In case coords are not provided, we approximate them with location coordinates (if available).
 
@@ -207,15 +204,13 @@ wd=wd_raw%>%
   mutate(n=replace_na(n,0)) %>%
   arrange(date)
 
-ggplot(tibs, aes(x=date,y=n))+geom_path()
-dim(tib)
+# ggplot(tibs, aes(x=date,y=n))+geom_path()
+# dim(tib)
 ```
-
 
 # Data from the global flood database
 
-The following data has been produced by
-[the global flood database project](https://global-flood-database.cloudtostreet.ai/#interactive-map)
+The following data has been produced by [the global flood database project](https://global-flood-database.cloudtostreet.ai/#interactive-map)
 
 ```{r read_tib_gdf}
 gfd_raw <- readr::read_csv("data/gfd_event_stats_20215_13_error_fixed_2.csv") %>% 
@@ -228,7 +223,7 @@ gfd_raw <- readr::read_csv("data/gfd_event_stats_20215_13_error_fixed_2.csv") %>
          coords=paste0("Point(",dfo_centroid_x,
                        ",",dfo_centroid_y,")"))
 gfd_comp=gfd_raw %>% 
-  select(flood,flood_label,country_label,deathtoll, start, end,coord)
+  select(flood,flood_label,country_label,deathtoll, start, end,coords)
 head(gfd_raw)
 ```
 
@@ -239,17 +234,17 @@ gfd= gfd_raw %>%
   mutate(month_began=floor_date(lubridate::mdy(dfo_began),"month"),
          month_ended=ceiling_date(lubridate::mdy(dfo_ended),"month")) %>%
   tidyr::pivot_longer(cols=starts_with("month_"),names_to="start_end",values_to="month")
-
-tt=tib_gdf %>%
-  select(index,month) %>%
-  group_by(index) %>%
-  tidyr::nest(data=month) %>%
-  mutate(month=purrr::map(.x=data, ~seq(first(.x$month),last(.x$month),"month"))) %>%
-  tidyr::unnest(month) %>%
-  ungroup() %>%
-  group_by(month) %>%
-  summarise(n=n())
-ggplot(tt, aes(x=month,y=n))+geom_path()
+# 
+# tt=tib_gdf %>%
+#   select(index,month) %>%
+#   group_by(index) %>%
+#   tidyr::nest(data=month) %>%
+#   mutate(month=purrr::map(.x=data, ~seq(first(.x$month),last(.x$month),"month"))) %>%
+#   tidyr::unnest(month) %>%
+#   ungroup() %>%
+#   group_by(month) %>%
+#   summarise(n=n())
+# ggplot(tt, aes(x=month,y=n))+geom_path()
 ```
 
 # Comparison
@@ -259,4 +254,3 @@ tib=bind_rows(wd_comp  %>% mutate(source="wd"),
               gfd_comp %>% mutate(source="gfd"))
 tib
 ```
-
