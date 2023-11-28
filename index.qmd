@@ -1,0 +1,262 @@
+---
+title: "glourb_floods"
+---
+
+# General purpose
+
+## Aim of the article
+
+This study aims at showing how participatory data such as the ones collected through the Wikimedia initiative (Wikidata, Wikipedia) document environmental and historical events (floods) in a way that is complementary to a physical definition of the event.
+
+## Journaux potentiels
+
+### Digital Humanities Quarterly: 
+
+Journal open access, pile dedans pour le scope 
+
+The journal's scope includes but is not limited to:
+
+- Digital Tools and Methods in Humanities Research: DHQ publishes articles that showcase innovative digital tools, methods, and approaches used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.
+
+- Critical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the implications, challenges, and limitations of using digital technologies in humanities research. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.
+
+- Interdisciplinary Collaborations: The journal promotes interdisciplinary collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.
+
+- Digital Pedagogy and Teaching Approaches: DHQ discusses innovative pedagogical approaches that integrate digital tools and methods into humanities teaching. This includes case studies, reviews, and discussions on the use of technology in the classroom to enhance learning experiences.
+
+- Digital Humanities Projects and Case Studies: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.
+
+- Open Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to data curation, preservation, and accessibility in the context of digital humanities research.
+
+# Collect Wikidata about floods
+
+```{r}
+library(glitter)
+library(tidyverse)
+if(!file.exists("data/wd_raw.RDS")){
+  wd_raw=spq_init() %>%
+    spq_add("?flood wdt:P31/wdt:P279* wd:Q8068") %>%
+    spq_add("?flood wdt:P31 ?what") %>% 
+    spq_add("?flood wdt:P625 ?coords",.required=FALSE) %>% 
+    spq_add("?flood wdt:P17 ?country",.required=FALSE) %>% 
+    spq_add("?flood wdt:P585 ?date",.required=FALSE) %>%
+    spq_add("?flood wdt:P580 ?start",.required=FALSE) %>%
+    spq_add("?flood wdt:P582 ?end",.required=FALSE) %>%
+    spq_add("?flood wdt:P1120 ?deathtoll",.required=FALSE) %>%
+    spq_add("?flood wdt:P276 ?loc",.required=FALSE) %>%
+    spq_label(flood,country,what) %>%
+    spq_perform() %>% 
+    mutate(deathtoll=as.numeric(deathtoll)) %>% 
+    mutate(loc=stringr::str_replace_all(loc, "http://www.wikidata.org/entity/", "wd:"))
+  saveRDS(wd_raw,"data/wd_raw.RDS")
+}
+wd_raw=readRDS("data/wd_raw.RDS")
+head(wd_raw)
+```
+
+The degree of precision in the geographical location might vary. For each recorded flood event we might have access to all or part of these informations:
+
+- a **location** (`loc`) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.
+- a **country** (`country`)
+- **spatial coordinates** (`coords`)
+
+In case location is not provided, we approximate it with country (if available). 
+
+```{r}
+wd_raw=wd_raw %>% 
+  mutate(loc=case_when(is.na(loc)~country,
+                       !is.na(loc)~loc))
+```
+
+## Get coordinates if possible
+
+### Get coordinates and country of locations
+
+Now we try and complete geographical informations based on Wikidata. For each location identifier, we collect data about
+
+- country of the location (country_loc)
+- coordinates of the location (coords_loc)
+- type of location (loc_type)
+
+```{r def_get_loc_info}
+get_loc_info=function(loc_id){
+  result=spq_init() %>%
+    spq_set(loc=loc_id) %>% 
+    spq_add("?loc wdt:P17 ?country_loc") %>% 
+    spq_add("?loc wdt:P625 ?coords_loc") %>% 
+    spq_add("?loc wdt:P31 ?loc_type") %>% 
+    spq_label(loc, country_loc, loc_type) %>% 
+    spq_select(-loc) %>% 
+    spq_perform()
+  result
+}
+```
+
+We apply this query to all locations mentioned in `wd_raw`:
+
+```{r}
+if(!file.exists("data/locs.RDS")){
+  locs=wd_raw %>%
+    select(loc) %>% 
+    unique() %>% 
+    na.omit() %>% 
+    mutate(data=purrr::map(loc,get_loc_info)) %>% 
+    tidyr::unnest(data)
+  saveRDS(locs, "data/locs.RDS")
+}
+locs=readRDS("data/locs.RDS")
+```
+
+Now we update the data about floods taking into account that supplementary data about locations:
+
+```{r update_locs_in_wd}
+wd_loc=wd_raw %>% 
+  left_join(locs,by="loc") %>%
+  mutate(country_label=case_when(country_label==""~country_loc_label,
+                                 country_label!=""~country_label)) %>% 
+  mutate(country=case_when(is.na(country)~country_loc,
+                           !is.na(country)~country)) %>% 
+  mutate(coords_from=case_when(!is.na(coords)~"flood",
+                               is.na(coords)~"location")) %>% 
+  mutate(country=stringr::str_replace_all(country, "http://www.wikidata.org/entity/", "wd:"))
+    
+```
+
+### Get coordinates of countries
+
+We also want to get country coordinates
+
+```{r def_get_country_info}
+get_country_info=function(country_id){
+  result=spq_init() %>%
+    spq_set(country=country_id) %>% 
+    spq_add("?country wdt:P625 ?coords_country") %>%
+    spq_select(-country) %>% 
+    spq_perform() 
+  result
+}
+```
+
+
+```{r}
+if(!file.exists("data/countries.RDS")){
+  countries=wd_loc %>%
+    select(country) %>% 
+    unique() %>% 
+    na.omit() %>% 
+    mutate(data=purrr::map(country,get_country_info)) %>% 
+    tidyr::unnest(data)
+  saveRDS(countries, "data/countries.RDS")
+}
+countries=readRDS("data/countries.RDS")
+```
+
+Now we update the data about floods taking into account that supplementary data about countries:
+
+```{r update_locs_in_wd}
+wd_loc=wd_loc %>% 
+  left_join(countries,by="country") %>%
+  mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~"country",
+                               !is.na(coords_loc)~coords_loc)) %>% 
+  mutate(coords=case_when(is.na(coords)~coords_loc,
+                          !is.na(coords)~coords)) %>%
+  mutate(coords=case_when(is.na(coords)~coords_country,
+                          !is.na(coords)~coords))
+```
+
+## Clean dates
+
+```{r}
+wd_loc2=wd_loc %>% 
+  mutate(mstart=lubridate::round_date(start,"month"),
+         mend=lubridate::round_date(end,"month"),
+         mdate=lubridate::round_date(date,"month")) %>% 
+  mutate(mstart=case_when(is.na(mstart)~mdate,
+                          !is.na(mstart)~mstart)) %>% 
+  mutate(mend=case_when(is.na(mend)~mdate,
+                        !is.na(mend)~mend))
+  group_by(-mstart,mend,mdate) %>% 
+  tidyr::nest() %>% 
+  mutate()
+```
+
+
+## Select variables for comparison
+
+```{r}
+wd_comp=wd_loc %>% 
+  select(flood,flood_label,country_label,deathtoll,start,end,date,coords)
+```
+
+
+In case coords are not provided, we approximate them with location coordinates (if available).
+
+## monthly summary
+
+```{r}
+all_dates=tibble::tibble(date=seq(from=lubridate::ymd("2000-01-01"),
+                                  to=lubridate::ymd("2019-01-01"),
+                                  by="month"))
+wd=wd_raw%>%
+  mutate(date=lubridate::round_date(date,'month'))%>%
+  filter(date>lubridate::ymd("2000-01-01"),
+         date<lubridate::ymd("2019-01-01")) %>%
+  group_by(date) %>%
+  summarise(n=n()) %>%
+  full_join(all_dates) %>%
+  mutate(n=replace_na(n,0)) %>%
+  arrange(date)
+
+ggplot(tibs, aes(x=date,y=n))+geom_path()
+dim(tib)
+```
+
+
+# Data from the global flood database
+
+The following data has been produced by
+[the global flood database project](https://global-flood-database.cloudtostreet.ai/#interactive-map)
+
+```{r read_tib_gdf}
+gfd_raw <- readr::read_csv("data/gfd_event_stats_20215_13_error_fixed_2.csv") %>% 
+  mutate(start=lubridate::mdy(dfo_began),
+         end=lubridate::mdy(dfo_ended)) %>% 
+  mutate(flood=as.character(index),
+         flood_label=as.character(index),
+         country_label=dfo_country,
+         deathtoll=dfo_dead,
+         coords=paste0("Point(",dfo_centroid_x,
+                       ",",dfo_centroid_y,")"))
+gfd_comp=gfd_raw %>% 
+  select(flood,flood_label,country_label,deathtoll, start, end,coord)
+head(gfd_raw)
+```
+
+## monthly summary
+
+```{r}
+gfd= gfd_raw %>%
+  mutate(month_began=floor_date(lubridate::mdy(dfo_began),"month"),
+         month_ended=ceiling_date(lubridate::mdy(dfo_ended),"month")) %>%
+  tidyr::pivot_longer(cols=starts_with("month_"),names_to="start_end",values_to="month")
+
+tt=tib_gdf %>%
+  select(index,month) %>%
+  group_by(index) %>%
+  tidyr::nest(data=month) %>%
+  mutate(month=purrr::map(.x=data, ~seq(first(.x$month),last(.x$month),"month"))) %>%
+  tidyr::unnest(month) %>%
+  ungroup() %>%
+  group_by(month) %>%
+  summarise(n=n())
+ggplot(tt, aes(x=month,y=n))+geom_path()
+```
+
+# Comparison
+
+```{r}
+tib=bind_rows(wd_comp  %>% mutate(source="wd"),
+              gfd_comp %>% mutate(source="gfd"))
+tib
+```
+
