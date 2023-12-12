@@ -9,12 +9,15 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
+      
+bibliography: references.bib
 
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
+    code-fold: true
 
 editor: visual
 
