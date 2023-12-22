@@ -54,7 +54,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -117,7 +136,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
- <span class="menu-text">Home</span></a>
+ <span class="menu-text">Article</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./collect_and_curate_wikidata.html" rel="" target="">
+ <span class="menu-text">Collect Wikidata</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./use_wikipedia.html" rel="" target="">
+ <span class="menu-text">Collect Wikipedia-related data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./join_data.html" rel="" target="">
+ <span class="menu-text">Join data and produce maps</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./about.html" rel="" target="">
@@ -142,371 +173,167 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#general-purpose" id="toc-general-purpose" class="nav-link active" data-scroll-target="#general-purpose">General purpose</a>
   <ul class="collapse">
   <li><a href="#aim-of-the-article" id="toc-aim-of-the-article" class="nav-link" data-scroll-target="#aim-of-the-article">Aim of the article</a></li>
-  <li><a href="#journaux-potentiels" id="toc-journaux-potentiels" class="nav-link" data-scroll-target="#journaux-potentiels">Journaux potentiels</a>
+  <li><a href="#digital-humanities-quarterly-scope" id="toc-digital-humanities-quarterly-scope" class="nav-link" data-scroll-target="#digital-humanities-quarterly-scope">Digital Humanities Quarterly scope:</a></li>
+  </ul></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
-  <li><a href="#digital-humanities-quarterly" id="toc-digital-humanities-quarterly" class="nav-link" data-scroll-target="#digital-humanities-quarterly">Digital Humanities Quarterly:</a></li>
+  <li><a href="#participatory-local-data-about-floods" id="toc-participatory-local-data-about-floods" class="nav-link" data-scroll-target="#participatory-local-data-about-floods">Participatory local data about floods</a></li>
+  <li><a href="#institutional-global-data-about-floods" id="toc-institutional-global-data-about-floods" class="nav-link" data-scroll-target="#institutional-global-data-about-floods">Institutional global data about floods</a></li>
   </ul></li>
-  </ul></li>
-  <li><a href="#collect-wikidata-about-floods" id="toc-collect-wikidata-about-floods" class="nav-link" data-scroll-target="#collect-wikidata-about-floods">Collect Wikidata about floods</a>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
   <ul class="collapse">
-  <li><a href="#get-coordinates-if-possible" id="toc-get-coordinates-if-possible" class="nav-link" data-scroll-target="#get-coordinates-if-possible">Get coordinates if possible</a>
+  <li><a href="#wikidata-on-floods" id="toc-wikidata-on-floods" class="nav-link" data-scroll-target="#wikidata-on-floods">Wikidata on floods</a></li>
+  <li><a href="#compare-to-dfo-data" id="toc-compare-to-dfo-data" class="nav-link" data-scroll-target="#compare-to-dfo-data">Compare to DFO data</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
   <ul class="collapse">
-  <li><a href="#get-coordinates-and-country-of-locations" id="toc-get-coordinates-and-country-of-locations" class="nav-link" data-scroll-target="#get-coordinates-and-country-of-locations">Get coordinates and country of locations</a></li>
-  <li><a href="#get-coordinates-of-countries" id="toc-get-coordinates-of-countries" class="nav-link" data-scroll-target="#get-coordinates-of-countries">Get coordinates of countries</a></li>
+  <li><a href="#how-does-wikidata-provide-unique-data" id="toc-how-does-wikidata-provide-unique-data" class="nav-link" data-scroll-target="#how-does-wikidata-provide-unique-data">How does Wikidata provide unique data</a></li>
   </ul></li>
-  <li><a href="#clean-dates" id="toc-clean-dates" class="nav-link" data-scroll-target="#clean-dates">Clean dates</a></li>
-  <li><a href="#select-variables-for-comparison" id="toc-select-variables-for-comparison" class="nav-link" data-scroll-target="#select-variables-for-comparison">Select variables for comparison</a></li>
-  <li><a href="#monthly-summary" id="toc-monthly-summary" class="nav-link" data-scroll-target="#monthly-summary">monthly summary</a></li>
-  </ul></li>
-  <li><a href="#data-from-the-global-flood-database" id="toc-data-from-the-global-flood-database" class="nav-link" data-scroll-target="#data-from-the-global-flood-database">Data from the global flood database</a>
-  <ul class="collapse">
-  <li><a href="#monthly-summary-1" id="toc-monthly-summary-1" class="nav-link" data-scroll-target="#monthly-summary-1">monthly summary</a></li>
-  </ul></li>
-  <li><a href="#comparison" id="toc-comparison" class="nav-link" data-scroll-target="#comparison">Comparison</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">glourb_floods</h1>
-</div>
 
-
-
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-</header>
 
 <section id="general-purpose" class="level1">
 <h1>General purpose</h1>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glitter)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <section id="aim-of-the-article" class="level2">
 <h2 class="anchored" data-anchor-id="aim-of-the-article">Aim of the article</h2>
-<p>This study aims at showing how participatory data such as the ones collected through the Wikimedia initiative (Wikidata, Wikipedia) document environmental and historical events (floods) in a way that is complementary to a physical definition of the event.</p>
+<p>This study’s objectives are to</p>
+<ol type="1">
+<li>collect and assess the information provided by the Wikimedia initiative (Wikidata, Wikipedia, Wikimedia Commons) on flood events.</li>
+<li>compare this data, which is crowdsourced, to an institutionnally curated database on the same topic.</li>
+<li>use this data to characterize the historical importance and human impact of the flood events documented.</li>
+</ol>
 </section>
-<section id="journaux-potentiels" class="level2">
-<h2 class="anchored" data-anchor-id="journaux-potentiels">Journaux potentiels</h2>
-<section id="digital-humanities-quarterly" class="level3">
-<h3 class="anchored" data-anchor-id="digital-humanities-quarterly">Digital Humanities Quarterly:</h3>
-<p>Journal open access, pile dedans pour le scope</p>
-<p>The journal’s scope includes but is not limited to:</p>
+<section id="digital-humanities-quarterly-scope" class="level2">
+<h2 class="anchored" data-anchor-id="digital-humanities-quarterly-scope">Digital Humanities Quarterly scope:</h2>
+<p>Open Access Journal. The journal’s scope includes but is not limited to:</p>
 <ul>
-<li><p>Digital Tools and Methods in Humanities Research: DHQ publishes articles that showcase innovative digital tools, methods, and approaches used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.</p></li>
-<li><p>Critical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the implications, challenges, and limitations of using digital technologies in humanities research. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.</p></li>
-<li><p>Interdisciplinary Collaborations: The journal promotes interdisciplinary collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.</p></li>
+<li><p>Digital Tools and Methods in Humanities Research: DHQ publishes articles that showcase <strong>innovative digital tools, methods, and approaches</strong> used in humanities scholarship. This can involve text analysis, data visualization, digital archives, GIS (Geographic Information Systems), network analysis, and more.</p></li>
+<li><p>Critical Assessment of Digital Technologies in Humanities Studies: DHQ features critical evaluations and discussions about the <strong>implications, challenges, and limitations of using digital technologies in humanities research</strong>. This includes considerations of ethics, accessibility, and cultural implications of digital humanities work.</p></li>
+<li><p>Interdisciplinary Collaborations: The journal promotes <strong>interdisciplinary</strong> collaborations by highlighting research at the intersection of humanities disciplines and technology. It covers collaborations between historians, literary scholars, linguists, cultural studies scholars, and experts in computer science, data science, and information technology.</p></li>
 <li><p>Digital Pedagogy and Teaching Approaches: DHQ discusses innovative pedagogical approaches that integrate digital tools and methods into humanities teaching. This includes case studies, reviews, and discussions on the use of technology in the classroom to enhance learning experiences.</p></li>
-<li><p>Digital Humanities Projects and Case Studies: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.</p></li>
-<li><p>Open Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to data curation, preservation, and accessibility in the context of digital humanities research.</p></li>
+<li><p><strong>Digital Humanities Projects and Case Studies</strong>: The journal publishes case studies and reports on digital humanities projects, initiatives, and experiments, providing insights into the practical application of digital methods in various humanities fields.</p></li>
+<li><p>Open Access and Open Data: DHQ supports open access and open data principles, often discussing issues related to <strong>data curation, preservation, and accessibility in the context of digital humanities research</strong>.</p></li>
 </ul>
 </section>
 </section>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Producing worldwide data about flood events poses numerous challenges due to the complexity of data semantics, collection, standardization, and accessibility. One primary obstacle is the lack of uniform reporting standards across countries and regions, leading to inconsistencies in data collection methods and definitions of flood events. Additionally, varying technological capabilities and resources among nations contribute to disparities in data availability. Natural disasters like floods might occur in areas where communication and infrastructure are limited, hindering real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or inadequately document flood occurrences due to reasons such as insufficient resources, lack of governmental transparency, or competing priorities. Despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires huge collaborative efforts, data curating, and improved global information-sharing mechanisms.</p>
+<section id="participatory-local-data-about-floods" class="level2">
+<h2 class="anchored" data-anchor-id="participatory-local-data-about-floods">Participatory local data about floods</h2>
+<p>Participatory data collection holds significant potential in enhancing the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale <span class="citation" data-cites="dixon_role_2021">Sekajugo et al. (<a href="#ref-sekajugo_can_2022" role="doc-biblioref">2022</a>)</span>. By incorporating local knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems. More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding natural hazards.</p>
+<p>Communities living in flood-prone regions possess unique, context-specific knowledge about local environmental changes, historical flood patterns, vulnerable areas, and coping mechanisms. Engaging these communities in data collection through citizen science initiatives, mobile applications, community mapping, or participatory workshops allows for the collection of granular, real-time information that supplements existing datasets. This bottom-up approach not only enhances the accuracy and granularity of flood data but also fosters community empowerment, resilience-building, and local capacity development.</p>
+<p>Moreover, participatory data can bridge gaps in official reporting by capturing small-scale or localized flood events that might not meet the threshold for formal reporting. Integrating participatory data with conventional datasets enables a more comprehensive understanding of flood dynamics, aiding in the development of effective early warning systems, disaster response plans, and mitigation strategies.</p>
+<p>However, challenges such as ensuring data accuracy, reliability, and standardization persist in participatory approaches. Establishing protocols for data validation, quality control, and harmonization between participatory and formal datasets is crucial to maximize the potential of participatory data while maintaining data integrity <span class="citation" data-cites="senaratne_review_2017">(<a href="#ref-senaratne_review_2017" role="doc-biblioref">Senaratne et al. 2017</a>)</span>. The stakes around data validation and homogeneization are particularly high in the prospect of studying floods at a large (or even global) scale.</p>
+<p>Overall, leveraging participatory data in conjunction with conventional methods has the potential to enrich global flood databases, improve resilience, and empower communities to better respond to and mitigate the impacts of flood events. This collaborative approach can contribute significantly to more holistic and inclusive strategies for managing floods worldwide.</p>
 </section>
-<section id="collect-wikidata-about-floods" class="level1">
-<h1>Collect Wikidata about floods</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glitter)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.2     ✔ readr     2.1.4
-✔ forcats   1.0.0     ✔ stringr   1.5.0
-✔ ggplot2   3.4.2     ✔ tibble    3.2.1
-✔ lubridate 1.9.2     ✔ tidyr     1.3.0
-✔ purrr     1.0.1     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wd_raw.RDS"</span>)){</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  wd_raw<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P31/wdt:P279* wd:Q8068"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P31 ?what"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P625 ?coords"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P17 ?country"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P585 ?date"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P580 ?start"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P582 ?end"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P1120 ?deathtoll"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P276 ?loc"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(flood,country,what) <span class="sc">%&gt;%</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">deathtoll=</span><span class="fu">as.numeric</span>(deathtoll)) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">loc=</span>stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(loc, <span class="st">"http://www.wikidata.org/entity/"</span>, <span class="st">"wd:"</span>))</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wd_raw,<span class="st">"data/wd_raw.RDS"</span>)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(wd_raw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 10
-  flood    date                start               end                 deathtoll
-  &lt;chr&gt;    &lt;dttm&gt;              &lt;dttm&gt;              &lt;dttm&gt;                  &lt;dbl&gt;
-1 http://… 2002-08-01 00:00:00 2002-08-05 00:00:00 2002-09-13 00:00:00        45
-2 http://… 2002-08-01 00:00:00 2002-08-05 00:00:00 2002-09-13 00:00:00        45
-3 http://… 2002-08-01 00:00:00 2002-08-05 00:00:00 2002-09-13 00:00:00        45
-4 http://… 2002-08-01 00:00:00 2002-08-05 00:00:00 2002-09-13 00:00:00        45
-5 http://… 2002-08-01 00:00:00 2002-08-05 00:00:00 2002-09-13 00:00:00        45
-6 http://… 2002-08-01 00:00:00 2002-08-05 00:00:00 2002-09-13 00:00:00        45
-# ℹ 5 more variables: loc &lt;chr&gt;, country_label &lt;chr&gt;, flood_label &lt;chr&gt;,
-#   country &lt;chr&gt;, coords &lt;chr&gt;</code></pre>
-</div>
-</div>
-<p>The degree of precision in the geographical location might vary. For each recorded flood event we might have access to all or part of these informations:</p>
+<section id="institutional-global-data-about-floods" class="level2">
+<h2 class="anchored" data-anchor-id="institutional-global-data-about-floods">Institutional global data about floods</h2>
+<p>The Dartmouth Flood Observatory (DFO) is a research group specializing in the collection and analysis of global flood data. Combining remote sensing and news reports’ analysis, the DFO produces detailed information on the extent, frequency, and impacts of floods worldwide <span class="citation" data-cites="kundzewicz_large_2013">(<a href="#ref-kundzewicz_large_2013" role="doc-biblioref">Kundzewicz, Pińskwar, and Brakenridge 2013</a>)</span>. It constitutes an invaluable source of information on the subject, used in many scientific studies on flood events.</p>
+<p>In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, being one of the largest collaborative encyclopedias globally, harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking semi-structured participatory data on various topics, including flood events, across the globe.</p>
+</section>
+</section>
+<section id="methods" class="level1">
+<h1>Methods</h1>
+<p>The methods are detailed (for now) in the other pages of this document.</p>
 <ul>
-<li>a <strong>location</strong> (<code>loc</code>) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.</li>
-<li>a <strong>country</strong> (<code>country</code>)</li>
-<li><strong>spatial coordinates</strong> (<code>coords</code>)</li>
+<li>We collect Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) <span class="citation" data-cites="vaudor_glitter_2023">(<a href="#ref-vaudor_glitter_2023" role="doc-biblioref">Vaudor and Salmon 2023</a>)</span>.</li>
+<li>We complete it based on the linked Wikipedia articles</li>
+<li>We compare this data to the DFO database, trying to establish a link between events described on both datasets, based on distance and time gap.</li>
 </ul>
-<p>In case location is not provided, we approximate it with country (if available).</p>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<section id="wikidata-on-floods" class="level2">
+<h2 class="anchored" data-anchor-id="wikidata-on-floods">Wikidata on floods</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(loc)<span class="sc">~</span>country,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">!</span><span class="fu">is.na</span>(loc)<span class="sc">~</span>loc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_events.RDS"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>wd_full<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_full.RDS"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Nwd<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Naft1900<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year<span class="sc">&gt;=</span><span class="dv">1900</span>) <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Naft2000<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year<span class="sc">&gt;=</span><span class="dv">2000</span>) <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>Propaft1900<span class="ot">=</span>Naft1900<span class="sc">/</span>Nwd</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Propaft2000<span class="ot">=</span>Naft2000<span class="sc">/</span>Nwd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<section id="get-coordinates-if-possible" class="level2">
-<h2 class="anchored" data-anchor-id="get-coordinates-if-possible">Get coordinates if possible</h2>
-<section id="get-coordinates-and-country-of-locations" class="level3">
-<h3 class="anchored" data-anchor-id="get-coordinates-and-country-of-locations">Get coordinates and country of locations</h3>
-<p>Now we try and complete geographical informations based on Wikidata. For each location identifier, we collect data about</p>
-<ul>
-<li>country of the location (country_loc)</li>
-<li>coordinates of the location (coords_loc)</li>
-<li>type of location (loc_type)</li>
-</ul>
+<p>Our Wikidata base documents 814 flood events, 0.7555283% of which occurred after 1900 and 0.5208845% of which occurred after 2000.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>get_loc_info<span class="ot">=</span><span class="cf">function</span>(loc_id){</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">loc=</span>loc_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P17 ?country_loc"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P625 ?coords_loc"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P31 ?loc_type"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(loc, country_loc, loc_type) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>loc) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>()</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wd_events_freq<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cat_year=</span><span class="fu">cut</span>(year,<span class="at">breaks=</span><span class="fu">c</span>(<span class="dv">1000</span>,<span class="dv">1200</span>,<span class="dv">1400</span>,<span class="dv">1600</span>,<span class="dv">1800</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                                    <span class="dv">2000</span>,<span class="dv">2023</span>),<span class="at">dig.lab=</span><span class="dv">10</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cat_year) <span class="sc">%&gt;%</span> <span class="fu">tally</span>()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>p1<span class="ot">=</span><span class="fu">ggplot</span>(wd_events_freq, <span class="fu">aes</span>(<span class="at">x=</span>cat_year,<span class="at">y=</span>n))<span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>p2<span class="ot">=</span><span class="fu">ggplot</span>(wd_events <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year<span class="sc">&gt;=</span><span class="dv">2000</span>), <span class="fu">aes</span>(<span class="at">x=</span>year))<span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">breaks=</span><span class="dv">2000</span><span class="sc">:</span><span class="dv">2023</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>figure <span class="ot">&lt;-</span> <span class="fu">ggarrange</span>(p1,p2,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>figure</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-wd_year" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-wd_year-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Distribution of flood events through time A) all events dated with a year-accuracy B) events dated with a year-accuracy starting in 2000</figcaption>
+</figure>
 </div>
-<p>We apply this query to all locations mentioned in <code>wd_raw</code>:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/locs.RDS"</span>)){</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  locs<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(loc) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(loc,get_loc_info)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(data)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(locs, <span class="st">"data/locs.RDS"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>locs<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/locs.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Now we update the data about floods taking into account that supplementary data about locations:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wd_loc<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(locs,<span class="at">by=</span><span class="st">"loc"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country_label=</span><span class="fu">case_when</span>(country_label<span class="sc">==</span><span class="st">""</span><span class="sc">~</span>country_loc_label,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                                 country_label<span class="sc">!=</span><span class="st">""</span><span class="sc">~</span>country_label)) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(country)<span class="sc">~</span>country_loc,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!</span><span class="fu">is.na</span>(country)<span class="sc">~</span>country)) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords_from=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"flood"</span>,</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"location"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country=</span>stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(country, <span class="st">"http://www.wikidata.org/entity/"</span>, <span class="st">"wd:"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in left_join(., locs, by = "loc"): Detected an unexpected many-to-many relationship between `x` and `y`.
-ℹ Row 1 of `x` matches multiple rows in `y`.
-ℹ Row 76 of `y` matches multiple rows in `x`.
-ℹ If a many-to-many relationship is expected, set `relationship =
-  "many-to-many"` to silence this warning.</code></pre>
 </div>
 </div>
 </section>
-<section id="get-coordinates-of-countries" class="level3">
-<h3 class="anchored" data-anchor-id="get-coordinates-of-countries">Get coordinates of countries</h3>
-<p>We also want to get country coordinates</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>get_country_info<span class="ot">=</span><span class="cf">function</span>(country_id){</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">country=</span>country_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P625 ?coords_country"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>country) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>() </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/countries.RDS"</span>)){</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  countries<span class="ot">=</span>wd_loc <span class="sc">%&gt;%</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(country) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(country,get_country_info)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(data)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(countries, <span class="st">"data/countries.RDS"</span>)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>countries<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/countries.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Now we update the data about floods taking into account that supplementary data about countries:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wd_loc<span class="ot">=</span>wd_loc <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(countries,<span class="at">by=</span><span class="st">"country"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords_from=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords) <span class="sc">&amp;</span> <span class="fu">is.na</span>(coords_loc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(coords_country) <span class="sc">~</span><span class="st">"country"</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                               <span class="sc">!</span><span class="fu">is.na</span>(coords_loc)<span class="sc">~</span>coords_loc)) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords)<span class="sc">~</span>coords_loc,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span>coords)) <span class="sc">%&gt;%</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords)<span class="sc">~</span>coords_country,</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span>coords))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="compare-to-dfo-data" class="level2">
+<h2 class="anchored" data-anchor-id="compare-to-dfo-data">Compare to DFO data</h2>
 </section>
 </section>
-<section id="clean-dates" class="level2">
-<h2 class="anchored" data-anchor-id="clean-dates">Clean dates</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>wd_loc2<span class="ot">=</span>wd_loc <span class="sc">%&gt;%</span> </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mstart=</span>lubridate<span class="sc">::</span><span class="fu">round_date</span>(start,<span class="st">"month"</span>),</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">mend=</span>lubridate<span class="sc">::</span><span class="fu">round_date</span>(end,<span class="st">"month"</span>),</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">mdate=</span>lubridate<span class="sc">::</span><span class="fu">round_date</span>(date,<span class="st">"month"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mstart=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(mstart)<span class="sc">~</span>mdate,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(mstart)<span class="sc">~</span>mstart)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mend=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(mend)<span class="sc">~</span>mdate,</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                        <span class="sc">!</span><span class="fu">is.na</span>(mend)<span class="sc">~</span>mend)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(mstart,mend,mdate) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">nest</span>()<span class="co"># %&gt;% </span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#mutate()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="select-variables-for-comparison" class="level2">
-<h2 class="anchored" data-anchor-id="select-variables-for-comparison">Select variables for comparison</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wd_comp<span class="ot">=</span>wd_loc <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(flood,flood_label,country_label,deathtoll,start,end,date,coords)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>In case coords are not provided, we approximate them with location coordinates (if available).</p>
-</section>
-<section id="monthly-summary" class="level2">
-<h2 class="anchored" data-anchor-id="monthly-summary">monthly summary</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>all_dates<span class="ot">=</span>tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">date=</span><span class="fu">seq</span>(<span class="at">from=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="st">"2000-01-01"</span>),</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">to=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="st">"2019-01-01"</span>),</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">by=</span><span class="st">"month"</span>))</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>wd<span class="ot">=</span>wd_raw<span class="sc">%&gt;%</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">round_date</span>(date,<span class="st">'month'</span>))<span class="sc">%&gt;%</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date<span class="sc">&gt;</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="st">"2000-01-01"</span>),</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>         date<span class="sc">&lt;</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="st">"2019-01-01"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">%&gt;%</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">full_join</span>(all_dates) <span class="sc">%&gt;%</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n=</span><span class="fu">replace_na</span>(n,<span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Joining with `by = join_by(date)`</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(tibs, aes(x=date,y=n))+geom_path()</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># dim(tib)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-</section>
-<section id="data-from-the-global-flood-database" class="level1">
-<h1>Data from the global flood database</h1>
-<p>The following data has been produced by <a href="https://global-flood-database.cloudtostreet.ai/#interactive-map">the global flood database project</a></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>gfd_raw <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"data/gfd_event_stats_20215_13_error_fixed_2.csv"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">start=</span>lubridate<span class="sc">::</span><span class="fu">mdy</span>(dfo_began),</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">end=</span>lubridate<span class="sc">::</span><span class="fu">mdy</span>(dfo_ended)) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">flood=</span><span class="fu">as.character</span>(index),</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">flood_label=</span><span class="fu">as.character</span>(index),</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">country_label=</span>dfo_country,</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">deathtoll=</span>dfo_dead,</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">coords=</span><span class="fu">paste0</span>(<span class="st">"Point("</span>,dfo_centroid_x,</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>                       <span class="st">","</span>,dfo_centroid_y,<span class="st">")"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 913 Columns: 23
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr  (9): system:index, threshold_type, glide_index, dfo_country, dfo_other_...
-dbl (14): index, dfo_centroid_x, dfo_centroid_y, dfo_dead, dfo_displaced, df...
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<section id="how-does-wikidata-provide-unique-data" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-wikidata-provide-unique-data">How does Wikidata provide unique data</h2>
+<p>This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity <span class="citation" data-cites="ruprechter_poor_2023">(<a href="#ref-ruprechter_poor_2023" role="doc-biblioref">Ruprechter, Burghardt, and Helic 2023</a>)</span> due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, institutional global data sources are not immune to spatial heterogeneities due to scarcity of research activity, linguistic barriers, varying degrees of public investment in disaster management, and other sources of environmental, political and social inequities.</p>
 
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>gfd_comp<span class="ot">=</span>gfd_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(flood,flood_label,country_label,deathtoll, start, end,coords)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(gfd_raw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 30
-  `system:index`  index threshold_type glide_index dfo_country dfo_other_country
-  &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;            
-1 DFO_1586_From_…  1586 otsu           0           Australia   0                
-2 DFO_1587_From_…  1587 otsu           0           Madagascar  0                
-3 DFO_1595_From_…  1595 otsu           0           Romania     Hungary          
-4 DFO_1614_From_…  1614 otsu           0           Thailand    Vietnam          
-5 DFO_1627_From_…  1627 otsu           0           China       Russia           
-6 DFO_1631_From_…  1631 std            0           China       0                
-# ℹ 24 more variables: dfo_centroid_x &lt;dbl&gt;, dfo_centroid_y &lt;dbl&gt;,
-#   dfo_began &lt;chr&gt;, dfo_ended &lt;chr&gt;, dfo_validation &lt;chr&gt;, dfo_dead &lt;dbl&gt;,
-#   dfo_displaced &lt;dbl&gt;, dfo_cause &lt;chr&gt;, dfo_severity &lt;dbl&gt;, gfd_area &lt;dbl&gt;,
-#   gfd_exp_ghsl_ts &lt;dbl&gt;, gfd_exp_ghsl_2000 &lt;dbl&gt;, gfd_exp_ghsl_2015 &lt;dbl&gt;,
-#   Errors &lt;dbl&gt;, `dif 2000` &lt;dbl&gt;, `dif 2015` &lt;dbl&gt;, `error 2000` &lt;dbl&gt;,
-#   start &lt;date&gt;, end &lt;date&gt;, flood &lt;chr&gt;, flood_label &lt;chr&gt;,
-#   country_label &lt;chr&gt;, deathtoll &lt;dbl&gt;, coords &lt;chr&gt;</code></pre>
-</div>
-</div>
-<section id="monthly-summary-1" class="level2">
-<h2 class="anchored" data-anchor-id="monthly-summary-1">monthly summary</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>gfd<span class="ot">=</span> gfd_raw <span class="sc">%&gt;%</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month_began=</span><span class="fu">floor_date</span>(lubridate<span class="sc">::</span><span class="fu">mdy</span>(dfo_began),<span class="st">"month"</span>),</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">month_ended=</span><span class="fu">ceiling_date</span>(lubridate<span class="sc">::</span><span class="fu">mdy</span>(dfo_ended),<span class="st">"month"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols=</span><span class="fu">starts_with</span>(<span class="st">"month_"</span>),<span class="at">names_to=</span><span class="st">"start_end"</span>,<span class="at">values_to=</span><span class="st">"month"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># tt=tib_gdf %&gt;%</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(index,month) %&gt;%</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(index) %&gt;%</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   tidyr::nest(data=month) %&gt;%</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(month=purrr::map(.x=data, ~seq(first(.x$month),last(.x$month),"month"))) %&gt;%</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   tidyr::unnest(month) %&gt;%</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   ungroup() %&gt;%</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(month) %&gt;%</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   summarise(n=n())</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(tt, aes(x=month,y=n))+geom_path()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-</section>
-<section id="comparison" class="level1">
-<h1>Comparison</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tib<span class="ot">=</span><span class="fu">bind_rows</span>(wd_comp  <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">source=</span><span class="st">"wd"</span>),</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>              gfd_comp <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">source=</span><span class="st">"gfd"</span>))</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>tib</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3,314 × 9
-   flood                 flood_label country_label deathtoll start              
-   &lt;chr&gt;                 &lt;chr&gt;       &lt;chr&gt;             &lt;dbl&gt; &lt;dttm&gt;             
- 1 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 2 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 3 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 4 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 5 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 6 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 7 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 8 http://www.wikidata.… 2002 Europ… Croatia              45 2002-08-05 00:00:00
- 9 http://www.wikidata.… 2002 Europ… Romania              45 2002-08-05 00:00:00
-10 http://www.wikidata.… 2002 Europ… Romania              45 2002-08-05 00:00:00
-# ℹ 3,304 more rows
-# ℹ 4 more variables: end &lt;dttm&gt;, date &lt;dttm&gt;, coords &lt;chr&gt;, source &lt;chr&gt;</code></pre>
-</div>
-</div>
 
 
 </section>
+</section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-dixon_role_2021" class="csl-entry" role="listitem">
+Dixon, Barnali, RebeccaA. Johns, and Amada Fernandez. 2021. <span>“The Role of Crowdsourced Data, Participatory Decision-Making and Mapping of Flood Related Events.”</span> <em>Applied Geography</em> 128 (March): 102393. <a href="https://doi.org/10.1016/j.apgeog.2021.102393">https://doi.org/10.1016/j.apgeog.2021.102393</a>.
+</div>
+<div id="ref-kundzewicz_large_2013" class="csl-entry" role="listitem">
+Kundzewicz, Zbigniew W., Iwona Pińskwar, and G. Robert Brakenridge. 2013. <span>“Large Floods in <span>Europe</span>, 1985–2009.”</span> <em>Hydrological Sciences Journal</em> 58 (1): 1–7. <a href="https://doi.org/10.1080/02626667.2012.745082">https://doi.org/10.1080/02626667.2012.745082</a>.
+</div>
+<div id="ref-ruprechter_poor_2023" class="csl-entry" role="listitem">
+Ruprechter, Thorsten, Keith Burghardt, and Denis Helic. 2023. <span>“Poor Attention: <span>The</span> Wealth and Regional Gaps in Event Attention and Coverage on <span>Wikipedia</span>.”</span> Edited by Robin Haunschild. <em>PLOS ONE</em> 18 (11): e0289325. <a href="https://doi.org/10.1371/journal.pone.0289325">https://doi.org/10.1371/journal.pone.0289325</a>.
+</div>
+<div id="ref-sekajugo_can_2022" class="csl-entry" role="listitem">
+Sekajugo, John, Grace Kagoro-Rugunda, Rodgers Mutyebere, Clovis Kabaseke, Esther Namara, Olivier Dewitte, Matthieu Kervyn, and Liesbet Jacobs. 2022. <span>“Can Citizen Scientists Provide a Reliable Geo-Hydrological Hazard Inventory? <span>An</span> Analysis of Biases, Sensitivity and Precision for the <span>Rwenzori</span> <span>Mountains</span>, <span>Uganda</span>.”</span> <em>Environmental Research Letters</em> 17 (4): 045011. <a href="https://doi.org/10.1088/1748-9326/ac5bb5">https://doi.org/10.1088/1748-9326/ac5bb5</a>.
+</div>
+<div id="ref-senaratne_review_2017" class="csl-entry" role="listitem">
+Senaratne, Hansi, Amin Mobasheri, Ahmed Loai Ali, Cristina Capineri, and Mordechai (Muki) Haklay. 2017. <span>“A Review of Volunteered Geographic Information Quality Assessment Methods.”</span> <em>International Journal of Geographical Information Science</em> 31 (1): 139–67. <a href="https://doi.org/10.1080/13658816.2016.1189556">https://doi.org/10.1080/13658816.2016.1189556</a>.
+</div>
+<div id="ref-vaudor_glitter_2023" class="csl-entry" role="listitem">
+Vaudor, Lise, and Maëlle Salmon. 2023. <em>Glitter: Glitter Makes <span>SPARQL</span></em>. <a href="https://lvaudor.github.io/glitter/">https://lvaudor.github.io/glitter/</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
