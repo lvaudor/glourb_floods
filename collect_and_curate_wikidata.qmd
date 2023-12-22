@@ -1,11 +1,10 @@
-# Collect Wikidata about floods
+# Collect Wikidata about floods 
 
 ```{r setup, message=FALSE,warning=FALSE}
 library(glitter)
 library(tidyverse)
 library(sequins)
 ```
-
 
 ## Basic query
 
@@ -136,7 +135,7 @@ floodlocs=wd_raw %>%
             relationship ="many-to-many") %>%
   mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~"3) country",
                                !is.na(coords_loc)~"2) location",
-                               !is.na(coords)~"1) not infered: direct",
+                               !is.na(coords)~"1) direct",
                                TRUE~"4) no coordinates")) %>% 
   mutate(coords=case_when(is.na(coords)~coords_loc,
                           !is.na(coords)~coords)) %>%
@@ -150,10 +149,10 @@ The coordinates for the flood events are thus inferred from:
 ```{r flood_coords_from}
 floodlocs %>%
   group_by(flood,coords_from) %>%
-  summarise(coords_from=unique(coords_from)) %>% 
+  summarise(coords_from=unique(coords_from),.groups="drop") %>% 
   ungroup() %>% 
   group_by(coords_from) %>% 
-  summarise(n=n())
+  summarise(n=n(),.groups="drop")
 ```
 
 ## Get and clean dates
@@ -203,16 +202,16 @@ if(!file.exists("data/dates.RDS")){
 
 There is a certain heterogeneity in the way information about dates is provided. The flood events' time of occurrence might be provided through the properties
 
-- point in time (P585)
-- start time (P580)
-- end time (P582)
+-   point in time (P585)
+-   start time (P580)
+-   end time (P582)
 
 We infer the date of a flood event in that order of priority
 
-- primarily as the date provided by "point in time" (*direct*)
-- OR by the average date between "start time" and "end time" if they are both provided (*start* or *end*), 
-- OR by start time or end time if only one of them is provided (*av_start_end*)
-- OR by a year provided in flood labels in the form of 4 digits-words if possible (*flood_label*)
+-   primarily as the date provided by "point in time" (*direct*)
+-   OR by the average date between "start time" and "end time" if they are both provided (*start* or *end*),
+-   OR by start time or end time if only one of them is provided (*av_start_end*)
+-   OR by a year provided in flood labels in the form of 4 digits-words if possible (*flood_label*)
 
 ```{r def_avdate}
 avdate=function(date1,date2){
@@ -252,8 +251,6 @@ dates=readRDS("data/dates.RDS") %>%
                         TRUE~date)) %>% 
   select(-av_start_end)
 
-
-dates %>% filter(flood=="wd:Q20051820") 
 ```
 
 ```{r}
@@ -300,6 +297,7 @@ if(!file.exists("data/wikisites.RDS")){
   saveRDS(wikisites, "data/wikisites.RDS")
 }
 wikisites=readRDS("data/wikisites.RDS")
+wikisites=readRDS("data/wikisites_translated.RDS")
 ```
 
 ## Add images

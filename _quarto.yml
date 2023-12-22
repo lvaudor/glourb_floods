@@ -5,12 +5,19 @@ project:
 website:
   title: "glourb_floods"
   navbar:
-    left:
+    left:      
       - href: index.qmd
-        text: Home
-      - about.qmd
+        text: Article
+      - href: collect_and_curate_wikidata.qmd
+        text: Collect Wikidata
+      - href: use_wikipedia.qmd
+        text: Collect Wikipedia-related data
+      - href: join_data.qmd
+        text: Join data and produce maps
+      - href: about.qmd
+        text: About
       
-bibliography: references.bib
+bibliography: floods.bib
 
 format:
   html:

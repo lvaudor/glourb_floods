@@ -1,0 +1,70 @@
+# Use Wikipedia to complete Wikidata
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+if(!file.exists("data/wikisites_translated.RDS")){
+  wikisites=readRDS("data/wikisites.RDS") %>% 
+     mutate(lang=stringr::str_extract(article,"(?<=https://)[[:alpha:]]{2}"))%>% 
+     mutate(title=stringr::str_extract(article,"(?<=\\/wiki\\/).*")) %>% 
+     mutate(title=purrr::map_chr(title,URLdecode)) %>% 
+     mutate(title=stringr::str_replace_all(title,"_"," ")) %>% 
+     mutate(translated_title=purrr::map2(title,lang,
+                                         ~safely(polyglotr::google_translate)(.x,,source_language=.y,target_language="en"))) %>% 
+    mutate(translated_title=purrr::map(translated_title,
+                                       ~.$result)) %>%
+    mutate(translated_title=purrr::map_chr(translated_title,
+                                           ~replace(.x,is.null(.x),NA)))
+  saveRDS(wikisites,"data/wikisites_translated.RDS")
+}
+wikisites=readRDS("data/wikisites_translated.RDS")
+```
+
+```{r}
+if(!file.exists("data/wikisites_text.RDS")){
+  library(rvest)
+  # Get text paragraphs from all Wikipedia articles
+  wikisites_text=wikisites %>%
+    mutate(html=purrr::map(article,read_html)) %>% 
+    mutate(html=purrr::map(html,~html_nodes(.x,"p"))) %>%
+    mutate(text=purrr::map(html,html_text)) %>% 
+    mutate(text=purrr::map(text,~paste0(.x,collapse=""))) %>%
+    mutate(text=purrr::map(text,~str_replace_all(.x,"\\[\\d*\\]","")))
+  # Translate them all to English with Google Translate (if possible)
+  wikisites_text=wikisites_text %>% 
+    mutate(textt=purrr::map2(text,lang,
+                            ~safely(polyglotr::google_translate)(.x,
+                                                                 source_language=.y,
+                                                                 target_language="en"))) %>% 
+    mutate(error=purrr::map(textt,"error")) %>% 
+    mutate(textt=purrr::map(textt,"result")) %>% 
+    mutate(textt=purrr::map_chr(textt,
+                               ~replace(.x,is.null(.x),NA))) 
+saveRDS(wikisites_text,"data/wikisites_text.RDS")
+}
+
+# text=text %>% 
+#   mutate(dead=purrr::map(textt,
+#                          ~unlist(stringr::str_extract_all(.x,
+#     "[\\d\\.\\,]+\\s(dead|victims)"))))
+
+```
+
+```{r wikisites_text_to_words}
+# lexicon_en=mixr::get_lexicon("en")
+# words=wikisites_text %>% 
+#   tidytext::unnest_tokens(output="word",input="textt",token="words") %>% 
+#   left_join(lexicon_en,by=c("word")) %>% 
+#   filter(type!="sw" & lemma!="flood") %>% 
+#   group_by(flood,flood_label,lemma) %>% 
+#   summarise(n=n()) %>% 
+#   arrange(flood,flood_label,desc(n)) %>% 
+#   slice_head(n=20) %>%
+#   ungroup() %>% 
+#   group_by(flood,flood_label) %>% 
+#   summarise(words=paste(lemma,collapse="; "))
+
+
+```
