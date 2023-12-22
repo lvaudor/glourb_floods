@@ -8,11 +8,13 @@ website:
     left:      
       - href: index.qmd
         text: Article
-      - href: collect_and_curate_wikidata.qmd
+      - href: 1_collect_wikidata.qmd
         text: Collect Wikidata
-      - href: use_wikipedia.qmd
+      - href: 2_use_wikipedia.qmd
         text: Collect Wikipedia-related data
-      - href: join_data.qmd
+      - href: 3_curate_wikidata.qmd
+        text: Curate Wikidata
+      - href: 4_join_data.qmd
         text: Join data and produce maps
       - href: about.qmd
         text: About

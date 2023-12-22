@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>glourb_floods – collect_and_curate_wikidata</title>
+<title>glourb_floods – collect_wikidata</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -120,7 +120,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Article</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./1_collect_wikidata.html" rel="" target="">
+    <a class="nav-link active" href="./1_collect_wikidata.html" rel="" target="" aria-current="page">
  <span class="menu-text">Collect Wikidata</span></a>
   </li>  
   <li class="nav-item">
@@ -194,7 +194,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_query</span>(query, <span class="at">labelling=</span><span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="collect_and_curate_wikidata_files/figure-html/initial_query-1.png" class="img-fluid" width="672"></p>
+<p><img src="1_collect_wikidata_files/figure-html/initial_query-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Here are the initial results we get when performing this query:</p>
@@ -453,21 +453,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>This table has 1587 rows and documents 804 flood events.</p>
-<p>The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:</p>
-<ul>
-<li>a <strong>location</strong> (<code>loc</code>) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.</li>
-<li>a <strong>country</strong> (<code>country</code>)</li>
-<li><strong>spatial coordinates</strong> (<code>coords</code>)</li>
-</ul>
-<p>In case location is not provided, we approximate it with country (if available).</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(loc)<span class="sc">~</span>country,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">!</span><span class="fu">is.na</span>(loc)<span class="sc">~</span>loc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 
 
 </section>

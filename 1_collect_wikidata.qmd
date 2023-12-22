@@ -35,17 +35,3 @@ kableExtra::kable(wd_raw %>% head(20))
 ```
 
 This table has `r nrow(wd_raw)` rows and documents `r length(unique(wd_raw$flood))` flood events.
-
-The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:
-
--   a **location** (`loc`) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.
--   a **country** (`country`)
--   **spatial coordinates** (`coords`)
-
-In case location is not provided, we approximate it with country (if available).
-
-```{r}
-wd_raw=wd_raw %>% 
-  mutate(loc=case_when(is.na(loc)~country,
-                       !is.na(loc)~loc))
-```

@@ -198,17 +198,20 @@ tib=bind_rows(wd_comp,dfo_comp) %>%
 Based on the spatial and temporal data in both datasets, we try to find correspondences between the events described in Wikidata and those described in the Dartmouth Flood Observatory.
 
 ```{r def_find_corresponding_flood}
-# tib %>% 
-#   sf::st_transform(crs="")
+tibproj= tib %>% 
+  sf::st_set_crs(4326) %>% 
+   sf::st_transform(3857)
 
-find_corresponding_flood=function(flood_id,tib){
+find_corresponding_flood=function(flood_id,tib=tibproj){
   tib_sub=tib %>% filter(flood==flood_id)
   tib_dist=tib %>% 
     mutate(disttime=abs(tib$date-tib_sub$date),
            distspace=sf::st_distance(tib,tib_sub)[,1]) %>% 
-    filter(flood!=flood_id) %>%  
+    mutate(disttime=as.numeric(disttime),
+           distspace=as.numeric(distspace)) %>% 
+    filter(flood!=flood_id) %>% 
     filter(disttime==min(disttime)|distspace==min(distspace)) %>% 
-    filter(disttime<60 & distspace<2) %>%
+    filter(disttime<395 & distspace<400000)%>%
     select(floodcorr=flood,
            disttime,
            distspace,
@@ -227,6 +230,8 @@ find_corresponding_flood=function(flood_id,tib){
   return(tib_dist)
 }
 ```
+
+For each flood event defined in the WD dataset, we filter the DFO dataset to only keep the event corresponding to the minimum distance in space and time, then we consider the events concur if they occurred less than 400 days apart and 400 kms away. This is a rather loose correspondence which is explained by the sometimes low precision in the WD information corresponding to time or coordinates of occurrence (not to mention the inherent difficulty, for contributors of both datasets, of associating a flood event to a precise time and place). 
 
 ```{r}
 if(!file.exists("data/tibcorr.RDS")){

@@ -1,0 +1,367 @@
+# Curate wikidata
+
+```{r setup}
+library(tidyverse)
+wd_raw=readRDS("data/wd_raw.RDS")
+```
+
+
+
+The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:
+
+-   a **location** (`loc`) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.
+-   a **country** (`country`)
+-   **spatial coordinates** (`coords`)
+
+In case location is not provided, we approximate it with country (if available).
+
+```{r}
+wd_raw=wd_raw %>% 
+  mutate(loc=case_when(is.na(loc)~country,
+                       !is.na(loc)~loc))
+```
+
+## Add coordinates
+
+Now we try and complete our dataset with coordinates, for the events that do not come directly with coordinates. We perform the task thanks to the linked nature of Wikidata's knowledge graph. 
+
+### Locations
+
+Here is a function that collects data for each location identifier about:
+
+-   country of the location (country_loc)
+-   coordinates of the location (coords_loc)
+-   type of location (loc_type)
+
+
+```{r def_get_loc_info}
+get_loc_info=function(loc_id){
+  result=spq_init() %>%
+    spq_set(loc=loc_id) %>% 
+    spq_add("?loc wdt:P17 ?country_loc") %>% 
+    spq_add("?loc wdt:P625 ?coords_loc") %>% 
+    spq_add("?loc wdt:P31 ?loc_type") %>% 
+    spq_label(loc, country_loc, loc_type) %>% 
+    spq_select(-loc) %>% 
+    spq_perform(replace_prefixes=TRUE)
+  result
+}
+```
+
+We apply this function to all locations appearing in `wd_raw`:
+
+```{r}
+if(!file.exists("data/locs.RDS")){
+  locs=wd_raw %>%
+    select(loc) %>% 
+    unique() %>% 
+    na.omit() %>% 
+    mutate(data=purrr::map(loc,get_loc_info)) %>% 
+    tidyr::unnest(data)
+  saveRDS(locs, "data/locs.RDS")
+}
+locs=readRDS("data/locs.RDS")
+# summarise which loc_types are sub-categories of human settlement
+```
+
+### Countries
+
+For some events, location is not provided, only country. We still use this information, though imprecise, to locate these.
+
+Here is a function that collects data for each country identifier about the coordinates of the location (coords_country)
+
+```{r def_get_country_info}
+get_country_info=function(country_id){
+  result=spq_init() %>%
+    spq_set(country=country_id) %>% 
+    spq_add("?country wdt:P625 ?coords_country") %>%
+    spq_select(-country) %>% 
+    spq_perform(replace_prefixes=TRUE) 
+  result
+}
+```
+
+We apply this function to all countries appearing in the raw dataset which might provide us with coordinates for the events, when missing.
+
+```{r}
+if(!file.exists("data/countries.RDS")){
+  countries=wd_raw %>%
+    select(country) %>% 
+    unique() %>% 
+    na.omit() %>% 
+    mutate(data=purrr::map(country,get_country_info)) %>% 
+    tidyr::unnest(data)
+  saveRDS(countries, "data/countries.RDS")
+}
+countries=readRDS("data/countries.RDS")
+```
+
+### Incorporate to data
+
+Now we update the data about floods taking into account that supplementary data about countries, and locations:
+
+```{r update_locs_in_wd_through_countries}
+floodlocs=wd_raw %>%
+  left_join(locs,by="loc",
+            relationship ="many-to-many") %>%
+  mutate(country_label=case_when(country_label==""~country_loc_label,
+                                 is.na(country_label)~country_loc_label,
+                                 country_label!=""~country_label)) %>% 
+  mutate(country=case_when(is.na(country)~country_loc,
+                           !is.na(country)~country)) %>% 
+  mutate(coords_from=case_when(!is.na(coords)~"flood",
+                               is.na(coords)~"location")) %>% 
+  select(flood,flood_label,coords,coords_loc,country,country_label) %>% 
+  left_join(countries,by="country",
+            relationship ="many-to-many") %>%
+  mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~"3) country",
+                               !is.na(coords_loc)~"2) location",
+                               !is.na(coords)~"1) direct",
+                               TRUE~"4) no coordinates")) %>% 
+  mutate(coords=case_when(is.na(coords)~coords_loc,
+                          !is.na(coords)~coords)) %>%
+  mutate(coords=case_when(is.na(coords)~coords_country,
+                          !is.na(coords)~coords)) %>% 
+  unique()
+```
+
+The coordinates for the flood events are thus inferred from:
+
+```{r flood_coords_from}
+floodlocs %>%
+  group_by(flood,coords_from) %>%
+  summarise(coords_from=unique(coords_from),.groups="drop") %>% 
+  ungroup() %>% 
+  group_by(coords_from) %>% 
+  summarise(n=n(),.groups="drop")
+```
+
+## Get and clean dates
+
+Each flood event in Wikidata might come with all or part of the information regarding time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582).
+
+We write a function which collects this information for each flood event.
+
+```{r def_get_date_info}
+get_date_info=function(flood_id,type="P585"){
+  result=spq_init() %>%
+    spq_set(flood=flood_id) %>% 
+    spq_add(glue::glue("?flood p:{type}/psv:{type} ?datestatement")) %>% 
+    spq_add("?datestatement wikibase:timeValue ?datetime") %>%
+    spq_add("?datestatement wikibase:timePrecision ?precision",.required=FALSE) %>%
+    spq_mutate(date=as.date(datetime)) %>% 
+    spq_select(-datestatement,-datetime) %>% 
+    spq_perform(replace_prefixes=TRUE)
+  result
+}
+```
+
+We then apply this function to all locations mentioned in `wd_raw`:
+
+```{r get_dates_and_precision}
+fill_void=function(tib,name="date"){
+  if(nrow(tib)==0){
+    tib=tibble::tibble(flood=NA,
+                       date=NA,
+                       precision=NA)
+  }
+  tib=tib %>% select(date, precision)
+  colnames(tib)=c(name,paste0(name,"_precision"))
+  return(tib)
+}
+if(!file.exists("data/dates.RDS")){
+  dates=wd_raw %>%
+    select(flood,flood_label)%>% 
+    unique() %>%
+    mutate(date=purrr::map(flood,get_date_info)) %>% 
+    mutate(start=purrr::map(flood,get_date_info, type="P580")) %>%
+    mutate(end=purrr::map(flood,get_date_info, type="P582")) %>%
+    mutate(date=purrr::map(date,fill_void)) %>% 
+    mutate(start=purrr::map(start,fill_void,name="start")) %>% 
+    mutate(end=purrr::map(end,fill_void,name="end")) %>% 
+    tidyr::unnest(c(date,start,end))
+  saveRDS(dates, "data/dates.RDS")
+}
+```
+
+There is a certain heterogeneity in the way information about dates is provided. The flood events' time of occurrence might be provided through the properties
+
+-   point in time (P585)
+-   start time (P580)
+-   end time (P582)
+
+We infer the date of a flood event in that order of priority
+
+-   primarily as the date provided by "point in time" (*direct*)
+-   OR by the average date between "start time" and "end time" if they are both provided (*start* or *end*),
+-   OR by start time or end time if only one of them is provided (*av_start_end*)
+-   OR by a year provided in flood labels in the form of 4 digits-words if possible (*flood_label*)
+
+```{r def_avdate}
+avdate=function(date1,date2){
+  date1=as.numeric(date1)
+  date2=as.numeric(date2)
+  result=as.Date(mean(c(date1,date2)))
+  return(result)
+}
+```
+
+```{r clean_dates_some_more}
+dates=readRDS("data/dates.RDS") %>% 
+  filter(date_precision>=9|is.na(date_precision)) %>% 
+  mutate(date=lubridate::ymd(date),
+         start=lubridate::ymd(start),
+         end=lubridate::ymd(end)) %>%
+  mutate(date_from=case_when(!is.na(date)~"direct",
+                            (is.na(date) & !is.na(start) & !is.na(end))~"av_start_end",
+                            (is.na(date) & is.na(end) & !is.na(start))~"start",
+                            (is.na(date) & is.na(start) & !is.na(end))~"end")) %>% 
+  mutate(av_start_end=purrr::map2(start,end,avdate)) %>% 
+  tidyr::unnest(av_start_end) %>% 
+  mutate(date=case_when(!is.na(date)~date,
+                        (is.na(date) & !is.na(start) & !is.na(end))~av_start_end,
+                        (is.na(date) & is.na(end) & !is.na(start))~start,
+                        (is.na(date) & is.na(start) & !is.na(end))~end)) %>% 
+  mutate(date_label=stringr::str_extract(flood_label,"\\d{4}")) %>% 
+  mutate(date_label=case_when(!is.na(date_label)~paste0(date_label,"-01-01"),
+                              TRUE~NA)) %>% 
+  mutate(date_label=case_when(!is.na(date_label)~lubridate::ymd(date_label),
+                              TRUE~NA)) %>% 
+  mutate(date_from=case_when((is.na(date) & !is.na(date_label))~"flood_label",
+                              TRUE~date_from)) %>% 
+  mutate(date_precision=case_when((is.na(date) & !is.na(date_label))~9,
+                              TRUE~date_precision)) %>% 
+  mutate(date=case_when((is.na(date) & !is.na(date_label))~date_label,
+                        TRUE~date)) %>% 
+  select(-av_start_end)
+
+```
+
+Finally, the dates provided in the dataset for the flood events correspond to the estimate given by:
+
+```{r}
+dates %>% 
+  group_by(date_from) %>% 
+  tally()
+```
+
+
+# Join datasets
+
+## Join wd_raw to locations and dates
+
+```{r}
+wd=wd_raw  %>% 
+  select(-coords,-country,-country_label) %>% 
+  left_join(floodlocs,by=c("flood","flood_label"),
+            relationship ="many-to-many") %>% 
+  left_join(dates, by=c("flood","flood_label"),
+            relationship ="many-to-many") %>% 
+  mutate(year=lubridate::year(date)) 
+
+  
+```
+
+## Add wiki sites
+
+We collect all wikipedia pages (in all languages) relative to the events.
+
+```{r def_get_wikisites}
+get_wikisites=function(flood_id){
+  result=spq_init() %>%
+    spq_set(flood=flood_id) %>% 
+    spq_add("?article schema:about ?flood") %>%  
+    spq_select(-flood) %>% 
+    spq_perform() %>% 
+    filter(stringr::str_detect(article,"wikipedia"))
+  result
+}
+```
+
+```{r}
+if(!file.exists("data/wikisites.RDS")){
+  wikisites=wd %>%
+    select(flood,flood_label) %>% 
+    unique() %>%
+    mutate(wikisites=purrr::map(flood,get_wikisites)) %>% 
+    tidyr::unnest(c(wikisites))
+  saveRDS(wikisites, "data/wikisites.RDS")
+}
+wikisites=readRDS("data/wikisites.RDS")
+wikisites=readRDS("data/wikisites_translated.RDS")
+```
+
+## Add images
+
+We also collect images related to the flood events (wikidata property wdt:P18) when available
+
+```{r def_get_images}
+get_images=function(flood_id){
+  result=spq_init() %>%
+    spq_set(flood=flood_id) %>% 
+    spq_add("?flood wdt:P18 ?image") %>%  
+    spq_select(-flood) %>% 
+    spq_perform()
+  result
+}
+```
+
+```{r}
+if(!file.exists("data/images.RDS")){
+  images=wd %>%
+    select(flood,flood_label) %>% 
+    unique() %>% 
+    mutate(images=purrr::map(flood,get_images)) %>% 
+    tidyr::unnest(c(images))
+  saveRDS(images, "data/images.RDS")
+}
+images=readRDS("data/images.RDS")
+```
+
+## Add categories
+
+```{r def_get_categories}
+get_categories=function(flood_id){
+  result=spq_init() %>%
+    spq_set(flood=flood_id) %>% 
+    spq_add("?flood wdt:P373 ?category") %>%  
+    spq_select(-flood) %>% 
+    spq_perform()
+  result
+}
+```
+
+```{r}
+if(!file.exists("data/categories.RDS")){
+  categories=wd %>%
+    select(flood,flood_label) %>% 
+    unique() %>% 
+    mutate(categories=purrr::map(flood,get_categories)) %>% 
+    tidyr::unnest(c(categories))
+  saveRDS(categories, "data/categories.RDS")
+}
+categories=readRDS("data/categories.RDS")
+```
+
+## Join everything
+
+```{r}
+wd_events=wd %>% 
+  select(-date,-date_precision) %>% 
+  left_join(dates %>% select(flood,date,date_precision),by=c("flood"),
+            relationship ="many-to-many") %>% 
+  unique()
+wd_full=wd_events %>% 
+  left_join(wikisites,by=c("flood","flood_label"),
+            relationship ="many-to-many") %>% 
+  left_join(images,by=c("flood","flood_label"),
+            relationship ="many-to-many") %>% 
+  left_join(categories,by=c("flood","flood_label"),
+            relationship ="many-to-many")
+wd_events=wd_events %>% select(flood,flood_label,date) %>%
+  mutate(year=lubridate::year(date)) %>% 
+  unique()
+
+saveRDS(wd_full,"data/wd_full.RDS")
+saveRDS(wd_events,"data/wd_events.RDS")
+```

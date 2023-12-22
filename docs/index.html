@@ -139,15 +139,19 @@ div.csl-indent {
  <span class="menu-text">Article</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./collect_and_curate_wikidata.html" rel="" target="">
+    <a class="nav-link" href="./1_collect_wikidata.html" rel="" target="">
  <span class="menu-text">Collect Wikidata</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./use_wikipedia.html" rel="" target="">
+    <a class="nav-link" href="./2_use_wikipedia.html" rel="" target="">
  <span class="menu-text">Collect Wikipedia-related data</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./join_data.html" rel="" target="">
+    <a class="nav-link" href="./3_curate_wikidata.html" rel="" target="">
+ <span class="menu-text">Curate Wikidata</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./4_join_data.html" rel="" target="">
  <span class="menu-text">Join data and produce maps</span></a>
   </li>  
   <li class="nav-item">
@@ -180,16 +184,18 @@ div.csl-indent {
   <li><a href="#participatory-local-data-about-floods" id="toc-participatory-local-data-about-floods" class="nav-link" data-scroll-target="#participatory-local-data-about-floods">Participatory local data about floods</a></li>
   <li><a href="#institutional-global-data-about-floods" id="toc-institutional-global-data-about-floods" class="nav-link" data-scroll-target="#institutional-global-data-about-floods">Institutional global data about floods</a></li>
   </ul></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#primary-census-of-flood-events" id="toc-primary-census-of-flood-events" class="nav-link" data-scroll-target="#primary-census-of-flood-events">Primary census of flood events</a></li>
+  <li><a href="#description-of-events" id="toc-description-of-events" class="nav-link" data-scroll-target="#description-of-events">Description of events</a></li>
+  <li><a href="#comparison-to-an-institutional-database" id="toc-comparison-to-an-institutional-database" class="nav-link" data-scroll-target="#comparison-to-an-institutional-database">Comparison to an institutional database</a></li>
+  </ul></li>
   <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
   <ul class="collapse">
   <li><a href="#wikidata-on-floods" id="toc-wikidata-on-floods" class="nav-link" data-scroll-target="#wikidata-on-floods">Wikidata on floods</a></li>
   <li><a href="#compare-to-dfo-data" id="toc-compare-to-dfo-data" class="nav-link" data-scroll-target="#compare-to-dfo-data">Compare to DFO data</a></li>
   </ul></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
-  <ul class="collapse">
-  <li><a href="#how-does-wikidata-provide-unique-data" id="toc-how-does-wikidata-provide-unique-data" class="nav-link" data-scroll-target="#how-does-wikidata-provide-unique-data">How does Wikidata provide unique data</a></li>
-  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
   </ul>
 </nav>
     </div>
@@ -250,11 +256,26 @@ div.csl-indent {
 <section id="methods" class="level1">
 <h1>Methods</h1>
 <p>The methods are detailed (for now) in the other pages of this document.</p>
+<section id="primary-census-of-flood-events" class="level2">
+<h2 class="anchored" data-anchor-id="primary-census-of-flood-events">Primary census of flood events</h2>
+<p>We collect Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) <span class="citation" data-cites="vaudor_glitter_2023">(<a href="#ref-vaudor_glitter_2023" role="doc-biblioref">Vaudor and Salmon 2023</a>)</span>.</p>
+</section>
+<section id="description-of-events" class="level2">
+<h2 class="anchored" data-anchor-id="description-of-events">Description of events</h2>
+<p>We complete the database regarding flood events with attributes corresponding to</p>
 <ul>
-<li>We collect Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) <span class="citation" data-cites="vaudor_glitter_2023">(<a href="#ref-vaudor_glitter_2023" role="doc-biblioref">Vaudor and Salmon 2023</a>)</span>.</li>
-<li>We complete it based on the linked Wikipedia articles</li>
-<li>We compare this data to the DFO database, trying to establish a link between events described on both datasets, based on distance and time gap.</li>
+<li>location</li>
+<li>country</li>
+<li>coordinates</li>
+<li>deathtoll</li>
+<li>related Wikipedia articles</li>
+<li>linked images</li>
 </ul>
+</section>
+<section id="comparison-to-an-institutional-database" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-to-an-institutional-database">Comparison to an institutional database</h2>
+<p>We compare this data to the DFO database, trying to establish a link between events described on both datasets, based on distance and time gap.</p>
+</section>
 </section>
 <section id="results" class="level1">
 <h1>Results</h1>
@@ -305,13 +326,11 @@ div.csl-indent {
 </section>
 <section id="discussion" class="level1">
 <h1>Discussion</h1>
-<section id="how-does-wikidata-provide-unique-data" class="level2">
-<h2 class="anchored" data-anchor-id="how-does-wikidata-provide-unique-data">How does Wikidata provide unique data</h2>
-<p>This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity <span class="citation" data-cites="ruprechter_poor_2023">(<a href="#ref-ruprechter_poor_2023" role="doc-biblioref">Ruprechter, Burghardt, and Helic 2023</a>)</span> due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, institutional global data sources are not immune to spatial heterogeneities due to scarcity of research activity, linguistic barriers, varying degrees of public investment in disaster management, and other sources of environmental, political and social inequities.</p>
+<p>This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity <span class="citation" data-cites="lorini_uneven_2020">Ruprechter, Burghardt, and Helic (<a href="#ref-ruprechter_poor_2023" role="doc-biblioref">2023</a>)</span> due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.</p>
+<p>Linked Open Data such as Wikidata hold immense interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. The interconnected nature of Wikidata’s model (as a knowledge graph) as well as their link to other data silos indeed allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context (in particular through the integration of Wikipedia discourse elements and Wikimedia Commons images) as well as the difficulties inherent to identifying particular flood events based solely on presumably objective information, such as coordinates and dates for these events.</p>
 
 
 
-</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
@@ -320,6 +339,9 @@ Dixon, Barnali, RebeccaA. Johns, and Amada Fernandez. 2021. <span>“The Role of
 </div>
 <div id="ref-kundzewicz_large_2013" class="csl-entry" role="listitem">
 Kundzewicz, Zbigniew W., Iwona Pińskwar, and G. Robert Brakenridge. 2013. <span>“Large Floods in <span>Europe</span>, 1985–2009.”</span> <em>Hydrological Sciences Journal</em> 58 (1): 1–7. <a href="https://doi.org/10.1080/02626667.2012.745082">https://doi.org/10.1080/02626667.2012.745082</a>.
+</div>
+<div id="ref-lorini_uneven_2020" class="csl-entry" role="listitem">
+Lorini, Valerio, Javier Rando, Diego Saez-Trumper, and Carlos Castillo. 2020. <span>“Uneven <span>Coverage</span> of <span>Natural</span> <span>Disasters</span> in <span>Wikipedia</span>: The <span>Case</span> of <span>Flood</span>.”</span> <a href="https://doi.org/10.48550/ARXIV.2001.08810">https://doi.org/10.48550/ARXIV.2001.08810</a>.
 </div>
 <div id="ref-ruprechter_poor_2023" class="csl-entry" role="listitem">
 Ruprechter, Thorsten, Keith Burghardt, and Denis Helic. 2023. <span>“Poor Attention: <span>The</span> Wealth and Regional Gaps in Event Attention and Coverage on <span>Wikipedia</span>.”</span> Edited by Robin Haunschild. <em>PLOS ONE</em> 18 (11): e0289325. <a href="https://doi.org/10.1371/journal.pone.0289325">https://doi.org/10.1371/journal.pone.0289325</a>.
