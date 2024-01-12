@@ -1,6 +1,6 @@
 # Curate wikidata
 
-```{r setup}
+```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
 wd_raw=readRDS("data/wd_raw.RDS")
 ```
@@ -229,8 +229,15 @@ dates=readRDS("data/dates.RDS") %>%
                               TRUE~NA)) %>% 
   mutate(date_from=case_when((is.na(date) & !is.na(date_label))~"flood_label",
                               TRUE~date_from)) %>% 
-  mutate(date_precision=case_when((is.na(date) & !is.na(date_label))~9,
-                              TRUE~date_precision)) %>% 
+  mutate(date_precision=case_when(date_precision==9~"year",
+                                  date_precision==10~"month",
+                                  date_precision==11~"day",
+                                  TRUE~NA)) %>% 
+  mutate(date_precision=case_when(date_from=="flood_label"~"year",
+                                  date_from=="av_start_end"~"day",
+                                  date_from=="start"~"day",
+                                  date_from=="end"~"day",
+                                  TRUE~date_precision)) %>% 
   mutate(date=case_when((is.na(date) & !is.na(date_label))~date_label,
                         TRUE~date)) %>% 
   select(-av_start_end)
@@ -239,9 +246,17 @@ dates=readRDS("data/dates.RDS") %>%
 
 Finally, the dates provided in the dataset for the flood events correspond to the estimate given by:
 
-```{r}
+```{r dates_from}
 dates %>% 
   group_by(date_from) %>% 
+  tally()
+```
+
+and they correspond to a precision of: 
+
+```{r dates_precision}
+dates %>% 
+  group_by(date_precision) %>% 
   tally()
 ```
 

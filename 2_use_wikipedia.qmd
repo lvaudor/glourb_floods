@@ -1,6 +1,6 @@
 # Use Wikipedia to complete Wikidata
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
 ```
 
@@ -21,8 +21,34 @@ if(!file.exists("data/wikisites_translated.RDS")){
 }
 wikisites=readRDS("data/wikisites_translated.RDS")
 ```
+```{r translate_function}
+  translate <- function(i){
+    tryCatch(
+        #try to do this
+        {
+         result=polyglotr::google_translate(wikisites_text$text[i][[1]],
+                                            source_language=wikisites_text$lang[i])
+         return(result)
+        },
+        #if an error occurs, tell me the error
+        error=function(e) {
+            message('An Error Occurred')
+            print(e)
+            return(NA)
+        },
+        #if a warning occurs, tell me the warning
+        warning=function(w) {
+            message('A Warning Occurred')
+            print(w)
+            return(NA)
+        }
+    )
+}
+```
 
-```{r}
+
+
+```{r apply_translation}
 if(!file.exists("data/wikisites_text.RDS")){
   library(rvest)
   # Get text paragraphs from all Wikipedia articles
@@ -32,39 +58,60 @@ if(!file.exists("data/wikisites_text.RDS")){
     mutate(text=purrr::map(html,html_text)) %>% 
     mutate(text=purrr::map(text,~paste0(.x,collapse=""))) %>%
     mutate(text=purrr::map(text,~str_replace_all(.x,"\\[\\d*\\]","")))
+  
+  
   # Translate them all to English with Google Translate (if possible)
-  wikisites_text=wikisites_text %>% 
-    mutate(textt=purrr::map2(text,lang,
-                            ~safely(polyglotr::google_translate)(.x,
-                                                                 source_language=.y,
-                                                                 target_language="en"))) %>% 
-    mutate(error=purrr::map(textt,"error")) %>% 
-    mutate(textt=purrr::map(textt,"result")) %>% 
-    mutate(textt=purrr::map_chr(textt,
-                               ~replace(.x,is.null(.x),NA))) 
-saveRDS(wikisites_text,"data/wikisites_text.RDS")
-}
+  wikisites_textt=wikisites_text %>% 
+    mutate(textt=NA)
+  tmp=Sys.time()
+  for(i in 1:nrow(wikisites_text)){
+    print(i)
+    result=translate(i)
+    if(length(result)>0){
+    wikisites_textt$textt[i]=result}
+  }  
+  print(Sys.time()-tmp) # takes approx. 10 minutes
+  # Problems with items 1170, 2320 => portions in other languages?
+  # wikisites_textt=wikisites_text%>%
+  #   mutate(textt=purrr::map2(text,lang,
+  #                           ~safely(polyglotr::google_translate)(.x,
+  #                                                                source_language=.y,
+  #                                                                target_language="en"))) %>% 
+  #   mutate(error=purrr::map(textt,"error")) %>% 
+  #   mutate(textt=purrr::map(textt,"result")) %>% 
+  #   mutate(textt=purrr::map_chr(textt,
+  #                              ~replace(.x,is.null(.x),NA))) 
 
-# text=text %>% 
-#   mutate(dead=purrr::map(textt,
-#                          ~unlist(stringr::str_extract_all(.x,
-#     "[\\d\\.\\,]+\\s(dead|victims)"))))
+saveRDS(wikisites_textt,"data/wikisites_text.RDS")
+}
+wikisites_text=readRDS("data/wikisites_text.RDS")
 
 ```
 
 ```{r wikisites_text_to_words}
-# lexicon_en=mixr::get_lexicon("en")
-# words=wikisites_text %>% 
-#   tidytext::unnest_tokens(output="word",input="textt",token="words") %>% 
-#   left_join(lexicon_en,by=c("word")) %>% 
-#   filter(type!="sw" & lemma!="flood") %>% 
-#   group_by(flood,flood_label,lemma) %>% 
-#   summarise(n=n()) %>% 
-#   arrange(flood,flood_label,desc(n)) %>% 
-#   slice_head(n=20) %>%
-#   ungroup() %>% 
-#   group_by(flood,flood_label) %>% 
-#   summarise(words=paste(lemma,collapse="; "))
-
-
+if(!file.exists("data/words.RDS")){
+lexicon_en=mixr::get_lexicon("en")
+words=wikisites_text %>%
+  tidytext::unnest_tokens(output="word",input="textt",token="words") %>%
+  left_join(lexicon_en,by=c("word")) %>%
+  filter(type!="sw" & lemma!="flood") %>%
+  group_by(flood,flood_label,lemma) %>%
+  summarise(n=n()) %>%
+  arrange(flood,flood_label,desc(n)) %>%
+  slice_head(n=20) %>%
+  ungroup() %>%
+  group_by(flood,flood_label) %>%
+  summarise(words=paste(lemma,collapse="; "), .groups="drop")
+saveRDS(words,"data/words.RDS")
+}
+words=readRDS("data/words.RDS")
 ```
+
+
+```{r annex}
+# text=text %>% 
+#   mutate(dead=purrr::map(textt,
+#                          ~unlist(stringr::str_extract_all(.x,
+#     "[\\d\\.\\,]+\\s(dead|victims)"))))
+```
+
