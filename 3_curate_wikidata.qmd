@@ -2,10 +2,9 @@
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
-wd_raw=readRDS("data/wd_raw.RDS")
+wd_raw=readRDS("data/wd_raw.RDS") %>% 
+  filter(flood_label!="London Beer Flood")
 ```
-
-
 
 The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:
 
@@ -23,7 +22,7 @@ wd_raw=wd_raw %>%
 
 ## Add coordinates
 
-Now we try and complete our dataset with coordinates, for the events that do not come directly with coordinates. We perform the task thanks to the linked nature of Wikidata's knowledge graph. 
+Now we try and complete our dataset with coordinates, for the events that do not come directly with coordinates. We perform the task thanks to the linked nature of Wikidata's knowledge graph.
 
 ### Locations
 
@@ -32,7 +31,6 @@ Here is a function that collects data for each location identifier about:
 -   country of the location (country_loc)
 -   coordinates of the location (coords_loc)
 -   type of location (loc_type)
-
 
 ```{r def_get_loc_info}
 get_loc_info=function(loc_id){
@@ -252,14 +250,13 @@ dates %>%
   tally()
 ```
 
-and they correspond to a precision of: 
+and they correspond to a precision of:
 
 ```{r dates_precision}
 dates %>% 
   group_by(date_precision) %>% 
   tally()
 ```
-
 
 # Join datasets
 
@@ -366,7 +363,7 @@ wd_events=wd %>%
   left_join(dates %>% select(flood,date,date_precision),by=c("flood"),
             relationship ="many-to-many") %>% 
   unique()
-wd_full=wd_events %>% 
+wm_full=wd_events %>% 
   left_join(wikisites,by=c("flood","flood_label"),
             relationship ="many-to-many") %>% 
   left_join(images,by=c("flood","flood_label"),
@@ -377,6 +374,6 @@ wd_events=wd_events %>% select(flood,flood_label,date) %>%
   mutate(year=lubridate::year(date)) %>% 
   unique()
 
-saveRDS(wd_full,"data/wd_full.RDS")
+saveRDS(wm_full,"data/wm_full.RDS")
 saveRDS(wd_events,"data/wd_events.RDS")
 ```

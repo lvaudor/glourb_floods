@@ -8,25 +8,29 @@ website:
     left:      
       - href: index.qmd
         text: Article
-      - href: 1_collect_wikidata.qmd
-        text: Collect Wikidata
-      - href: 2_use_wikipedia.qmd
-        text: Collect Wikipedia-related data
-      - href: 3_curate_wikidata.qmd
-        text: Curate Wikidata
-      - href: 4_join_data.qmd
-        text: Join data and produce maps
       - href: about.qmd
         text: About
+      - href: 1_collect_wikidata.qmd
+        text: Methods 1
+      - href: 2_use_wikipedia.qmd
+        text: Methods 2
+      - href: 3_curate_wikidata.qmd
+        text: Methods 3
+      - href: 4_text_analysis.qmd
+        text: Methods 4
+      - href: 5_join_data.qmd
+        text: Methods 5
       
 bibliography: floods.bib
 
 format:
   html:
+    css: styles.scss
     theme: cosmo
-    css: styles.css
     toc: true
+    toc-depth: 2
     code-fold: true
+
 
 editor: visual
 

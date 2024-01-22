@@ -1,26 +1,30 @@
 ```{r setup, warnings=FALSE, message=FALSE}
 library(tidyverse)
 wd_events=readRDS("data/wd_events.RDS")
-wd_full=readRDS("data/wd_full.RDS")
-wd_words=readRDS("data/words.RDS")
-wd_full=wd_full %>% left_join(wd_words, by=c("flood","flood_label"))
+wm_full=readRDS("data/wm_full.RDS")
+wp_20_words_per_event=readRDS("data/wp_20_words_per_event.RDS")
+wp_themes=readRDS("data/tib_gamma.RDS") %>% 
+  group_by(flood) %>% 
+  slice_max(gamma) %>% 
+  ungroup()
+wm_full=wm_full %>% 
+  left_join(wp_20_words_per_event, by=c("flood","flood_label")) %>% 
+  left_join(wp_themes,
+            by="flood")
 ```
 
 # Wikidata Map
 
-```{r wd_map, warning=FALSE, message=FALSE}
+wm_map corresponds to a dataset with one row=one event (we summarise coordinates into a single centroid) and a popup variable.
+
+```{r wm_map, warning=FALSE, message=FALSE}
 library(leaflet) 
- wd_map=wd_full %>%
-  # filter NA coords before transforming in sf multipoint
+ wm_map=wm_full %>%
   filter(!is.na(coords)) %>%
   sf::st_as_sf(wkt="coords") %>% 
-  # group by flood event
   group_by(flood,flood_label) %>%
-  # in case there is no Wikipedia article 
   mutate(noarticle=all(is.na(article)),
-         noimage=all(is.na(image)),
-         lang=stringr::str_extract(article,"..(?=\\.wikipedia)"),
-         flood=stringr::str_replace(flood,"wd:","")) %>% 
+         noimage=all(is.na(image))) %>% 
   mutate(article=case_when(noarticle~"",
                            !noarticle~glue::glue("<a href='{article}',target='_blank'>{lang} 🔗 </a>")),
          image=case_when(noimage~"",
@@ -37,15 +41,18 @@ library(leaflet)
             image=paste0(unique(image),collapse=" "),
             words=unique(words),
             date_precision=unique(date_precision),
-            coords_from=unique(coords_from)) %>% 
+            coords_from=unique(coords_from),
+            topic=unique(topic),
+            gamma=unique(gamma),
+            nwords=unique(nwords),
+            topic_label=unique(topic_label)) %>% 
   ungroup() %>% 
-  mutate(popup=glue::glue("<h1>{flood_label}<a href='http://www.wikidata.org/entity/{flood}'
-                             target='_blank'>🔗</a></h1>")) %>%
+  mutate(popup=glue::glue("<h3>{flood_label}<a href='http://www.wikidata.org/entity/{flood}'     target='_blank'>🔗</a></h3>")) %>%
   mutate(popup=case_when(!is.na(date)~glue::glue("{popup}<p>date: {date}</p>"),
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(deathtoll)~glue::glue("{popup}<p>deathtoll:{deathtoll}</p>"),
                                  TRUE~popup)) %>% 
-  mutate(popup=case_when(!is.na(article)~glue::glue("{popup}<p>{article}</p>"),
+  mutate(popup=case_when(!is.na(article)~glue::glue("{popup}Wikipedia:<p>{article}</p>"),
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(image)~glue::glue("{popup}<p>{image}</p>"),
                                  TRUE~popup)) %>%   
@@ -53,29 +60,34 @@ library(leaflet)
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p>{words}</p>"),
                                  TRUE~popup)) %>% 
+  mutate(popup=case_when(!is.na(topic_label)~glue::glue("{popup}<p>Topic:{topic_label}({round(gamma*100)}%)</p>"),
+                                 TRUE~popup)) %>% 
+  mutate(popup=paste0("<style> div.leaflet-popup-content {width:500 !important;}</style>;",popup)) %>% 
   sf::st_centroid()
-coords=wd_map %>%
+```
+
+
+We will jitter the coordinates in order to not have exactly overlapping coordinates on the map.
+
+```{r jitter_coords}
+coords=wm_map %>%
   sf::st_coordinates() %>% 
   as_tibble() %>% 
   select(long=X,lat=Y)
-wd_map=wd_map %>% 
+wm_map=wm_map %>% 
   bind_cols(coords) %>% 
   mutate(coords_txt=as.character(coords))
-```
 
-```{r def_jitter_coords}
 jitter_coord=function(datlonlat,n){
-  long=datlonlat$long+runif(n,-1,1)
-  lat=datlonlat$lat+runif(n,-1,1)
+  long=datlonlat$long+runif(n,-0.2,0.2)
+  lat=datlonlat$lat+runif(n,-0.2,0.2)
   result=tibble::tibble(flood=datlonlat$flood,
                            long=long,
                            lat=lat)
   return(result)
 }
-```
 
-```{r jittered_coords}
-jittered_coords=wd_map  %>% 
+jittered_coords=wm_map  %>% 
   sf::st_drop_geometry() %>% 
   select(flood,coords_txt,long,lat) %>% 
   unique() %>% 
@@ -88,8 +100,10 @@ jittered_coords=wd_map  %>%
 
 ```
 
-```{r}
-wd_map=wd_map %>%
+Re-generate data geometry from jittered coords
+
+```{r new_geometry}
+wm_map=wm_map %>%
   sf::st_drop_geometry() %>% 
   select(-long,-lat,-coords_txt) %>% 
   left_join(jittered_coords %>%
@@ -97,26 +111,23 @@ wd_map=wd_map %>%
             by="flood") %>% 
   sf::st_as_sf(coords = c("long", "lat"), 
                crs = 4326, agr = "constant")
+saveRDS(wm_map,"data/wm_map.RDS")
 ```
 
-```{r}
+```{r produce_map}
 # Définition d'une échelle colorée 
 # (en fonction de date de sortie) 
 pal <- colorNumeric(c("red", "green", "blue"),
                     c(1648,1900,1950,1980,2000,2010,2023)) 
 # Création de la carte 
-leaf_wd_map=leaflet(wd_map) %>% # déf carte 
-  addProviderTiles(providers$Esri.NatGeoWorldMap) %>% # ajout fond de carte
+leaf_wm_map=leaflet(wm_map) %>% # déf carte 
+  addProviderTiles(providers$Esri.WorldTopoMap) %>% # ajout fond de carte
   addCircleMarkers(col=~pal(year),
                    popup = ~popup,
                    radius =~log(deathtoll+2)
                    ) 
-
 ```
 
-```{r leaf_wd_map, fig.width=10,fig.height=8}
-leaf_wd_map 
-```
 
 # Data from institutionnally curated databases
 
@@ -140,71 +151,57 @@ colnames(dfo_raw)=c("index","GlideNumber","dfo_country","dfo_other_country",
 dfo_raw=dfo_raw %>% 
   mutate(start=lubridate::dmy(dfo_began),
          end=lubridate::dmy(dfo_ended)) %>% 
-  # mutate(dfo_other_country=case_when(is.na(dfo_other_country)~"",
-  #                                    dfo_other_country==0~"",
-  #                                    TRUE~dfo_other_country)) %>% 
   mutate(flood=as.character(index),
          flood_label=as.character(index),
          country_label=dfo_country,
-         #country_label=paste(dfo_country," ",dfo_other_country),
          deathtoll=dfo_dead,
          coords=paste0("Point(",dfo_centroid_x," ",dfo_centroid_y,")"))
 
 dfo_comp=dfo_raw %>% 
   select(flood,flood_label,country_label,deathtoll, start, end,coords) %>% 
   mutate(date=purrr::map2(start,end,avdate)) %>% 
-  tidyr::unnest(date)
-saveRDS(dfo_comp,"data/dfo_comp.RDS")
+  tidyr::unnest(date)%>% 
+  sf::st_as_sf(wkt="coords") %>% 
+  sf::st_set_crs(4326) 
+saveRDS(dfo_comp,"data/dfo_comp_befcorrection.RDS")
 source("correct_dfo_countries.R")
-dfo_comp=readRDS("data/dfo_compc.RDS")
-```
-
-```{r}
-wd_comp=wd_map %>%
-  select(flood,flood_label,country_label,deathtoll, date ,start, end,popup) %>% 
-  mutate(flood=stringr::str_replace(flood,"wd:",""))
+dfo_comp=readRDS("data/dfo_comp.RDS")
 ```
 
 This dataset documents `r nrow(dfo_comp)` flood events that occurred between `r min(dfo_comp$start)` and `r max(dfo_comp$end)`.
 
-```{r}
-Nwd_in_range=wd_events %>% 
-  filter(year>=1985 & year<=2021) %>% 
-  sf::st_drop_geometry() %>%
-  summarise(n=length(unique(flood))) %>% 
-  pull(n)
+
+```{r wm_comp}
+wm_comp=wm_map %>%
+  select(flood,flood_label,country_label,deathtoll, date ,start, end,popup) %>% 
+  mutate(flood=stringr::str_replace(flood,"wd:","")) %>% 
+  filter(date>lubridate::ymd("1985-01-01") & 
+         date<lubridate::ymd("2021-12-31")) %>% 
+  mutate(source="wd") %>% 
+  mutate(flood=paste0("wd:",flood)) 
+saveRDS(wm_comp,"data/wm_comp.RDS")
 ```
 
-Based on the dates of observations for the DFO data base, `r Nwd_in_range` out of the `r nrow(wd_events)` flood events in our Wikidata base might fall into it.
 
-## Basic stats
-
-```{r}
-wd_comp=wd_comp  %>% 
-   mutate(source="wd") %>% 
-   mutate(flood=paste0("wd:",flood)) %>% 
-   filter(date>lubridate::ymd("1985-01-01") & 
-          date<lubridate::ymd("2021-12-31")) %>% 
-  sf::st_set_crs(4326) %>% 
-  sf::st_transform(3857)
+```{r dfo_comp}
 dfo_comp=dfo_comp %>%
-  sf::st_set_crs(4326) %>% 
-  sf::st_transform(3857) %>% 
    mutate(source="dfo",
           geometry=coords) %>%
    select(-coords) %>% 
    mutate(popup=glue::glue("<h1>{flood_label}</h1>
                             <p>date: {date}</p>
                             <p>deathtoll:{deathtoll}</p>"))  
-tib=bind_rows(wd_comp,dfo_comp) %>% 
-  mutate(date=lubridate::round_date(date,"month")) %>% 
-  sf::st_as_sf(wkt="geometry")
+wm_dfo=bind_rows(wm_comp,dfo_comp)
+saveRDS(wm_dfo,"data/wm_dfo.RDS")
 ```
+
+
+## Basic stats
 
 Based on the spatial and temporal data in both datasets, we try to find correspondences between the events described in Wikidata and those described in the Dartmouth Flood Observatory.
 
 ```{r def_find_corresponding_flood}
-find_corresponding_flood=function(flood_id,tib=tib){
+find_corresponding_flood=function(flood_id,tib=wm_dfo){
   tib_sub=tib %>% filter(flood==flood_id)
   tib_dist=tib %>% 
     mutate(disttime=abs(tib$date-tib_sub$date),
@@ -240,32 +237,35 @@ find_corresponding_flood=function(flood_id,tib=tib){
 
 For each flood event defined in the WD dataset, we filter the DFO dataset to only keep the event corresponding to the minimum distance in space and time, then we consider the events concur if they occurred less than 400 days apart and 400 kms away. This is a rather loose correspondence which is explained by the sometimes low precision in the WD information corresponding to time or coordinates of occurrence (not to mention the inherent difficulty, for contributors of both datasets, of associating a flood event to a precise time and place).
 
-```{r}
-if(!file.exists("data/tibcorr.RDS")){
-tibcorr= tib %>%
-  mutate(data=purrr::map(flood,find_corresponding_flood,tib=tib)) %>% 
-  tidyr::unnest(data) %>% 
-  filter(source=="wd" & sourcecorr=="dfo")
-saveRDS(tibcorr,
-        "data/tibcorr.RDS")
+```{r wm_dfo}
+if(!file.exists("data/wm_dfo_corr.RDS")){
+  wm_dfo_proj= wm_dfo %>%
+    sf::st_set_crs(4326) %>% 
+    sf::st_transform(3857)
+  wm_dfo_corr= wm_dfo_proj%>% 
+    mutate(data=purrr::map(flood,
+                           find_corresponding_flood,
+                           tib=wm_dfo_proj)) %>% 
+    tidyr::unnest(data) %>% 
+    filter(source=="wd" & sourcecorr=="dfo") %>% 
+    sf::st_transform(4326)
+  saveRDS(wm_dfo_corr,
+        "data/wm_dfo_corr.RDS")
 }
-tibcorr=readRDS("data/tibcorr.RDS")
-tib=tib %>%
-  sf::st_transform(4326) %>% 
-  select(-coords)
+wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS")
 ```
 
 
 We create lines to join events from one dataset to the other.
 
-```{r}
-tibcorr=readRDS("data/tibcorr.RDS") %>% 
+```{r create_joined_events_lines}
+wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS") %>% 
   sf::st_drop_geometry()
 joined_events=bind_rows(
-  tibble::tibble(id=1:nrow(tibcorr),flood=tibcorr$flood),
-  tibble::tibble(id=1:nrow(tibcorr),flood=tibcorr$floodcorr)) %>% 
+  tibble::tibble(id=1:nrow(wm_dfo_corr),flood=wm_dfo_corr$flood),
+  tibble::tibble(id=1:nrow(wm_dfo_corr),flood=wm_dfo_corr$floodcorr)) %>% 
   arrange(id)
-joined_events=tib %>% 
+joined_events=wm_dfo %>% 
   left_join(joined_events, by="flood") %>%  
   select(id)%>%
   filter(!is.na(id)) %>% 
@@ -274,33 +274,47 @@ joined_events=tib %>%
   summarise(m =mean(id),do_union=FALSE) %>% 
   sf::st_cast("LINESTRING")
 joined_events=joined_events[1:(nrow(joined_events)-1),]
+saveRDS(joined_events,"data/joined_events.RDS")
 ```
 
 ## Number of correspondences
 
-```{r nb_corr}
-nb_wd=wd_comp %>% group_by(flood) %>% tally() %>% nrow()
-nb_wd_in_dfo=tibcorr %>% group_by(flood) %>% tally() %>% nrow()
-nb_dfo=dfo_comp %>% group_by(flood) %>% tally() %>% nrow()
-nb_dfo_in_wd=tibcorr %>% group_by(floodcorr) %>% tally() %>% nrow()
+
+```{r Nwd_in_ange}
+Nwd_in_range=wd_events %>% 
+  filter(year>=1985 & year<=2021) %>% 
+  sf::st_drop_geometry() %>%
+  summarise(n=length(unique(flood))) %>% 
+  pull(n)
 ```
 
-Out of `r nb_wd` flood events documented in the WD comparison data subset, `r nb_wd_in_dfo` have at least one correspondence in the DFO comparison data subset (`r round(nb_wd_in_dfo/nb_wd *100,2)`%).
+Based on the dates of observations for the DFO data base, `r Nwd_in_range` out of the `r nrow(wd_events)` flood events in our Wikidata base might fall into it.
+
+
+
+```{r nb_corr}
+nb_wm=wm_comp %>% group_by(flood) %>% tally() %>% nrow()
+nb_wm_in_dfo=wm_dfo_corr %>% group_by(flood) %>% tally() %>% nrow()
+nb_dfo=dfo_comp %>% group_by(flood) %>% tally() %>% nrow()
+nb_dfo_in_wd=wm_dfo_corr %>% group_by(floodcorr) %>% tally() %>% nrow()
+```
+
+Out of `r nb_wm` flood events documented in the WD comparison data subset, `r nb_wm_in_dfo` have at least one correspondence in the DFO comparison data subset (`r round(nb_wm_in_dfo/nb_wm *100,2)`%).
 
 Out of `r nb_dfo` flood events documented in the DFO comparison data subset, `r nb_dfo_in_wd` have at least one correspondence in the WD comparison data subset (`r round(nb_dfo_in_wd/nb_dfo *100,2)`%).
 
 ## Why are flood events documented in Wikidata
 
-1st hypothesis: number of dead explains the occurrence of the event in WD. =\> nope, actually it's the opposite because events are documented in rich countries in which the number of dead is lower. How to account for this effect?
+1st hypothesis: number of dead explains the occurrence of the event in WD. => nope, actually it's the opposite because events are documented in rich countries in which the number of dead is lower. How to account for this effect?
 
-```{r}
+```{r severity_and_deathtoll}
 #severity
 dfo_raw %>%  pull(severity) %>% mean()
-dfo_raw %>% filter(flood %in% tibcorr$floodcorr) %>% pull(severity) %>% mean()
+dfo_raw %>% filter(flood %in% wm_dfo_corr$floodcorr) %>% pull(severity) %>% mean()
 
 #deathtoll
 dfo_raw %>%  pull(deathtoll) %>% mean()
-dfo_raw %>% filter(flood %in% tibcorr$floodcorr) %>% pull(deathtoll) %>% mean()
+dfo_raw %>% filter(flood %in% wm_dfo_corr$floodcorr) %>% pull(deathtoll) %>% mean()
 
 ```
 
@@ -308,8 +322,8 @@ dfo_raw %>% filter(flood %in% tibcorr$floodcorr) %>% pull(deathtoll) %>% mean()
 mean(dfo_comp$deathtoll)
 ```
 
-```{r}
-tib_wd_in_dfo=tibcorr %>% 
+```{r tib_dfo}
+tib_wd_in_dfo=wm_dfo_corr %>% 
   select(country_label,flood) %>% 
   unique() %>% 
   group_by(country_label) %>% 
@@ -326,27 +340,4 @@ tib_dfo=dfo_comp %>%
 truc=left_join(tib_dfo,tib_wd_in_dfo,by="country_label") %>% 
   mutate(prop=n_wd_in_dfo/n_dfo)
 
-```
-
-## Map comparison
-
-```{r}
-library(leaflet) 
-# Définition d'une échelle colorée 
-# (en fonction de date de sortie) 
-# Création de la carte 
-pal=colorFactor(c("red","blue"), domain=c("wd","dfo"))
-comp_map=leaflet(tib)  %>%
-  addProviderTiles(providers$Esri.NatGeoWorldMap) %>% # ajout fond de carte
-  addCircleMarkers(col=~pal(source),
-                   popup =~popup,
-                   radius =~log(deathtoll+2)
-                   )  %>%
-  addPolylines(data=joined_events,color="green")
-  
-
-```
-
-```{r}
-comp_map
 ```

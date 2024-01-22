@@ -4,10 +4,14 @@
 library(tidyverse)
 ```
 
+We translate all Wikipedia pages' titles and texts to English (when Google translate allows it).
+
 ```{r}
 if(!file.exists("data/wikisites_translated.RDS")){
   wikisites=readRDS("data/wikisites.RDS") %>% 
-     mutate(lang=stringr::str_extract(article,"(?<=https://)[[:alpha:]]{2}"))%>% 
+     mutate(lang=stringr::str_extract(article,"(?<=https://)[[:alpha:]]*(?=\\.)"))%>%
+     mutate(lang=case_when(lang=="simple"~"en",
+                           TRUE~lang)) %>% 
      mutate(title=stringr::str_extract(article,"(?<=\\/wiki\\/).*")) %>% 
      mutate(title=purrr::map_chr(title,URLdecode)) %>% 
      mutate(title=stringr::str_replace_all(title,"_"," ")) %>% 
@@ -21,13 +25,20 @@ if(!file.exists("data/wikisites_translated.RDS")){
 }
 wikisites=readRDS("data/wikisites_translated.RDS")
 ```
+
+We define a translate function, based on the polyglotr package.
+
 ```{r translate_function}
-  translate <- function(i){
+translate <- function(i){
+    if(wikisites_text$lang[i]=="en"){return(text)}
     tryCatch(
         #try to do this
-        {
-         result=polyglotr::google_translate(wikisites_text$text[i][[1]],
-                                            source_language=wikisites_text$lang[i])
+        {text=wikisites_text$text[i][[1]]
+         texts=unlist(stringr::str_split(text,"\n"))
+         result=purrr::map_chr(texts,
+                               polyglotr::google_translate,
+                               source_language=wikisites_text$lang[i])
+         result=paste0(result, collapse="\n")
          return(result)
         },
         #if an error occurs, tell me the error
@@ -46,67 +57,132 @@ wikisites=readRDS("data/wikisites_translated.RDS")
 }
 ```
 
-
-
 ```{r apply_translation}
 if(!file.exists("data/wikisites_text.RDS")){
   library(rvest)
   # Get text paragraphs from all Wikipedia articles
+  tmp=Sys.time()
   wikisites_text=wikisites %>%
     mutate(html=purrr::map(article,read_html)) %>% 
     mutate(html=purrr::map(html,~html_nodes(.x,"p"))) %>%
     mutate(text=purrr::map(html,html_text)) %>% 
-    mutate(text=purrr::map(text,~paste0(.x,collapse=""))) %>%
-    mutate(text=purrr::map(text,~str_replace_all(.x,"\\[\\d*\\]","")))
-  
+    mutate(text=purrr::map(text,~paste0(.x,collapse="\n"))) %>% 
+    mutate(initlength=purrr::map(text,str_length))
+  tmp-Sys.time()
   
   # Translate them all to English with Google Translate (if possible)
   wikisites_textt=wikisites_text %>% 
     mutate(textt=NA)
   tmp=Sys.time()
-  for(i in 1:nrow(wikisites_text)){
+  for(i in 1:nrow(wikisites_textt)){
     print(i)
     result=translate(i)
     if(length(result)>0){
     wikisites_textt$textt[i]=result}
   }  
-  print(Sys.time()-tmp) # takes approx. 10 minutes
-  # Problems with items 1170, 2320 => portions in other languages?
-  # wikisites_textt=wikisites_text%>%
-  #   mutate(textt=purrr::map2(text,lang,
-  #                           ~safely(polyglotr::google_translate)(.x,
-  #                                                                source_language=.y,
-  #                                                                target_language="en"))) %>% 
-  #   mutate(error=purrr::map(textt,"error")) %>% 
-  #   mutate(textt=purrr::map(textt,"result")) %>% 
-  #   mutate(textt=purrr::map_chr(textt,
-  #                              ~replace(.x,is.null(.x),NA))) 
-
-saveRDS(wikisites_textt,"data/wikisites_text.RDS")
+  print(Sys.time()-tmp) 
+saveRDS(wikisites_textt,"data/wp_pages.RDS")
 }
-wikisites_text=readRDS("data/wikisites_text.RDS")
-
+wp_pages=readRDS("data/wp_pages.RDS") %>% 
+  mutate(length=map_dbl(textt,str_length))
 ```
 
+## wp_words
+
 ```{r wikisites_text_to_words}
-if(!file.exists("data/words.RDS")){
+if(!file.exists("data/wp_words.RDS")){
 lexicon_en=mixr::get_lexicon("en")
-words=wikisites_text %>%
+wp_words=wp_pages %>%
   tidytext::unnest_tokens(output="word",input="textt",token="words") %>%
   left_join(lexicon_en,by=c("word")) %>%
   filter(type!="sw" & lemma!="flood") %>%
   group_by(flood,flood_label,lemma) %>%
-  summarise(n=n()) %>%
-  arrange(flood,flood_label,desc(n)) %>%
-  slice_head(n=20) %>%
-  ungroup() %>%
-  group_by(flood,flood_label) %>%
+  summarise(n=n(),.groups="drop") %>%
+  arrange(flood,flood_label,desc(n)) 
+saveRDS(wp_words,"data/wp_words.RDS")
+wp_20_words_per_event=wp_words %>% 
+  group_by(flood,flood_label) %>% 
+  arrange(desc(n)) %>% 
+  slice_head(n=20) %>% 
   summarise(words=paste(lemma,collapse="; "), .groups="drop")
-saveRDS(words,"data/words.RDS")
+saveRDS(wp_20_words_per_event,"data/wp_20_words_per_event.RDS")
 }
-words=readRDS("data/words.RDS")
+wp_words=readRDS("data/wp_words.RDS")
 ```
 
+## wp_revisions
+
+```{r}
+get_revs=function(lang, title){
+  f=function(x){
+    ind=which(map_lgl(x,is.null))
+    if(length(ind)>0){x[ind]=NA}
+    x[["comment"]]=x[["comment"]][[1]]
+    if(length(x$user)==1){
+      x$user=list(id=NA,name=NA)
+    }
+    if(length(x$user)==2){
+      if(is.null(x$user$name)){name=NA}else{name=x$user$name}
+      if(is.null(x$user$id)){id=NA}else{id=x$user$id}
+      x$user=list(id=id,name=name)
+    }
+    return(x)
+  }
+  url=paste0("https://",lang,
+               ".wikipedia.org/w/rest.php/v1/page/",
+             URLencode(title),
+             "/history")
+  revs_raw=GET(url)
+  if(revs_raw$status_code<=200){
+  revs=revs_raw %>%
+    content() %>%
+    .$revisions %>% 
+    map(f) %>% 
+    map(as_tibble) %>%
+    bind_rows()
+  while("older" %in% names(content(revs_raw))){
+    revs_raw=GET(content(revs_raw)$older)
+    revs_tmp=revs_raw %>%
+      content() %>%
+      .$revisions %>%
+      map(f) %>% 
+      map(as_tibble) %>%
+      bind_rows()
+    revs=bind_rows(revs,revs_tmp)
+  }
+  # revs=revs %>% 
+  #   mutate(timestamp=lubridate::ymd_hms(timestamp)) %>% 
+  #   mutate(day=lubridate::round_date(timestamp,"day"),
+  #          year=lubridate::year(timestamp))
+  revs=revs %>% 
+    group_by(id) %>% 
+    mutate(type=c("user_id","user_name")) %>% 
+    tidyr::pivot_wider(names_from=type,values_from=user) %>% 
+    tidyr::unnest(cols = c(user_id, user_name))
+  }else{revs=tibble(id=NA,
+                     timestamp=NA,
+                     minor=NA,
+                     size=NA,
+                     comment=NA,
+                     delta=NA,
+                     user_id=NA,
+                     user_name=NA)}
+  return(revs)
+}
+
+```
+
+```{r}
+library(httr)
+
+if(!file.exists("data/wp_revisions.RDS")){
+wp_revisions=wp_pages %>% 
+  select(-text,-textt,-html) %>% 
+  mutate(revisions=purrr::map2(lang,title,get_revs)) %>% 
+  tidyr::unnest(cols=c(revisions))
+saveRDS(wp_revisions,"data/wp_revisions.RDS")
+}
+```
 
 ```{r annex}
 # text=text %>% 
@@ -114,4 +190,3 @@ words=readRDS("data/words.RDS")
 #                          ~unlist(stringr::str_extract_all(.x,
 #     "[\\d\\.\\,]+\\s(dead|victims)"))))
 ```
-

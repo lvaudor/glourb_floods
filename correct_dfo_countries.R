@@ -1,5 +1,5 @@
-dfo_comp=readRDS("data/dfo_comp.RDS")
-wd_full=readRDS("data/wd_full.RDS")
+dfo_comp=readRDS("data/dfo_comp_befcorrection.RDS")
+wm_full=readRDS("data/wm_full.RDS")
 corrections=tibble::tribble( ~raw,~clean,
                              "El Savador","El Salvador",
                              "Bangaldesh","Bangladesh",
@@ -64,7 +64,7 @@ dfo_rc=dfo_comp%>%
   mutate(flood_label=case_when(flood=="4842b"~"4842b",
                                TRUE~flood_label))
 
-tt=full_join(wd_full %>% select(flood,country_label) %>% unique() %>% group_by(country_label) %>% summarise(nwd=n()),
+tt=full_join(wm_full %>% select(flood,country_label) %>% unique() %>% group_by(country_label) %>% summarise(nwd=n()),
              dfo_rc %>% group_by(country_label) %>% summarise(ndfo=n()),
              by="country_label")
 tt
@@ -78,4 +78,4 @@ dfo_compc=sf::st_as_sf(dfo_rc,wkt="coords") %>%
             date=mean(date)) %>% 
   sf::st_centroid() %>% 
   ungroup() 
-saveRDS(dfo_compc,"data/dfo_compc.RDS")
+saveRDS(dfo_compc,"data/dfo_comp.RDS")
