@@ -120,24 +120,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Article</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./1_collect_wikidata.html" rel="" target="">
- <span class="menu-text">Collect Wikidata</span></a>
+ <span class="menu-text">Methods 1</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./2_use_wikipedia.html" rel="" target="">
- <span class="menu-text">Collect Wikipedia-related data</span></a>
+ <span class="menu-text">Methods 2</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./3_curate_wikidata.html" rel="" target="" aria-current="page">
- <span class="menu-text">Curate Wikidata</span></a>
+ <span class="menu-text">Methods 3</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./4_join_data.html" rel="" target="">
- <span class="menu-text">Join data and produce maps</span></a>
+    <a class="nav-link" href="./4_text_analysis.html" rel="" target="">
+ <span class="menu-text">Methods 4</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="./5_join_data.html" rel="" target="">
+ <span class="menu-text">Methods 5</span></a>
   </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
@@ -154,15 +158,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
-  <ul>
+  <ul class="collapse">
   <li><a href="#curate-wikidata" id="toc-curate-wikidata" class="nav-link active" data-scroll-target="#curate-wikidata">Curate wikidata</a>
   <ul class="collapse">
-  <li><a href="#add-coordinates" id="toc-add-coordinates" class="nav-link" data-scroll-target="#add-coordinates">Add coordinates</a>
-  <ul class="collapse">
-  <li><a href="#locations" id="toc-locations" class="nav-link" data-scroll-target="#locations">Locations</a></li>
-  <li><a href="#countries" id="toc-countries" class="nav-link" data-scroll-target="#countries">Countries</a></li>
-  <li><a href="#incorporate-to-data" id="toc-incorporate-to-data" class="nav-link" data-scroll-target="#incorporate-to-data">Incorporate to data</a></li>
-  </ul></li>
+  <li><a href="#add-coordinates" id="toc-add-coordinates" class="nav-link" data-scroll-target="#add-coordinates">Add coordinates</a></li>
   <li><a href="#get-and-clean-dates" id="toc-get-and-clean-dates" class="nav-link" data-scroll-target="#get-and-clean-dates">Get and clean dates</a></li>
   </ul></li>
   <li><a href="#join-datasets" id="toc-join-datasets" class="nav-link" data-scroll-target="#join-datasets">Join datasets</a>
@@ -187,7 +186,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood_label<span class="sc">!=</span><span class="st">"London Beer Flood"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:</p>
@@ -330,7 +330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   coords_from           n
   &lt;chr&gt;             &lt;int&gt;
 1 1) direct            12
-2 2) location         689
+2 2) location         688
 3 3) country           28
 4 4) no coordinates    81</code></pre>
 </div>
@@ -609,7 +609,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(dates <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date,date_precision),<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>),</span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>wd_full<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> </span>
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wikisites,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(images,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
@@ -620,7 +620,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) <span class="sc">%&gt;%</span> </span>
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
 <span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wd_full,<span class="st">"data/wd_full.RDS"</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wm_full,<span class="st">"data/wm_full.RDS"</span>)</span>
 <span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wd_events,<span class="st">"data/wd_events.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>

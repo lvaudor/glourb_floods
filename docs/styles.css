@@ -1,1 +1,11 @@
 /* css styles */
+.reveal h2 .anchored .level2 {
+   font-size:1.1em;
+   color: #6666ff;
+}
+
+/* css styles */
+.reveal .level3 {
+   font-size:1.1em;
+   color: #6633ff;
+}
