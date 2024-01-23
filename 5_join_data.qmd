@@ -62,10 +62,9 @@ library(leaflet)
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(topic_label)~glue::glue("{popup}<p>Topic:{topic_label}({round(gamma*100)}%)</p>"),
                                  TRUE~popup)) %>% 
-  mutate(popup=paste0("<style> div.leaflet-popup-content {width:500 !important;}</style>;",popup)) %>% 
+  mutate(popup=paste0("<style> div.leaflet-popup-content {width:1000 !important;}</style>;",popup)) %>% 
   sf::st_centroid()
 ```
-
 
 We will jitter the coordinates in order to not have exactly overlapping coordinates on the map.
 
@@ -128,7 +127,6 @@ leaf_wm_map=leaflet(wm_map) %>% # déf carte
                    ) 
 ```
 
-
 # Data from institutionnally curated databases
 
 ## Data from the Dartmouth Flood Observatory
@@ -170,7 +168,6 @@ dfo_comp=readRDS("data/dfo_comp.RDS")
 
 This dataset documents `r nrow(dfo_comp)` flood events that occurred between `r min(dfo_comp$start)` and `r max(dfo_comp$end)`.
 
-
 ```{r wm_comp}
 wm_comp=wm_map %>%
   select(flood,flood_label,country_label,deathtoll, date ,start, end,popup) %>% 
@@ -181,7 +178,6 @@ wm_comp=wm_map %>%
   mutate(flood=paste0("wd:",flood)) 
 saveRDS(wm_comp,"data/wm_comp.RDS")
 ```
-
 
 ```{r dfo_comp}
 dfo_comp=dfo_comp %>%
@@ -194,7 +190,6 @@ dfo_comp=dfo_comp %>%
 wm_dfo=bind_rows(wm_comp,dfo_comp)
 saveRDS(wm_dfo,"data/wm_dfo.RDS")
 ```
-
 
 ## Basic stats
 
@@ -255,7 +250,6 @@ if(!file.exists("data/wm_dfo_corr.RDS")){
 wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS")
 ```
 
-
 We create lines to join events from one dataset to the other.
 
 ```{r create_joined_events_lines}
@@ -279,7 +273,6 @@ saveRDS(joined_events,"data/joined_events.RDS")
 
 ## Number of correspondences
 
-
 ```{r Nwd_in_ange}
 Nwd_in_range=wd_events %>% 
   filter(year>=1985 & year<=2021) %>% 
@@ -289,8 +282,6 @@ Nwd_in_range=wd_events %>%
 ```
 
 Based on the dates of observations for the DFO data base, `r Nwd_in_range` out of the `r nrow(wd_events)` flood events in our Wikidata base might fall into it.
-
-
 
 ```{r nb_corr}
 nb_wm=wm_comp %>% group_by(flood) %>% tally() %>% nrow()
@@ -305,7 +296,7 @@ Out of `r nb_dfo` flood events documented in the DFO comparison data subset, `r 
 
 ## Why are flood events documented in Wikidata
 
-1st hypothesis: number of dead explains the occurrence of the event in WD. => nope, actually it's the opposite because events are documented in rich countries in which the number of dead is lower. How to account for this effect?
+1st hypothesis: number of dead explains the occurrence of the event in WD. =\> nope, actually it's the opposite because events are documented in rich countries in which the number of dead is lower. How to account for this effect?
 
 ```{r severity_and_deathtoll}
 #severity

@@ -95,7 +95,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.scss">
 </head>
 
 <body class="nav-fixed">
@@ -242,7 +242,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>                                 <span class="cn">TRUE</span><span class="sc">~</span>popup)) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">popup=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(topic_label)<span class="sc">~</span>glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"{popup}&lt;p&gt;Topic:{topic_label}({round(gamma*100)}%)&lt;/p&gt;"</span>),</span>
 <span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>                                 <span class="cn">TRUE</span><span class="sc">~</span>popup)) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">popup=</span><span class="fu">paste0</span>(<span class="st">"&lt;style&gt; div.leaflet-popup-content {width:500 !important;}&lt;/style&gt;;"</span>,popup)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">popup=</span><span class="fu">paste0</span>(<span class="st">"&lt;style&gt; div.leaflet-popup-content {width:1000 !important;}&lt;/style&gt;;"</span>,popup)) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_centroid</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>

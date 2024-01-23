@@ -1,5 +1,4 @@
- 
-# Online reports and narrations of flood events 
+# Online reports and narrations of flood events
 
 ```{r setup, message=FALSE,warning=FALSE}
 library(glitter)
@@ -25,7 +24,6 @@ This study's objectives are to
 1)  collect and assess the information provided by the Wikimedia initiative (Wikidata, Wikipedia, Wikimedia Commons) on flood events.
 2)  compare this data, which is crowdsourced, to an institutionnally curated database on the same topic.
 3)  use this data to characterize and understand (in terms of human impact especially) the flood events documented.
-
 
 # Introduction
 
@@ -84,8 +82,8 @@ We have gathered tables of data organized as follows:
 
 -   wd_events: a table with one row= one event documented on Wikidata
 -   wp_pages: a table with one row= one page in Wikipedia (each one relative to a flood in wd_events), with attributes regarding each page and complemented by
-    + a column `text` corresponding to the text, and
-    + a column `textt` corresponding to the text translated in English
+    -   a column `text` corresponding to the text, and
+    -   a column `textt` corresponding to the text translated in English
 -   wp_revisions: a table with one row= one revision of a Wikipedia page
 
 ```{r wde}
@@ -133,8 +131,6 @@ wp_words=readRDS("data/wp_words.RDS")
 #Nwpw=
 ```
 
-
-
 ```{r wpr}
 wp_revisions=readRDS("data/wp_revisions.RDS")
 Nwpr=nrow(wp_revisions)
@@ -146,10 +142,7 @@ Nwpr_humans=wp_revisions %>%
   nrow()
 ```
 
-
-
-
-There are `r Nwpr` revisions that produced the Wikipedia pages as they appear to this date, which represents an average `r round(Nwpr/Nwpp)` revisions per page.
+There are **`r Nwpr` revisions** that produced the Wikipedia pages as they appear to this date, which represents an average `r round(Nwpr/Nwpp)` revisions per page.
 
 `r Nwpr_humans` (`r round(Nwpr_humans/Nwpr*100,2)`%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings "bot" or "Bot").
 
@@ -165,7 +158,7 @@ Nwpuh=wp_revisions %>%
   nrow()
 ```
 
-There are `r Nwpu` distinct editors, `r Nwpuh` (`r round(Nwpuh/Nwpu*100,2)`%) of which appear to be humans. On average, each human editor in our corpus is responsible for `r round(Nwpr_humans/Nwpuh,2)` edits. The number of articles (in the corpus) edited by each human editor is distributed as follows: 
+There are **`r Nwpu` distinct editors**, `r Nwpuh` (`r round(Nwpuh/Nwpu*100,2)`%) of which appear to be humans. On average, each human editor in our corpus is responsible for `r round(Nwpr_humans/Nwpuh,2)` edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:
 
 ```{r wp_revisions}
 wp_revisions %>% 
@@ -181,9 +174,6 @@ wp_revisions %>%
   select(number_of_articles_edited,number_of_editors,proportion_of_editors) %>% 
   knitr::kable()
 ```
-
-
-
 
 ## Wikidata on floods
 
@@ -208,8 +198,6 @@ figure <- ggarrange(p1,p2,
 figure
 ```
 
-
-
 ```{r Nwd_in_range}
 Nwd_in_range=wd_events %>% 
   filter(year>=1985 & year<=2021) %>% 
@@ -220,9 +208,7 @@ Nwd_in_range=wd_events %>%
 
 Based on the dates of observations for the DFO data base, `r Nwd_in_range` out of the `r nrow(wd_events)` flood events in our Wikidata base might fall into it.
 
-
 ## Compare to DFO data
-
 
 ```{r nb_corr}
 nb_wm=wm_comp %>% group_by(flood) %>% tally() %>% nrow()
@@ -237,12 +223,11 @@ Out of `r nb_dfo` flood events documented in the DFO comparison data subset, `r 
 
 ## Wikipedia content
 
-
 ### News or encyclopedia?
 
-```{r delay_revisions,fig.width=8,fig.height=8, warning=FALSE, message=FALSE}
+```{r delay_revisions,fig.width=10,fig.height=8, warning=FALSE, message=FALSE}
 #| label: fig-delay_revisions
-#| fig-cap: "Time delay between events and revisions to the Wikipedia articles documenting them. The color indicates the precision of the event date as stated by Wikidata (it can be accurate to the day, month or year)."
+#| fig-cap: "Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The color indicates the precision of the event date as stated by Wikidata (it can be accurate to the day, month or year)."
 flood_date_precision=readRDS("data/wm_full.RDS") %>% select(flood,date_precision) %>% unique()
 truc=wp_revisions %>%
   left_join(wd_events %>% select(flood,date),by="flood") %>%
@@ -267,8 +252,7 @@ ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
   facet_grid(rows=vars(year))
 ```
 
-
-@fig-delay_revisions shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events.
+@fig-delay_revisions shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.
 
 ### Topics
 
@@ -292,7 +276,6 @@ ggplot(termes_thematiques  %>%
     theme(legend.position="none")+
   scale_y_reordered()
 ```
-
 
 ```{r tib_meta_thematiques}
 tib_meta_thematiques=wp_words %>% 
@@ -319,10 +302,9 @@ ggplot(tib_meta_thematiques,
   labs(x="topic_label")
 ```
 
-
 @fig-topic_doctype shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding spatial range and hydrology, and bringing justification of the existence of the article through a discussion of the historical importance of the event, while longer articles might convey more extensive reports of weather conditions and management of the crisis.
 
-## Map 
+## Map
 
 ```{r leaf_wm_map, fig.width=10,fig.height=10, warning=FALSE, message=FALSE}
 wm_map=readRDS("data/wm_map.RDS")
@@ -342,8 +324,7 @@ leaf_wm_map
 
 ## Map comparison to DFO
 
-
-We tried to find the correspondence between events documented in Wikidata and events documented in the DFO dataset. To do that, for each WD event, we searched for all events in the DFO dataset occurring less than a year and 30 days apart and less than 400 kms away OR occurring less than a year and 30 days apart and in the same country. The limit of one year and 30 days accounts for the sometimes low precision of date (e.g., year) in Wikidata. 
+We tried to find the correspondence between events documented in Wikidata and events documented in the DFO dataset. To do that, for each WD event, we searched for all events in the DFO dataset occurring less than a year and 30 days apart and less than 400 kms away OR occurring less than a year and 30 days apart and in the same country. The limit of one year and 30 days accounts for the sometimes low precision of date (e.g., year) in Wikidata.
 
 ```{r map_comp, warning=FALSE, message=FALSE, fig.width=10, fig.height=12}
 library(leaflet) 
@@ -367,7 +348,8 @@ comp_map=leaflet(wm_dfo)  %>%
 #| fig-cap: "Comparison of events defined in DFO (red) and Wikidata/Wikipedia (blue). The attempts at finding the correspondence between a Wikidata/Wikipedia event and a corresponding one in the DFO dataset correspond to the lines."
 comp_map
 ```
-* oui je sais ces résultats sont assez vilains pour le moment. Je vais essayer de trouver une meilleure représentation + il faudra discuter les raisons pour lesquelles il est difficile de faire une correspondance -définition des événements différent, par exemple souvent dans Wikipedia plusieurs événements sont regroupés par exemple "Inondations de telle année en Europe centrale"-) *
+
+-   oui je sais ces résultats sont assez vilains pour le moment. Je vais essayer de trouver une meilleure représentation + il faudra discuter les raisons pour lesquelles il est difficile de faire une correspondance -définition des événements différent, par exemple souvent dans Wikipedia plusieurs événements sont regroupés par exemple "Inondations de telle année en Europe centrale"-) \*
 
 # Discussion
 
