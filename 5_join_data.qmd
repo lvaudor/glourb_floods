@@ -47,22 +47,23 @@ library(leaflet)
             nwords=unique(nwords),
             topic_label=unique(topic_label)) %>% 
   ungroup() %>% 
+  mutate(flood=stringr::str_replace(flood,"wd:","")) %>% 
   mutate(popup=glue::glue("<h3>{flood_label}<a href='http://www.wikidata.org/entity/{flood}'     target='_blank'>🔗</a></h3>")) %>%
   mutate(popup=case_when(!is.na(date)~glue::glue("{popup}<p>date: {date}</p>"),
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(deathtoll)~glue::glue("{popup}<p>deathtoll:{deathtoll}</p>"),
                                  TRUE~popup)) %>% 
-  mutate(popup=case_when(!is.na(article)~glue::glue("{popup}Wikipedia:<p>{article}</p>"),
+  mutate(popup=case_when(!is.na(article)~glue::glue("{popup}<p>Wikipedia: {article}</p>"),
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(image)~glue::glue("{popup}<p>{image}</p>"),
                                  TRUE~popup)) %>%   
-  mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p>Coords from {coords_from}; date precision: {date_precision}</p>"),
+  mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p><b>coords precision</b> from {coords_from}; <b>date precision</b>: {date_precision}</p>"),
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p>{words}</p>"),
                                  TRUE~popup)) %>% 
-  mutate(popup=case_when(!is.na(topic_label)~glue::glue("{popup}<p>Topic:{topic_label}({round(gamma*100)}%)</p>"),
+  mutate(popup=case_when(!is.na(topic_label)~glue::glue("{popup}<p><b>Topic:</b>{topic_label}({round(gamma*100)}%)</p>"),
                                  TRUE~popup)) %>% 
-  mutate(popup=paste0("<style> div.leaflet-popup-content {width:1000 !important;}</style>;",popup)) %>% 
+  mutate(popup=paste0("<style> div.leaflet-popup-content {width:1200}</style>",popup)) %>% 
   sf::st_centroid()
 ```
 

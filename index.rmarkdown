@@ -1,5 +1,6 @@
 # Online reports and narrations of flood events
 
+
 ```{r setup, message=FALSE,warning=FALSE}
 library(glitter)
 library(tidyverse)
@@ -16,6 +17,7 @@ wm_comp=readRDS("data/wm_comp.RDS")
 wm_dfo=readRDS("data/wm_dfo.RDS")
 wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS")
 ```
+
 
 ## Aim of the article
 
@@ -86,12 +88,15 @@ We have gathered tables of data organized as follows:
     -   a column `textt` corresponding to the text translated in English
 -   wp_revisions: a table with one row= one revision of a Wikipedia page
 
+
 ```{r wde}
 wd_events=readRDS("data/wd_events.RDS")
 Nwde=wd_events %>% nrow()
 ```
 
+
 The initial query provided **`r Nwde` Wikidata flood events**.
+
 
 ```{r wpp}
 wp_pages=readRDS("data/wikisites_translated.RDS")
@@ -105,7 +110,9 @@ Nwde_with_wpp=wp_pages %>%
   nrow()
 ```
 
+
 There are **`r Nwpp` Wikipedia pages** associated to these events (i.e. on average `r round(Nwpp/Nwde,2)` Wikipedia pages per event). `r Nwde_with_wpp` flood events (`r round(Nwde_with_wpp/Nwde*100,2)`%) are associated to at least one Wikipedia page.
+
 
 ```{r wpp_describe_text}
 wp_pages=readRDS("data/wp_pages.RDS") %>% 
@@ -116,7 +123,9 @@ Nwpp_untranslated=wp_pages %>%
   nrow()
 ```
 
+
 `r Nwpp_en` Wikipedia pages (`r round(Nwpp_en/Nwpp*100,2)`%) are in English. Out of the `r Nwpp-Nwpp_en` remaining, we could translate most pages to English, except `r Nwpp_untranslated` pages which were in languages that Google Translate did not support.
+
 
 ```{r wpp_length}
 wpp_length_average=wp_pages %>% pull(length) %>% mean(na.rm=TRUE)
@@ -124,7 +133,9 @@ wpp_length_quant10=wp_pages %>% pull(length) %>% quantile(0.1,na.rm=TRUE)
 wpp_length_quant90=wp_pages %>% pull(length) %>% quantile(0.9,na.rm=TRUE)
 ```
 
+
 The average length of articles (in English or translated to English) is `r round(wpp_length_average)` characters. The 10% shortest articles represent less than `r round(wpp_length_quant10)` characters and the 10% longest ones are more than `r round(wpp_length_quant90)` characters long.
+
 
 ```{r wpw}
 wp_words=readRDS("data/wp_words.RDS")
@@ -142,9 +153,11 @@ Nwpr_humans=wp_revisions %>%
   nrow()
 ```
 
+
 There are **`r Nwpr` revisions** that produced the Wikipedia pages as they appear to this date, which represents an average `r round(Nwpr/Nwpp)` revisions per page.
 
 `r Nwpr_humans` (`r round(Nwpr_humans/Nwpr*100,2)`%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings "bot" or "Bot").
+
 
 ```{r Nwpu_Nwpuh}
 Nwpu=wp_revisions %>%
@@ -158,7 +171,9 @@ Nwpuh=wp_revisions %>%
   nrow()
 ```
 
+
 There are **`r Nwpu` distinct editors**, `r Nwpuh` (`r round(Nwpuh/Nwpu*100,2)`%) of which appear to be humans. On average, each human editor in our corpus is responsible for `r round(Nwpr_humans/Nwpuh,2)` edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:
+
 
 ```{r wp_revisions}
 wp_revisions %>% 
@@ -175,7 +190,9 @@ wp_revisions %>%
   knitr::kable()
 ```
 
+
 ## Wikidata on floods
+
 
 ```{r wd_stats}
 wm_full=readRDS("data/wm_full.RDS")
@@ -202,7 +219,9 @@ figure
 
 
 
+
 ## Compare to DFO data
+
 
 
 
@@ -214,6 +233,7 @@ nb_dfo_in_wd=wm_dfo_corr %>% group_by(floodcorr) %>% tally() %>% nrow()
 ```
 
 
+
 Based on the dates of observations for the DFO data base, `r nb_wm` out of the `r nrow(wd_events)` flood events in our Wikidata base might fall into it.
 
 Out of `r nb_wm` flood events documented in the WD comparison data subset, `r nb_wm_in_dfo` have at least one correspondence in the DFO comparison data subset (`r round(nb_wm_in_dfo/nb_wm *100,2)`%).
@@ -223,6 +243,7 @@ Out of `r nb_dfo` flood events documented in the DFO comparison data subset, `r 
 ## Wikipedia content
 
 ### News or encyclopedia?
+
 
 ```{r delay_revisions,fig.width=10,fig.height=8, warning=FALSE, message=FALSE}
 #| label: fig-delay_revisions
@@ -251,11 +272,13 @@ ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
   facet_grid(rows=vars(year))
 ```
 
+
 @fig-delay_revisions shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.
 
 ### Topics
 
 We applied a structural topic modelling (STM) algorithm to identify topics in the Wikipedia text corpus and selected a number of topics of 6 [@weston_selecting_2023]. The STM method provides topics characterized by a set of most probable words (see fig. @fig-topic_terms). To help with the interpretation of subsequent results and figures, and although the corpus does not exhibit very distinct topics (which is unsurprising given the inherent specificity and formal homogeneity of the corpus) we propose a short label for each topic ("spatial range", "weather", "hydrology", "management", "historical importance", "human toll")
+
 
 ```{r get_text_data}
 topic_model=readRDS("data/topic_model.RDS")
@@ -301,9 +324,11 @@ ggplot(tib_meta_thematiques,
   labs(x="topic_label")
 ```
 
+
 @fig-topic_doctype shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding spatial range and hydrology, and bringing justification of the existence of the article through a discussion of the historical importance of the event, while longer articles might convey more extensive reports of weather conditions and management of the crisis.
 
 ## Map
+
 
 ```{r leaf_wm_map, fig.width=10,fig.height=10, warning=FALSE, message=FALSE}
 wm_map=readRDS("data/wm_map.RDS")
@@ -321,9 +346,11 @@ leaf_wm_map=leaflet(wm_map) %>% # déf carte
 leaf_wm_map
 ```
 
+
 ## Map comparison to DFO
 
 We tried to find the correspondence between events documented in Wikidata and events documented in the DFO dataset. To do that, for each WD event, we searched for all events in the DFO dataset occurring less than a year and 30 days apart and less than 400 kms away OR occurring less than a year and 30 days apart and in the same country. The limit of one year and 30 days accounts for the sometimes low precision of date (e.g., year) in Wikidata.
+
 
 ```{r map_comp, warning=FALSE, message=FALSE, fig.width=10, fig.height=12}
 library(leaflet) 
@@ -348,6 +375,7 @@ comp_map=leaflet(wm_dfo)  %>%
 comp_map
 ```
 
+
 *oui je sais ces résultats sont assez vilains pour le moment. Je vais essayer de trouver une meilleure représentation + il faudra discuter les raisons pour lesquelles il est difficile de faire une correspondance -définition des événements différent, souvent dans Wikipedia plusieurs événements sont regroupés par exemple "Inondations de telle année en Europe centrale"-) *
 
 # Discussion
@@ -355,3 +383,4 @@ comp_map
 This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity [@lorini_uneven_2020; @ruprechter_poor_2023] due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.
 
 Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. The interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos indeed allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context (in particular through the integration of Wikipedia discourse elements and Wikimedia Commons images) as well as the difficulties inherent to identifying particular flood events based solely on presumably objective information, such as coordinates and dates for these events.
+
