@@ -21,8 +21,6 @@ ggplot(wp_words_freq,aes(x=forcats::fct_reorder(lemma,n),
   labs(x="lemma",y="frequency")
 ```
 
-
-
 ```{r tib_sparse}
 
 tib_sparse=wp_words %>% 
@@ -33,7 +31,6 @@ tib_sparse=wp_words %>%
   cast_sparse(row=flood, column=lemma, value=n)
 ```
 
-
 ```{r run_stm}
 if(!file.exists("data/topic_model.RDS")){
 set.seed(123)
@@ -42,8 +39,6 @@ saveRDS(topic_model,"data/topic_model.RDS")
 }
 topic_model=readRDS("data/topic_model.RDS")
 ```
-
-
 
 ```{r termes_thematiques}
 termes_thematiques=tidy(topic_model, matrix="beta") %>% 
@@ -54,6 +49,7 @@ termes_thematiques=tidy(topic_model, matrix="beta") %>%
   ungroup()
 termes_thematiques
 ```
+
 ```{r add_topic_labels}
 topics=tibble::tribble(~topic,~topic_label,
                        1,"1) spatial range",
@@ -78,8 +74,6 @@ tib_gamma <- tidy(topic_model, matrix = "gamma") %>%
   left_join(topics,by="topic")
 saveRDS(tib_gamma,"data/tib_gamma.RDS")
 ```
-
-
 
 ## Choice of number of classes
 
@@ -119,4 +113,3 @@ library(mixr)
 tib_spec <- tidy_specificities(wp_words2,cat1=lemma, cat2=country_label, min_spec=2)
 head(tib_spec)
 ```
-

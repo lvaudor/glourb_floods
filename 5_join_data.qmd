@@ -3,6 +3,7 @@ library(tidyverse)
 wd_events=readRDS("data/wd_events.RDS")
 wm_full=readRDS("data/wm_full.RDS")
 wp_20_words_per_event=readRDS("data/wp_20_words_per_event.RDS")
+wp_words_spec=readRDS("data/wp_words_spec.RDS")
 wp_themes=readRDS("data/tib_gamma.RDS") %>% 
   group_by(flood) %>% 
   slice_max(gamma) %>% 
@@ -10,7 +11,8 @@ wp_themes=readRDS("data/tib_gamma.RDS") %>%
 wm_full=wm_full %>% 
   left_join(wp_20_words_per_event, by=c("flood","flood_label")) %>% 
   left_join(wp_themes,
-            by="flood")
+            by="flood") %>% 
+  left_join(wp_words_spec,by="flood")
 ```
 
 # Wikidata Map
@@ -40,6 +42,7 @@ library(leaflet)
             article=paste0(unique(article), collapse=" "),
             image=paste0(unique(image),collapse=" "),
             words=unique(words),
+            specific_words=unique(specific_words),
             date_precision=unique(date_precision),
             coords_from=unique(coords_from),
             topic=unique(topic),
@@ -59,7 +62,8 @@ library(leaflet)
                                  TRUE~popup)) %>%   
   mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p><b>coords precision</b> from {coords_from}; <b>date precision</b>: {date_precision}</p>"),
                                  TRUE~popup)) %>% 
-  mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p>{words}</p>"),
+  mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p><b>frequent words:</b> {words}</p>"),
+                                 TRUE~popup)) %>%   mutate(popup=case_when(!is.na(words)~glue::glue("{popup}<p><b>specific words:</b> {specific_words}</p>"),
                                  TRUE~popup)) %>% 
   mutate(popup=case_when(!is.na(topic_label)~glue::glue("{popup}<p><b>Topic:</b>{topic_label}({round(gamma*100)}%)</p>"),
                                  TRUE~popup)) %>% 

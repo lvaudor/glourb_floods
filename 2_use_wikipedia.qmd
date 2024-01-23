@@ -99,6 +99,12 @@ wp_words=wp_pages %>%
   group_by(flood,flood_label,lemma) %>%
   summarise(n=n(),.groups="drop") %>%
   arrange(flood,flood_label,desc(n)) 
+
+wp_words_spec <- mixr::tidy_specificities(wp_words %>% filter(n>3),lemma, flood) %>% 
+  filter(spec>2) %>% 
+  group_by(flood) %>% 
+  summarise(specific_words=paste(lemma,collapse="; "),.groups="drop")
+saveRDS(wp_words_spec,"data/wp_words_spec.RDS")
 saveRDS(wp_words,"data/wp_words.RDS")
 wp_20_words_per_event=wp_words %>% 
   group_by(flood,flood_label) %>% 

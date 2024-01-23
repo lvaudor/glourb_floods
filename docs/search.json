@@ -578,7 +578,7 @@
     "href": "5_join_data.html",
     "title": "Wikidata Map",
     "section": "",
-    "text": "Code\nlibrary(tidyverse)\nwd_events=readRDS(\"data/wd_events.RDS\")\nwm_full=readRDS(\"data/wm_full.RDS\")\nwp_20_words_per_event=readRDS(\"data/wp_20_words_per_event.RDS\")\nwp_themes=readRDS(\"data/tib_gamma.RDS\") %&gt;% \n  group_by(flood) %&gt;% \n  slice_max(gamma) %&gt;% \n  ungroup()\nwm_full=wm_full %&gt;% \n  left_join(wp_20_words_per_event, by=c(\"flood\",\"flood_label\")) %&gt;% \n  left_join(wp_themes,\n            by=\"flood\")"
+    "text": "Code\nlibrary(tidyverse)\nwd_events=readRDS(\"data/wd_events.RDS\")\nwm_full=readRDS(\"data/wm_full.RDS\")\nwp_20_words_per_event=readRDS(\"data/wp_20_words_per_event.RDS\")\nwp_words_spec=readRDS(\"data/wp_words_spec.RDS\")\nwp_themes=readRDS(\"data/tib_gamma.RDS\") %&gt;% \n  group_by(flood) %&gt;% \n  slice_max(gamma) %&gt;% \n  ungroup()\nwm_full=wm_full %&gt;% \n  left_join(wp_20_words_per_event, by=c(\"flood\",\"flood_label\")) %&gt;% \n  left_join(wp_themes,\n            by=\"flood\") %&gt;% \n  left_join(wp_words_spec,by=\"flood\")"
   },
   {
     "objectID": "5_join_data.html#data-from-the-dartmouth-flood-observatory",
