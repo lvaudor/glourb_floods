@@ -1,9 +1,16 @@
+author:
+    - name: Lise Vaudor
+    - name: Liolia Bajemon
+    - name: Maïlys Genouël
+    - name: Hervé Piégay
+
 project:
   type: website
   output-dir: docs
 
 website:
   title: "glourb_floods"
+
   navbar:
     left:      
       - href: index.qmd
@@ -18,8 +25,7 @@ website:
         text: Methods 3
       - href: 4_text_analysis.qmd
         text: Methods 4
-      - href: 5_join_data.qmd
-        text: Methods 5
+
       
 bibliography: floods.bib
 

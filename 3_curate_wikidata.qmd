@@ -2,8 +2,7 @@
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(tidyverse)
-wd_raw=readRDS("data/wd_raw.RDS") %>% 
-  filter(flood_label!="London Beer Flood")
+wd_raw=readRDS("data/wd_raw.RDS") 
 ```
 
 The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:
@@ -69,13 +68,23 @@ For some events, location is not provided, only country. We still use this infor
 Here is a function that collects data for each country identifier about the coordinates of the location (coords_country)
 
 ```{r def_get_country_info}
+library(glitter)
 get_country_info=function(country_id){
   result=spq_init() %>%
     spq_set(country=country_id) %>% 
     spq_add("?country wdt:P625 ?coords_country") %>%
-    spq_select(-country) %>% 
-    spq_perform(replace_prefixes=TRUE) 
-  result
+    spq_add("?country wdt:P37 ?language_official") %>% 
+    spq_add("?language_official wdt:P424 ?language_official_code") %>% 
+    spq_add("?country wdt:P1081 ?HDI") %>%
+    spq_add("?country wdt:P2936 ?language_used") %>% 
+    spq_add("?language_used wdt:P424 ?language_used_code") %>% 
+    spq_label(country,language_official,language_used) %>% 
+    spq_perform(replace_prefixes=TRUE) %>% 
+    mutate(country_label=country_label,
+           language_official=language_official_label,
+           language_used=language_used_label) %>% 
+    select(-country,-language_official_label,-language_used_label)
+  return(result)
 }
 ```
 
@@ -88,7 +97,27 @@ if(!file.exists("data/countries.RDS")){
     unique() %>% 
     na.omit() %>% 
     mutate(data=purrr::map(country,get_country_info)) %>% 
-    tidyr::unnest(data)
+    tidyr::unnest(data) %>% 
+    mutate(HDI=as.numeric(HDI))
+  getlang=function(tib){
+    result=bind_rows(
+      tibble::tibble(lang_type="official",
+                     language=tib$language_official,
+                     language_code=tib$language_official_code),
+      tibble::tibble(lang_type="used",
+                     language=tib$language_used,
+                     language_code=tib$language_used_code)
+    )
+    result=unique(result)
+    return(result)
+  }
+  countries=countries %>% 
+    group_by(country,country_label,coords_country,HDI) %>% 
+    tidyr::nest() %>% 
+    mutate(data=purrr::map(data,getlang)) %>% 
+    tidyr::unnest(cols=c(data)) %>% 
+    ungroup() %>% 
+    select(country,country_label,everything())
   saveRDS(countries, "data/countries.RDS")
 }
 countries=readRDS("data/countries.RDS")
@@ -110,7 +139,8 @@ floodlocs=wd_raw %>%
   mutate(coords_from=case_when(!is.na(coords)~"flood",
                                is.na(coords)~"location")) %>% 
   select(flood,flood_label,coords,coords_loc,country,country_label) %>% 
-  left_join(countries,by="country",
+  left_join(countries %>% select(country,coords_country),
+            by="country",
             relationship ="many-to-many") %>%
   mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~"3) country",
                                !is.na(coords_loc)~"2) location",
@@ -299,8 +329,10 @@ if(!file.exists("data/wikisites.RDS")){
     tidyr::unnest(c(wikisites))
   saveRDS(wikisites, "data/wikisites.RDS")
 }
-wikisites=readRDS("data/wikisites.RDS")
-wikisites=readRDS("data/wikisites_translated.RDS")
+wikisites=readRDS("data/wikisites.RDS") %>% 
+  filter(flood %in% wd_raw$flood)
+wikisites=readRDS("data/wikisites_translated.RDS")%>% 
+  filter(flood %in% wd_raw$flood)
 ```
 
 ## Add images
@@ -327,7 +359,8 @@ if(!file.exists("data/images.RDS")){
     tidyr::unnest(c(images))
   saveRDS(images, "data/images.RDS")
 }
-images=readRDS("data/images.RDS")
+images=readRDS("data/images.RDS")%>% 
+  filter(flood %in% wd_raw$flood)
 ```
 
 ## Add categories
@@ -352,7 +385,8 @@ if(!file.exists("data/categories.RDS")){
     tidyr::unnest(c(categories))
   saveRDS(categories, "data/categories.RDS")
 }
-categories=readRDS("data/categories.RDS")
+categories=readRDS("data/categories.RDS")%>% 
+  filter(flood %in% wd_raw$flood)
 ```
 
 ## Join everything
@@ -370,7 +404,7 @@ wm_full=wd_events %>%
             relationship ="many-to-many") %>% 
   left_join(categories,by=c("flood","flood_label"),
             relationship ="many-to-many")
-wd_events=wd_events %>% select(flood,flood_label,date) %>%
+wd_events=wd_events %>% select(flood,flood_label,date,country,country_label) %>%
   mutate(year=lubridate::year(date)) %>% 
   unique()
 

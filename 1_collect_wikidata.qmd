@@ -1,4 +1,4 @@
-# Collect Wikidata about floods 
+# Collect Wikidata about floods
 
 ```{r setup, message=FALSE,warning=FALSE}
 library(glitter)
@@ -21,6 +21,7 @@ query=spq_init() %>%
     spq_label(flood,country,what) 
 plot_query(query, labelling=TRUE)
 ```
+
 Here are the initial results we get when performing this query:
 
 ```{r run_initial_query}
@@ -31,6 +32,23 @@ if(!file.exists("data/wd_raw.RDS")){
   saveRDS(wd_raw,"data/wd_raw.RDS")
 }
 wd_raw=readRDS("data/wd_raw.RDS")
+
+
+wd_weird_events=wd_raw %>% 
+  mutate(weird=(what_label %in% c("Bible story",
+                                  "deluge myth",
+                                  "creation myth",
+                                  "episode in Greek mythology",
+                                  "reflective writing",
+                                  "non-water flood"))) %>% 
+  group_by(flood) %>% 
+  summarise(any_weird=any(weird), .groups="drop") %>% 
+  filter(any_weird)
+
+wd_raw = wd_raw %>%
+  filter(!(flood %in% wd_weird_events$flood))
+
+saveRDS(wd_raw, "data/wd_raw.RDS")
 kableExtra::kable(wd_raw %>% head(20))
 ```
 

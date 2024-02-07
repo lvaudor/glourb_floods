@@ -4,7 +4,9 @@
 library(tidyverse)
 library(stm)
 library(tidytext)
-wp_words=readRDS("data/wp_words.RDS")
+wd_raw=readRDS("data/wd_raw.RDS")
+wp_words=readRDS("data/wp_words.RDS") %>% 
+  filter(flood %in% wd_raw$flood)
 ```
 
 ```{r plot_words_freq,fig.width=4,fig.height=5}
@@ -102,7 +104,9 @@ plot(kresult)
 ## Specificities
 
 ```{r}
-wm_full=readRDS("data/wm_full.RDS")
+
+wm_full=readRDS("data/wm_full.RDS") %>% 
+  filter(flood %in% wd_raw$flood)
 wp_words2=wp_words %>% 
   left_join(wm_full %>% select(flood,date,country_label),by="flood") %>% 
   mutate(year=lubridate::year(date)) %>% 

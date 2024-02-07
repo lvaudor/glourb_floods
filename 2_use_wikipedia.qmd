@@ -2,6 +2,8 @@
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyverse)
+library(rainette)
+wd_raw=readRDS("data/wd_raw.RDS")
 ```
 
 We translate all Wikipedia pages' titles and texts to English (when Google translate allows it).
@@ -9,7 +11,7 @@ We translate all Wikipedia pages' titles and texts to English (when Google trans
 ```{r}
 if(!file.exists("data/wikisites_translated.RDS")){
   wikisites=readRDS("data/wikisites.RDS") %>% 
-     mutate(lang=stringr::str_extract(article,"(?<=https://)[[:alpha:]]*(?=\\.)"))%>%
+     mutate(lang=stringr::str_extract(article,"(?<=https://)([[:alpha:]]|-)*(?=\\.)"))%>%
      mutate(lang=case_when(lang=="simple"~"en",
                            TRUE~lang)) %>% 
      mutate(title=stringr::str_extract(article,"(?<=\\/wiki\\/).*")) %>% 
@@ -23,7 +25,8 @@ if(!file.exists("data/wikisites_translated.RDS")){
                                            ~replace(.x,is.null(.x),NA)))
   saveRDS(wikisites,"data/wikisites_translated.RDS")
 }
-wikisites=readRDS("data/wikisites_translated.RDS")
+wikisites=readRDS("data/wikisites_translated.RDS")%>% 
+  filter(flood %in% wd_raw$flood)
 ```
 
 We define a translate function, based on the polyglotr package.
@@ -57,6 +60,53 @@ translate <- function(i){
 }
 ```
 
+## is language local?
+
+```{r def_is_language_local}
+is_language_local=function(lang_id,country_id){
+  result=countries %>% 
+    filter(country==country_id) %>% 
+    filter(lang_id==language_code)
+  result=case_when(nrow(result)==1~TRUE,
+                   nrow(result)==0~FALSE)
+  return(result)
+}
+
+countries=readRDS("data/countries.RDS") %>% 
+  select(country,language_code) %>% 
+  unique()
+wp_pages=readRDS("data/wp_pages.RDS")
+wd_events=readRDS("data/wd_events.RDS") 
+wp_pages_local_articles=wd_events %>% select(flood,country) %>% 
+  left_join(wp_pages %>% select(flood,article,lang),
+            by="flood",relationship="many-to-many") %>% 
+  mutate(local=purrr::map2_lgl(lang,country,is_language_local)) %>% 
+  select(article,local)
+wp_pages=wp_pages %>% 
+  left_join(wp_pages_local_articles,by="article")
+saveRDS(wp_pages,"data/wp_pages.RDS")
+```
+
+
+##
+```{r def_clean_banners}
+clean_banners=function(text){
+  banner=str_detect(text,"This article|this banner|your knowledge")
+  if(banner & !is.na(text)){
+  result=text %>% 
+    str_replace("This article is.*\\n","") %>% 
+    str_replace("This article is a draft concerning.*\\.\\n\\n","") %>% 
+    str_replace("\\nedit - edit code - edit Wikidata\\n","") %>% 
+    str_replace("You can share your knowledge by.*\\.","") %>% 
+    str_replace("This article is based.*$","") %>% 
+    str_replace("^(.|\\n)*If you think these points have been resolved, you can remove this banner and improve the formatting of another article\\.","")%>% 
+    str_replace("This .*article.*\\. You can help Wikipedia by expanding it\\.") %>% 
+    str_replace("\\..*\\}","")
+  }else{result=text}
+  return(result)
+}
+```
+
 ```{r apply_translation}
 if(!file.exists("data/wikisites_text.RDS")){
   library(rvest)
@@ -66,8 +116,8 @@ if(!file.exists("data/wikisites_text.RDS")){
     mutate(html=purrr::map(article,read_html)) %>% 
     mutate(html=purrr::map(html,~html_nodes(.x,"p"))) %>%
     mutate(text=purrr::map(html,html_text)) %>% 
+    select(-html) %>% 
     mutate(text=purrr::map(text,~paste0(.x,collapse="\n"))) %>% 
-    mutate(initlength=purrr::map(text,str_length))
   tmp-Sys.time()
   
   # Translate them all to English with Google Translate (if possible)
@@ -82,9 +132,19 @@ if(!file.exists("data/wikisites_text.RDS")){
   }  
   print(Sys.time()-tmp) 
 saveRDS(wikisites_textt,"data/wp_pages.RDS")
+
+  wp_pages=wikisites_textt %>% 
+    mutate(textt=purrr::map_chr(textt,clean_banners)) %>% 
+    mutate(textt=stringr::str_replace(textt,"mw-parser-output.*$","")) %>% 
+    mutate(length=map_dbl(textt,str_length)) %>% 
+    select(-flood_label)
+  saveRDS(wp_pages,"data/wp_pages.RDS")
 }
+
+
+
 wp_pages=readRDS("data/wp_pages.RDS") %>% 
-  mutate(length=map_dbl(textt,str_length))
+  filter(flood %in% wd_raw$flood) 
 ```
 
 ## wp_words
@@ -113,86 +173,130 @@ wp_20_words_per_event=wp_words %>%
   summarise(words=paste(lemma,collapse="; "), .groups="drop")
 saveRDS(wp_20_words_per_event,"data/wp_20_words_per_event.RDS")
 }
-wp_words=readRDS("data/wp_words.RDS")
+wp_words=readRDS("data/wp_words.RDS") %>% 
+  filter(flood %in% wd_raw$flood)
 ```
+
+## Classification of segment's topics
+
+```{r prepare_class_rainette}
+
+
+if(!file.exists("data/wp_segments.RDS")){
+  library(quanteda)
+  library(rainette)
+  library(mixr)
+    lexicon_en=get_lexicon("en")
+    wp_segments=readRDS("data/wp_pages.RDS") %>%
+    tidytext::unnest_tokens(output="word",input="textt",token="words") %>%
+    left_join(lexicon_en,by=c("word")) %>%
+    mutate(keep=(type!="sw" & lemma!="flood")) %>% 
+    group_by(flood,flood_label,article) %>%
+    mutate(lemma=case_when(is.na(lemma)|(!keep)~"",
+                           TRUE~lemma)) %>% 
+    mutate(keep=as.numeric(keep)) %>% 
+    mutate(num_lemma=case_when(is.na(keep)~0,
+                     TRUE~keep)) %>% 
+    mutate(num_lemma=cumsum(num_lemma)) %>% 
+    mutate(num_segment=ceiling(num_lemma/10+0.000001)) %>% 
+    ungroup() %>% 
+    group_by(flood,flood_label,article,num_segment) %>% 
+    summarise(text_all=paste0(word, collapse=" "),
+              text_sig=paste0(lemma,collapse=" "),
+              .groups="drop") %>% 
+    mutate(num_segment=paste0(article,"_",num_segment)) %>% 
+    mutate(text_sig_dontkeep=text_sig)
+
+  corpus=corpus(wp_segments,docid_field="num_segment",text_field="text_sig_dontkeep")
+  tok <- tokens(corpus, remove_punct = TRUE, remove_numbers = TRUE)
+  dtm <- dfm(tok)
+  dtm <- dfm_trim(dtm, min_docfreq = 30)
+  set.seed(123)
+  res=rainette(dtm,k=10,min_split_members=10)
+  saveRDS(res,"data/res_rainette_wp.RDS")
+  saveRDS(corpus,"data/corpus.RDS")
+  saveRDS(dtm,"data/dtm.RDS")
+}
+res=readRDS("data/res_rainette_wp.RDS")
+corpus=readRDS("data/corpus.RDS")
+dtm=readRDS("data/dtm.RDS")
+#rainette_explor(res,dtm,corpus)
+```
+
+```{r plot_class_rainette, fig.width=10, fig.height=8}
+rainette_plot(
+  res, dtm, k = 6,
+  n_terms = 20,
+  free_scales = TRUE,
+  measure = "chi2",
+  show_negative = FALSE,
+  text_size = 12
+)
+```
+
+```{r attribute_classes}
+if(!file.exists("data/wp_segments.RDS")){
+  corpus$class=paste0("class_",cutree_rainette(res, k = 6))
+  
+  tib_classes=tibble::tribble(~class,~class_name,~color,
+                  "class_1","governance","#4E79A7",
+                  "class_2","relief","#F28E2B",
+                  "class_3","damage","#E15759",
+                  "class_4","hydrology", "#76B7B2", 
+                  "class_5","anticipation","#59A14F",
+                  "class_6","weather","#EDC948")
+  wp_segments=docvars(corpus) %>% 
+    left_join(tib_classes,by="class") %>% 
+    mutate(class=as.factor(class),
+           class_name=as.factor(class_name)) %>% 
+    select(-flood,-flood_label)
+  saveRDS(wp_segments,"data/wp_segments.RDS")
+}
+```
+
+## add classif results summary to wp_pages
+
+```{r make_wp_pages_class}
+wp_segments=readRDS("data/wp_segments.RDS")
+wp_segments_summary=wp_segments %>% 
+  group_by(article,class,class_name,color) %>% 
+  tally()
+spec=mixr::tidy_specificities(wp_segments,
+                              article,
+                              class_name)
+wp_pages_class=wp_pages %>% 
+  left_join(wp_segments_summary,
+            by="article") %>% 
+  left_join(spec,by=c("article","class_name","n"))
+
+saveRDS(wp_pages_class,"data/wp_pages_class.RDS")
+```
+
+## search for deathtoll in text
+
+```{r search_deathtoll}
+# dat %>% 
+#   mutate(mentions_death=stringr::str_detect(text_all,"dead|death|decease")) %>% 
+#   filter(mentions_death) %>% 
+  
+
+```
+
 
 ## wp_revisions
 
-```{r}
-get_revs=function(lang, title){
-  f=function(x){
-    ind=which(map_lgl(x,is.null))
-    if(length(ind)>0){x[ind]=NA}
-    x[["comment"]]=x[["comment"]][[1]]
-    if(length(x$user)==1){
-      x$user=list(id=NA,name=NA)
-    }
-    if(length(x$user)==2){
-      if(is.null(x$user$name)){name=NA}else{name=x$user$name}
-      if(is.null(x$user$id)){id=NA}else{id=x$user$id}
-      x$user=list(id=id,name=name)
-    }
-    return(x)
-  }
-  url=paste0("https://",lang,
-               ".wikipedia.org/w/rest.php/v1/page/",
-             URLencode(title),
-             "/history")
-  revs_raw=GET(url)
-  if(revs_raw$status_code<=200){
-  revs=revs_raw %>%
-    content() %>%
-    .$revisions %>% 
-    map(f) %>% 
-    map(as_tibble) %>%
-    bind_rows()
-  while("older" %in% names(content(revs_raw))){
-    revs_raw=GET(content(revs_raw)$older)
-    revs_tmp=revs_raw %>%
-      content() %>%
-      .$revisions %>%
-      map(f) %>% 
-      map(as_tibble) %>%
-      bind_rows()
-    revs=bind_rows(revs,revs_tmp)
-  }
-  # revs=revs %>% 
-  #   mutate(timestamp=lubridate::ymd_hms(timestamp)) %>% 
-  #   mutate(day=lubridate::round_date(timestamp,"day"),
-  #          year=lubridate::year(timestamp))
-  revs=revs %>% 
-    group_by(id) %>% 
-    mutate(type=c("user_id","user_name")) %>% 
-    tidyr::pivot_wider(names_from=type,values_from=user) %>% 
-    tidyr::unnest(cols = c(user_id, user_name))
-  }else{revs=tibble(id=NA,
-                     timestamp=NA,
-                     minor=NA,
-                     size=NA,
-                     comment=NA,
-                     delta=NA,
-                     user_id=NA,
-                     user_name=NA)}
-  return(revs)
-}
-
+```{r def_get_revs}
+source("scripts/get_revs.R")
 ```
 
-```{r}
-library(httr)
-
+```{r apply_get_revs}
 if(!file.exists("data/wp_revisions.RDS")){
+library(httr)
 wp_revisions=wp_pages %>% 
-  select(-text,-textt,-html) %>% 
+  select(-text,-textt) %>% 
   mutate(revisions=purrr::map2(lang,title,get_revs)) %>% 
-  tidyr::unnest(cols=c(revisions))
+  tidyr::unnest(cols=c(revisions)) %>% 
+  select(-flood,-flood_label,-lang,-title,-translated_title)
 saveRDS(wp_revisions,"data/wp_revisions.RDS")
 }
-```
-
-```{r annex}
-# text=text %>% 
-#   mutate(dead=purrr::map(textt,
-#                          ~unlist(stringr::str_extract_all(.x,
-#     "[\\d\\.\\,]+\\s(dead|victims)"))))
 ```
