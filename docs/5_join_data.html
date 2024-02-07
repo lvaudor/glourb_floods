@@ -6,6 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Lise Vaudor">
+<meta name="author" content="Liolia Bajemon">
+<meta name="author" content="Maïlys Genouël">
+<meta name="author" content="Hervé Piégay">
 
 <title>glourb_floods – join_data</title>
 <style>
@@ -362,7 +366,7 @@ treated as NA</code></pre>
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_as_sf</span>(<span class="at">wkt=</span><span class="st">"coords"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_set_crs</span>(<span class="dv">4326</span>) </span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dfo_comp,<span class="st">"data/dfo_comp_befcorrection.RDS"</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"correct_dfo_countries.R"</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"scripts/correct_dfo_countries.R"</span>)</span>
 <span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>dfo_comp<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dfo_comp.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -491,7 +495,7 @@ treated as NA</code></pre>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Based on the dates of observations for the DFO data base, 417 out of the 813 flood events in our Wikidata base might fall into it.</p>
+<p>Based on the dates of observations for the DFO data base, 414 out of the 802 flood events in our Wikidata base might fall into it.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -501,7 +505,7 @@ treated as NA</code></pre>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>nb_dfo_in_wd<span class="ot">=</span>wm_dfo_corr <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(floodcorr) <span class="sc">%&gt;%</span> <span class="fu">tally</span>() <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Out of 391 flood events documented in the WD comparison data subset, 296 have at least one correspondence in the DFO comparison data subset (75.7%).</p>
+<p>Out of 388 flood events documented in the WD comparison data subset, 296 have at least one correspondence in the DFO comparison data subset (76.29%).</p>
 <p>Out of 5129 flood events documented in the DFO comparison data subset, 281 have at least one correspondence in the WD comparison data subset (5.48%).</p>
 </section>
 <section id="why-are-flood-events-documented-in-wikidata" class="level2">

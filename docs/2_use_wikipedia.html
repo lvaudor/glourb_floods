@@ -6,6 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Lise Vaudor">
+<meta name="author" content="Liolia Bajemon">
+<meta name="author" content="Maïlys Genouël">
+<meta name="author" content="Hervé Piégay">
 
 <title>glourb_floods – use_wikipedia</title>
 <style>
@@ -95,7 +99,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.scss">
 </head>
 
 <body class="nav-fixed">
@@ -136,8 +140,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Methods 3</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./4_join_data.html" rel="" target="">
+    <a class="nav-link" href="./4_text_analysis.html" rel="" target="">
  <span class="menu-text">Methods 4</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./5_join_data.html" rel="" target="">
+ <span class="menu-text">Methods 5</span></a>
   </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
@@ -158,6 +166,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#use-wikipedia-to-complete-wikidata" id="toc-use-wikipedia-to-complete-wikidata" class="nav-link active" data-scroll-target="#use-wikipedia-to-complete-wikidata">Use Wikipedia to complete Wikidata</a>
   <ul class="collapse">
   <li><a href="#wp_words" id="toc-wp_words" class="nav-link" data-scroll-target="#wp_words">wp_words</a></li>
+  <li><a href="#classification-of-segments-topics" id="toc-classification-of-segments-topics" class="nav-link" data-scroll-target="#classification-of-segments-topics">Classification of segment’s topics</a></li>
+  <li><a href="#add-classif-results-summary-to-wp_pages" id="toc-add-classif-results-summary-to-wp_pages" class="nav-link" data-scroll-target="#add-classif-results-summary-to-wp_pages">add classif results summary to wp_pages</a></li>
   <li><a href="#wp_revisions" id="toc-wp_revisions" class="nav-link" data-scroll-target="#wp_revisions">wp_revisions</a></li>
   </ul></li>
   </ul>
@@ -173,7 +183,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rainette)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We translate all Wikipedia pages’ titles and texts to English (when Google translate allows it).</p>
@@ -182,7 +194,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wikisites_translated.RDS"</span>)){</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mutate</span>(<span class="at">lang=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(article,<span class="st">"(?&lt;=https://)[[:alpha:]]*(?=</span><span class="sc">\\</span><span class="st">.)"</span>))<span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mutate</span>(<span class="at">lang=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(article,<span class="st">"(?&lt;=https://)([[:alpha:]]|-)*(?=</span><span class="sc">\\</span><span class="st">.)"</span>))<span class="sc">%&gt;%</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mutate</span>(<span class="at">lang=</span><span class="fu">case_when</span>(lang<span class="sc">==</span><span class="st">"simple"</span><span class="sc">~</span><span class="st">"en"</span>,</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span><span class="sc">~</span>lang)) <span class="sc">%&gt;%</span> </span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mutate</span>(<span class="at">title=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(article,<span class="st">"(?&lt;=</span><span class="sc">\\</span><span class="st">/wiki</span><span class="sc">\\</span><span class="st">/).*"</span>)) <span class="sc">%&gt;%</span> </span>
@@ -196,7 +208,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>                                           <span class="sc">~</span><span class="fu">replace</span>(.x,<span class="fu">is.null</span>(.x),<span class="cn">NA</span>)))</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wikisites,<span class="st">"data/wikisites_translated.RDS"</span>)</span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites_translated.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites_translated.RDS"</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We define a translate function, based on the polyglotr package.</p>
@@ -234,33 +247,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wikisites_text.RDS"</span>)){</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(rvest)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Get text paragraphs from all Wikipedia articles</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  tmp<span class="ot">=</span><span class="fu">Sys.time</span>()</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  wikisites_text<span class="ot">=</span>wikisites <span class="sc">%&gt;%</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">html=</span>purrr<span class="sc">::</span><span class="fu">map</span>(article,read_html)) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">html=</span>purrr<span class="sc">::</span><span class="fu">map</span>(html,<span class="sc">~</span><span class="fu">html_nodes</span>(.x,<span class="st">"p"</span>))) <span class="sc">%&gt;%</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">text=</span>purrr<span class="sc">::</span><span class="fu">map</span>(html,html_text)) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">text=</span>purrr<span class="sc">::</span><span class="fu">map</span>(text,<span class="sc">~</span><span class="fu">paste0</span>(.x,<span class="at">collapse=</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">initlength=</span>purrr<span class="sc">::</span><span class="fu">map</span>(text,str_length))</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  tmp<span class="sc">-</span><span class="fu">Sys.time</span>()</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Translate them all to English with Google Translate (if possible)</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  wikisites_textt<span class="ot">=</span>wikisites_text <span class="sc">%&gt;%</span> </span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">textt=</span><span class="cn">NA</span>)</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  tmp<span class="ot">=</span><span class="fu">Sys.time</span>()</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(wikisites_textt)){</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(i)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    result<span class="ot">=</span><span class="fu">translate</span>(i)</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(result)<span class="sc">&gt;</span><span class="dv">0</span>){</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    wikisites_textt<span class="sc">$</span>textt[i]<span class="ot">=</span>result}</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  }  </span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">Sys.time</span>()<span class="sc">-</span>tmp) </span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wikisites_textt,<span class="st">"data/wp_pages.RDS"</span>)</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>wp_pages<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_pages.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">length=</span><span class="fu">map_dbl</span>(textt,str_length))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>clean_banners<span class="ot">=</span><span class="cf">function</span>(text){</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  banner<span class="ot">=</span><span class="fu">str_detect</span>(text,<span class="st">"This article|this banner|your knowledge"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(banner <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(text)){</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span>text <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"This article is.*</span><span class="sc">\\</span><span class="st">n"</span>,<span class="st">""</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"This article is a draft concerning.*</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">n</span><span class="sc">\\</span><span class="st">n"</span>,<span class="st">""</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">nedit - edit code - edit Wikidata</span><span class="sc">\\</span><span class="st">n"</span>,<span class="st">""</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"You can share your knowledge by.*</span><span class="sc">\\</span><span class="st">."</span>,<span class="st">""</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"This article is based.*$"</span>,<span class="st">""</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"^(.|</span><span class="sc">\\</span><span class="st">n)*If you think these points have been resolved, you can remove this banner and improve the formatting of another article</span><span class="sc">\\</span><span class="st">."</span>,<span class="st">""</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"This .*article.*</span><span class="sc">\\</span><span class="st">. You can help Wikipedia by expanding it</span><span class="sc">\\</span><span class="st">."</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_replace</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">..*</span><span class="sc">\\</span><span class="st">}"</span>,<span class="st">""</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{result<span class="ot">=</span>text}</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wikisites_text.RDS"</span>)){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(rvest)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Get text paragraphs from all Wikipedia articles</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  tmp<span class="ot">=</span><span class="fu">Sys.time</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  wikisites_text<span class="ot">=</span>wikisites <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">html=</span>purrr<span class="sc">::</span><span class="fu">map</span>(article,read_html)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">html=</span>purrr<span class="sc">::</span><span class="fu">map</span>(html,<span class="sc">~</span><span class="fu">html_nodes</span>(.x,<span class="st">"p"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">text=</span>purrr<span class="sc">::</span><span class="fu">map</span>(html,html_text)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>html) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">text=</span>purrr<span class="sc">::</span><span class="fu">map</span>(text,<span class="sc">~</span><span class="fu">paste0</span>(.x,<span class="at">collapse=</span><span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  tmp<span class="sc">-</span><span class="fu">Sys.time</span>()</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Translate them all to English with Google Translate (if possible)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  wikisites_textt<span class="ot">=</span>wikisites_text <span class="sc">%&gt;%</span> </span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">textt=</span><span class="cn">NA</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  tmp<span class="ot">=</span><span class="fu">Sys.time</span>()</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(wikisites_textt)){</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(i)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    result<span class="ot">=</span><span class="fu">translate</span>(i)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(result)<span class="sc">&gt;</span><span class="dv">0</span>){</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    wikisites_textt<span class="sc">$</span>textt[i]<span class="ot">=</span>result}</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  }  </span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">Sys.time</span>()<span class="sc">-</span>tmp) </span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wikisites_textt,<span class="st">"data/wp_pages.RDS"</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  wp_pages<span class="ot">=</span>wikisites_textt <span class="sc">%&gt;%</span> </span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">textt=</span>purrr<span class="sc">::</span><span class="fu">map_chr</span>(textt,clean_banners)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">textt=</span>stringr<span class="sc">::</span><span class="fu">str_replace</span>(textt,<span class="st">"mw-parser-output.*$"</span>,<span class="st">""</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">length=</span><span class="fu">map_dbl</span>(textt,str_length)) </span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wp_pages,<span class="st">"data/wp_pages.RDS"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>wp_pages<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_pages.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="wp_words" class="level2">
@@ -268,24 +310,139 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wp_words.RDS"</span>)){</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>lexicon_en<span class="ot">=</span>mixr<span class="sc">::</span><span class="fu">get_lexicon</span>(<span class="st">"en"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>wp_words<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  tidytext<span class="sc">::</span><span class="fu">unnest_tokens</span>(<span class="at">output=</span><span class="st">"word"</span>,<span class="at">input=</span><span class="st">"textt"</span>,<span class="at">token=</span><span class="st">"words"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(lexicon_en,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"word"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type<span class="sc">!=</span><span class="st">"sw"</span> <span class="sc">&amp;</span> lemma<span class="sc">!=</span><span class="st">"flood"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood,flood_label,lemma) <span class="sc">%&gt;%</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>(),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(flood,flood_label,<span class="fu">desc</span>(n)) </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_words,<span class="st">"data/wp_words.RDS"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>wp_20_words_per_event<span class="ot">=</span>wp_words <span class="sc">%&gt;%</span> </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">20</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">words=</span><span class="fu">paste</span>(lemma,<span class="at">collapse=</span><span class="st">"; "</span>), <span class="at">.groups=</span><span class="st">"drop"</span>)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_20_words_per_event,<span class="st">"data/wp_20_words_per_event.RDS"</span>)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>wp_words<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_words.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wp_words.RDS"</span>)){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>lexicon_en<span class="ot">=</span>mixr<span class="sc">::</span><span class="fu">get_lexicon</span>(<span class="st">"en"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>wp_words<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  tidytext<span class="sc">::</span><span class="fu">unnest_tokens</span>(<span class="at">output=</span><span class="st">"word"</span>,<span class="at">input=</span><span class="st">"textt"</span>,<span class="at">token=</span><span class="st">"words"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(lexicon_en,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"word"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type<span class="sc">!=</span><span class="st">"sw"</span> <span class="sc">&amp;</span> lemma<span class="sc">!=</span><span class="st">"flood"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood,flood_label,lemma) <span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>(),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(flood,flood_label,<span class="fu">desc</span>(n)) </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>wp_words_spec <span class="ot">&lt;-</span> mixr<span class="sc">::</span><span class="fu">tidy_specificities</span>(wp_words <span class="sc">%&gt;%</span> <span class="fu">filter</span>(n<span class="sc">&gt;</span><span class="dv">3</span>),lemma, flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(spec<span class="sc">&gt;</span><span class="dv">2</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">specific_words=</span><span class="fu">paste</span>(lemma,<span class="at">collapse=</span><span class="st">"; "</span>),<span class="at">.groups=</span><span class="st">"drop"</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_words_spec,<span class="st">"data/wp_words_spec.RDS"</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_words,<span class="st">"data/wp_words.RDS"</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>wp_20_words_per_event<span class="ot">=</span>wp_words <span class="sc">%&gt;%</span> </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">20</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">words=</span><span class="fu">paste</span>(lemma,<span class="at">collapse=</span><span class="st">"; "</span>), <span class="at">.groups=</span><span class="st">"drop"</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_20_words_per_event,<span class="st">"data/wp_20_words_per_event.RDS"</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>wp_words<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_words.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="classification-of-segments-topics" class="level2">
+<h2 class="anchored" data-anchor-id="classification-of-segments-topics">Classification of segment’s topics</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wp_segments.RDS"</span>)){</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(quanteda)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(rainette)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(mixr)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    lexicon_en<span class="ot">=</span><span class="fu">get_lexicon</span>(<span class="st">"en"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    wp_segments<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_pages.RDS"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    tidytext<span class="sc">::</span><span class="fu">unnest_tokens</span>(<span class="at">output=</span><span class="st">"word"</span>,<span class="at">input=</span><span class="st">"textt"</span>,<span class="at">token=</span><span class="st">"words"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(lexicon_en,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"word"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">keep=</span>(type<span class="sc">!=</span><span class="st">"sw"</span> <span class="sc">&amp;</span> lemma<span class="sc">!=</span><span class="st">"flood"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(flood,flood_label,article) <span class="sc">%&gt;%</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">lemma=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(lemma)<span class="sc">|</span>(<span class="sc">!</span>keep)<span class="sc">~</span><span class="st">""</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                           <span class="cn">TRUE</span><span class="sc">~</span>lemma)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">keep=</span><span class="fu">as.numeric</span>(keep)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">num_lemma=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(keep)<span class="sc">~</span><span class="dv">0</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                     <span class="cn">TRUE</span><span class="sc">~</span>keep)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">num_lemma=</span><span class="fu">cumsum</span>(num_lemma)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">num_segment=</span><span class="fu">ceiling</span>(num_lemma<span class="sc">/</span><span class="dv">10</span><span class="fl">+0.000001</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(flood,flood_label,article,num_segment) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">text_all=</span><span class="fu">paste0</span>(word, <span class="at">collapse=</span><span class="st">" "</span>),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>              <span class="at">text_sig=</span><span class="fu">paste0</span>(lemma,<span class="at">collapse=</span><span class="st">" "</span>),</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>              <span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">num_segment=</span><span class="fu">paste0</span>(article,<span class="st">"_"</span>,num_segment)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">text_sig_dontkeep=</span>text_sig)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  corpus<span class="ot">=</span><span class="fu">corpus</span>(wp_segments,<span class="at">docid_field=</span><span class="st">"num_segment"</span>,<span class="at">text_field=</span><span class="st">"text_sig_dontkeep"</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  tok <span class="ot">&lt;-</span> <span class="fu">tokens</span>(corpus, <span class="at">remove_punct =</span> <span class="cn">TRUE</span>, <span class="at">remove_numbers =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  dtm <span class="ot">&lt;-</span> <span class="fu">dfm</span>(tok)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  dtm <span class="ot">&lt;-</span> <span class="fu">dfm_trim</span>(dtm, <span class="at">min_docfreq =</span> <span class="dv">30</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  res<span class="ot">=</span><span class="fu">rainette</span>(dtm,<span class="at">k=</span><span class="dv">10</span>,<span class="at">min_split_members=</span><span class="dv">10</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(res,<span class="st">"data/res_rainette_wp.RDS"</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(corpus,<span class="st">"data/corpus.RDS"</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(dtm,<span class="st">"data/dtm.RDS"</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>res<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/res_rainette_wp.RDS"</span>)</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>corpus<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/corpus.RDS"</span>)</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>dtm<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dtm.RDS"</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="co">#rainette_explor(res,dtm,corpus)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rainette_plot</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  res, dtm, <span class="at">k =</span> <span class="dv">6</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_terms =</span> <span class="dv">20</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">free_scales =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="st">"chi2"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_negative =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">text_size =</span> <span class="dv">12</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="2_use_wikipedia_files/figure-html/plot_class_rainette-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wp_segments.RDS"</span>)){</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  corpus<span class="sc">$</span>class<span class="ot">=</span><span class="fu">paste0</span>(<span class="st">"class_"</span>,<span class="fu">cutree_rainette</span>(res, <span class="at">k =</span> <span class="dv">6</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  tib_classes<span class="ot">=</span>tibble<span class="sc">::</span><span class="fu">tribble</span>(<span class="sc">~</span>class,<span class="sc">~</span>class_name,<span class="sc">~</span>color,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"class_1"</span>,<span class="st">"governance"</span>,<span class="st">"#4E79A7"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"class_2"</span>,<span class="st">"relief"</span>,<span class="st">"#F28E2B"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"class_3"</span>,<span class="st">"damage"</span>,<span class="st">"#E15759"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"class_4"</span>,<span class="st">"hydrology"</span>, <span class="st">"#76B7B2"</span>, </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"class_5"</span>,<span class="st">"anticipation"</span>,<span class="st">"#59A14F"</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"class_6"</span>,<span class="st">"weather"</span>,<span class="st">"#EDC948"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  wp_segments<span class="ot">=</span><span class="fu">docvars</span>(corpus) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(tib_classes,<span class="at">by=</span><span class="st">"class"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">class=</span><span class="fu">as.factor</span>(class),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">class_name=</span><span class="fu">as.factor</span>(class_name)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(wp_pages <span class="sc">%&gt;%</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>                <span class="fu">select</span>(article,lang,translated_title,length),</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>              <span class="at">by=</span><span class="st">"article"</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wp_segments,<span class="st">"data/wp_segments.RDS"</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="add-classif-results-summary-to-wp_pages" class="level2">
+<h2 class="anchored" data-anchor-id="add-classif-results-summary-to-wp_pages">add classif results summary to wp_pages</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wp_segments<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_segments.RDS"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>wp_segments_summary<span class="ot">=</span>wp_segments <span class="sc">%&gt;%</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(article,class,class_name,color) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>()</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>spec<span class="ot">=</span>mixr<span class="sc">::</span><span class="fu">tidy_specificities</span>(wp_segments,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                              article,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                              class_name)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>wp_pages_class<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wp_segments_summary,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">by=</span><span class="st">"article"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(spec,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"article"</span>,<span class="st">"class_name"</span>,<span class="st">"n"</span>))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_pages_class,<span class="st">"wp_pages_class.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -294,85 +451,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>get_revs<span class="ot">=</span><span class="cf">function</span>(lang, title){</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  f<span class="ot">=</span><span class="cf">function</span>(x){</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    ind<span class="ot">=</span><span class="fu">which</span>(<span class="fu">map_lgl</span>(x,is.null))</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(ind)<span class="sc">&gt;</span><span class="dv">0</span>){x[ind]<span class="ot">=</span><span class="cn">NA</span>}</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    x[[<span class="st">"comment"</span>]]<span class="ot">=</span>x[[<span class="st">"comment"</span>]][[<span class="dv">1</span>]]</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(x<span class="sc">$</span>user)<span class="sc">==</span><span class="dv">1</span>){</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      x<span class="sc">$</span>user<span class="ot">=</span><span class="fu">list</span>(<span class="at">id=</span><span class="cn">NA</span>,<span class="at">name=</span><span class="cn">NA</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(x<span class="sc">$</span>user)<span class="sc">==</span><span class="dv">2</span>){</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">is.null</span>(x<span class="sc">$</span>user<span class="sc">$</span>name)){name<span class="ot">=</span><span class="cn">NA</span>}<span class="cf">else</span>{name<span class="ot">=</span>x<span class="sc">$</span>user<span class="sc">$</span>name}</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">is.null</span>(x<span class="sc">$</span>user<span class="sc">$</span>id)){id<span class="ot">=</span><span class="cn">NA</span>}<span class="cf">else</span>{id<span class="ot">=</span>x<span class="sc">$</span>user<span class="sc">$</span>id}</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      x<span class="sc">$</span>user<span class="ot">=</span><span class="fu">list</span>(<span class="at">id=</span>id,<span class="at">name=</span>name)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(x)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  url<span class="ot">=</span><span class="fu">paste0</span>(<span class="st">"https://"</span>,lang,</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>               <span class="st">".wikipedia.org/w/rest.php/v1/page/"</span>,</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>             <span class="fu">URLencode</span>(title),</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>             <span class="st">"/history"</span>)</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  revs_raw<span class="ot">=</span><span class="fu">GET</span>(url)</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(revs_raw<span class="sc">$</span>status_code<span class="sc">&lt;=</span><span class="dv">200</span>){</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  revs<span class="ot">=</span>revs_raw <span class="sc">%&gt;%</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">content</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    .<span class="sc">$</span>revisions <span class="sc">%&gt;%</span> </span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(f) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(as_tibble) <span class="sc">%&gt;%</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_rows</span>()</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="st">"older"</span> <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">content</span>(revs_raw))){</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    revs_raw<span class="ot">=</span><span class="fu">GET</span>(<span class="fu">content</span>(revs_raw)<span class="sc">$</span>older)</span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    revs_tmp<span class="ot">=</span>revs_raw <span class="sc">%&gt;%</span></span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">content</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>      .<span class="sc">$</span>revisions <span class="sc">%&gt;%</span></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>      <span class="fu">map</span>(f) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>      <span class="fu">map</span>(as_tibble) <span class="sc">%&gt;%</span></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>      <span class="fu">bind_rows</span>()</span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    revs<span class="ot">=</span><span class="fu">bind_rows</span>(revs,revs_tmp)</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># revs=revs %&gt;% </span></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  <span class="co">#   mutate(timestamp=lubridate::ymd_hms(timestamp)) %&gt;% </span></span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  <span class="co">#   mutate(day=lubridate::round_date(timestamp,"day"),</span></span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  <span class="co">#          year=lubridate::year(timestamp))</span></span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  revs<span class="ot">=</span>revs <span class="sc">%&gt;%</span> </span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">type=</span><span class="fu">c</span>(<span class="st">"user_id"</span>,<span class="st">"user_name"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from=</span>type,<span class="at">values_from=</span>user) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(user_id, user_name))</span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>  }<span class="cf">else</span>{revs<span class="ot">=</span><span class="fu">tibble</span>(<span class="at">id=</span><span class="cn">NA</span>,</span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>                     <span class="at">timestamp=</span><span class="cn">NA</span>,</span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>                     <span class="at">minor=</span><span class="cn">NA</span>,</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>                     <span class="at">size=</span><span class="cn">NA</span>,</span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>                     <span class="at">comment=</span><span class="cn">NA</span>,</span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>                     <span class="at">delta=</span><span class="cn">NA</span>,</span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>                     <span class="at">user_id=</span><span class="cn">NA</span>,</span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>                     <span class="at">user_name=</span><span class="cn">NA</span>)}</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(revs)</span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"scripts/get_revs.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wp_revisions.RDS"</span>)){</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>wp_revisions<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>text,<span class="sc">-</span>textt,<span class="sc">-</span>html) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">revisions=</span>purrr<span class="sc">::</span><span class="fu">map2</span>(lang,title,get_revs)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="at">cols=</span><span class="fu">c</span>(revisions))</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_revisions,<span class="st">"data/wp_revisions.RDS"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># text=text %&gt;% </span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(dead=purrr::map(textt,</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                          ~unlist(stringr::str_extract_all(.x,</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     "[\\d\\.\\,]+\\s(dead|victims)"))))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wp_revisions.RDS"</span>)){</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>wp_revisions<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>text,<span class="sc">-</span>textt) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">revisions=</span>purrr<span class="sc">::</span><span class="fu">map2</span>(lang,title,get_revs)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="at">cols=</span><span class="fu">c</span>(revisions))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_revisions,<span class="st">"data/wp_revisions.RDS"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 

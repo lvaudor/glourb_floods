@@ -6,6 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Lise Vaudor">
+<meta name="author" content="Liolia Bajemon">
+<meta name="author" content="Maïlys Genouël">
+<meta name="author" content="Hervé Piégay">
 
 <title>glourb_floods – text_analysis</title>
 <style>
@@ -95,7 +99,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.scss">
 </head>
 
 <body class="nav-fixed">
@@ -180,7 +184,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stm)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>wp_words<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_words.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>wp_words<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_words.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -237,18 +243,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 180 × 4
-   topic term     beta  rank
-   &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;int&gt;
- 1     1 water  0.0154     1
- 2     1 cause  0.0153     2
- 3     1 area   0.0151     3
- 4     1 river  0.0148     4
- 5     1 person 0.0147     5
- 6     1 damage 0.0146     6
- 7     1 rain   0.0144     7
- 8     1 affect 0.0140     8
- 9     1 heavy  0.0138     9
-10     1 occur  0.0137    10
+   topic term       beta  rank
+   &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt; &lt;int&gt;
+ 1     1 area     0.0149     1
+ 2     1 rain     0.0146     2
+ 3     1 cause    0.0145     3
+ 4     1 heavy    0.0138     4
+ 5     1 rainfall 0.0131     5
+ 6     1 record   0.0129     6
+ 7     1 water    0.0129     7
+ 8     1 damage   0.0125     8
+ 9     1 occur    0.0117     9
+10     1 hour     0.0114    10
 # ℹ 170 more rows</code></pre>
 </div>
 </div>
@@ -304,8 +310,8 @@ Creating Output... </code></pre>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">prepDocuments</span>(temp<span class="sc">$</span>documents, temp<span class="sc">$</span>vocab, temp<span class="sc">$</span>meta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Removing 2543 of 8582 terms (2543 of 191072 tokens) due to frequency 
-Your corpus now has 724 documents, 6039 terms and 188529 tokens.</code></pre>
+<pre><code>Removing 2396 of 8271 terms (2396 of 183240 tokens) due to frequency 
+Your corpus now has 712 documents, 5875 terms and 180844 tokens.</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -334,18 +340,19 @@ Your corpus now has 724 documents, 6039 terms and 188529 tokens.</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_full.RDS"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>wp_words2<span class="ot">=</span>wp_words <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wm_full <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date,country_label),<span class="at">by=</span><span class="st">"flood"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">recent=</span>year<span class="sc">&gt;</span><span class="dv">2000</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age=</span><span class="fu">case_when</span>(recent<span class="sc">~</span><span class="st">"recent"</span>,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span>recent<span class="sc">~</span><span class="st">"old"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_full.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>wp_words2<span class="ot">=</span>wp_words <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wm_full <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date,country_label),<span class="at">by=</span><span class="st">"flood"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">recent=</span>year<span class="sc">&gt;</span><span class="dv">2000</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age=</span><span class="fu">case_when</span>(recent<span class="sc">~</span><span class="st">"recent"</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span>recent<span class="sc">~</span><span class="st">"old"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in left_join(., wm_full %&gt;% select(flood, date, country_label), : Detected an unexpected many-to-many relationship between `x` and `y`.
 ℹ Row 1 of `x` matches multiple rows in `y`.
-ℹ Row 17523 of `y` matches multiple rows in `x`.
+ℹ Row 17402 of `y` matches multiple rows in `x`.
 ℹ If a many-to-many relationship is expected, set `relationship =
   "many-to-many"` to silence this warning.</code></pre>
 </div>
@@ -357,14 +364,14 @@ Your corpus now has 724 documents, 6039 terms and 188529 tokens.</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 4
-  lemma         country_label  spec     n
-  &lt;chr&gt;         &lt;chr&gt;         &lt;dbl&gt; &lt;int&gt;
-1 avert         Austria         Inf  1242
-2 gauge         Austria         Inf  1457
-3 ore           Austria         Inf  1377
-4 vote          Austria         Inf  1242
-5 accelerate    Belgium         Inf  1056
-6 accessibility Belgium         Inf  1056</code></pre>
+  lemma      country_label  spec     n
+  &lt;chr&gt;      &lt;chr&gt;         &lt;dbl&gt; &lt;int&gt;
+1 avert      Austria         Inf  1242
+2 gauge      Austria         Inf  1457
+3 manner     Austria         Inf  1242
+4 ore        Austria         Inf  1377
+5 vote       Austria         Inf  1242
+6 accelerate Belgium         Inf  1056</code></pre>
 </div>
 </div>
 
