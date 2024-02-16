@@ -21,6 +21,8 @@ show_table=function(table,provide_key=NA){
                    result_ndistinct %>% select(-var),
                    result_random %>% select(-var)) %>% 
     mutate(example=case_when(var %in% c("text","textt")~paste0(stringr::str_sub(example,1,100),"... [truncated]"),
+                             TRUE~example)) %>% 
+    mutate(example=case_when(var %in% c("text","textt")~stringr::str_replace_all(example,"\n"," - "),
                              TRUE~example))
   return(result)
 }

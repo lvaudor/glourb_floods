@@ -7,18 +7,19 @@ library(ggpubr)
 library(tidytext)
 library(leaflet)
 library(rainette)
+options(scipen = 9999)
 wd_events=readRDS("data/wd_events.RDS")
 wm_full=readRDS("data/wm_full.RDS")
 wp_20_words_per_event=readRDS("data/wp_20_words_per_event.RDS")
 wm_full=wm_full %>% 
-  left_join(wp_20_words_per_event, by=c("flood","flood_label"))
+  left_join(wp_20_words_per_event, by=c("flood"))
 dfo_comp=readRDS("data/dfo_comp.RDS")
 wm_comp=readRDS("data/wm_comp.RDS")
 wm_dfo=readRDS("data/wm_dfo.RDS")
 wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS")
 ```
 
-## Aim of the article
+# Aim of the article
 
 This study's objectives are to
 
@@ -28,13 +29,13 @@ This study's objectives are to
 
 # Introduction
 
-## Why is it complicated to produce worldwide data about floods
+### Why is it complicated to produce worldwide data about floods
 
-Producing a worldwide dataset about flood events poses numerous challenges due to the complexity of semantics, collection, standardization, and accessibility of such data. One primary obstacle is the lack of uniform reporting standards leading to inconsistencies in definitions of flood events and in data collection methods. Varying technological capabilities (in terms of material access and practice's acculturation)across geographical regions of the world also contribute to disparities in data availability. Disasters like floods might occur in areas where communication and infrastructure are limited, and/or not used for real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or document flood occurrences differently, due to reasons such as insufficient resources and infrastructures, lack of governmental transparency, or competing priorities \[add ref\]. Additionally, there are inequalities in the geographies of data production that reflect and reproduced global economic core-peripheries [@graham_inequitable_2014; graham_towards_2015; haklay_why_2016]. \[Ash et al. ref\] refers to some "informational magnetism" resulting in the over-representation of the global North (the "core"). As a result, and despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires better data curation; efforts to collaborate and improve information-sharing mechanisms on a global scale; and the development of a critical eye on the reasons for data production, on the geographical contexts in which it has been produced, and on its uses.
+Producing a worldwide dataset about flood events poses numerous challenges due to the complexity of semantics, collection, standardization, and accessibility of such data. One primary obstacle is the lack of uniform reporting standards leading to inconsistencies in definitions of flood events and in data collection methods. Varying technological capabilities (in terms of material access and practice's acculturation)across geographical regions of the world also contribute to disparities in data availability. Disasters like floods might occur in areas where communication and infrastructure are limited, and/or not used for real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or document flood occurrences differently, due to reasons such as insufficient resources and infrastructures, lack of governmental transparency, or competing priorities \[add ref\]. Additionally, there are inequalities in the geographies of data production that reflect and reproduced global economic core-peripheries [@graham_inequitable_2014; @graham_towards_2015; @haklay_why_2016]. \[Ash et al. ref\] refers to some "informational magnetism" resulting in the over-representation of the global North (the "core"). As a result, and despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires better data curation; efforts to collaborate and improve information-sharing mechanisms on a global scale; and the development of a critical eye on the reasons for data production, on the geographical contexts in which it has been produced, and on its uses.
 
-## Participatory local data about floods
+### Participatory local data about floods
 
-Participatory data collection holds significant potential in enhancing the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale [@dixon_role_2021; @sekajugo_can_2022]. By incorporating local knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems, controlled by certain systems in power (Nation-states, heterogeneous colaition of technologically savvy individuals, private technology companies). More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding hazards [@herfort_evolution_2021].
+Participatory data collection holds significant potential in enhancing the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale [@dixon_role_2021; @sekajugo_can_2022]. By incorporating locpôlesal knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems, controlled by certain systems in power (Nation-states, heterogeneous colaition of technologically savvy individuals, private technology companies). More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding hazards [@herfort_evolution_2021].
 
 Communities living in flood-prone regions possess unique, context-specific, even vernacular knowledge about local environmental changes, historical flood memory, vulnerable areas, and coping mechanisms. Engaging these communities in data collection through citizen science initiatives, mobile applications, community mapping, or participatory workshops allows for the collection of granular, real-time information that supplements existing datasets. Ideally, this bottom-up approach not only enhances the accuracy and granularity of flood data but also fosters community empowerment in terms of resilience, engaging all communities to participate, including those excluded from decision-making or digital access (from a material point of view and in terms of skills).
 
@@ -44,41 +45,75 @@ However, challenges such as ensuring data accuracy, reliability, and standardiza
 
 Overall, leveraging participatory data in conjunction with conventional methods has the potential to enrich global flood databases, improve resilience, and empower communities to better respond to and mitigate the impacts of flood events. This collaborative approach can contribute significantly to more holistic and inclusive strategies for managing floods worldwide, to question (i) the data (how, by whom and for what purpose they are collected) and (ii) the collection process (highlighting ethnocentric biases by comparison).
 
-## Institutional global data about floods
+### Institutional global data about floods
 
 The Dartmouth Flood Observatory (DFO) is a research group specializing in the collection and analysis of global flood data. Combining remote sensing and news reports' analysis, the DFO produces detailed information on the extent, frequency, and impacts of floods worldwide [@kundzewicz_large_2013]. It constitutes an invaluable source of information on the subject, used in many scientific studies on flood events \[add refs\].
 
-## Wikimedia data
+### Wikimedia data
 
-In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, being one of the largest collaborative encyclopedias, and one of the most used and visited websites globally [@graham_towards_2015; ballatore_digital_2017] harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. It can be viewed both as a source of breaking news and as an encyclopedia, providing information and narrative regarding ongoing and past events, in particular crises and controversies [@moats_following_2019]. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking information on various topics, including flood events, across the globe. The Wikimedia projects are an example of user-generated content on web 2.0 [@mandiberg_4_2020]. Moreover, flood events are generally associated with a location or toponymic information: as such, the produced data can also be included in what @goodchild_citizens_2007 calls "volunteered geographic information" (VGI).
+In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, being one of the largest collaborative encyclopedias, and one of the most used and visited websites globally [@graham_towards_2015; @ballatore_digital_2017] harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. It can be viewed both as a source of breaking news and as an encyclopedia, providing information and narrative regarding ongoing and past events, in particular crises and controversies [@moats_following_2019]. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking information on various topics, including flood events, across the globe. The Wikimedia projects are an example of user-generated content on web 2.0 [@mandiberg_4_2020]. Moreover, flood events are generally associated with a location or toponymic information: as such, the produced data can also be included in what @goodchild_citizens_2007 calls "volunteered geographic information" (VGI).
 
-## Geographies of Wikimedia
+### Geographies of Wikimedia
 
-Like many volunteered mapping platforms, the Wikimedia projects are receiving growing interest from the research community [@farda-sarbas_wikidata_2019]. As such, they are used in various projects: on the one hand, the content is employed directly as a data source, e.g. in history, literacy studies, archeology, philosophy [@zhao_systematic_2023], linguistics [@turki_using_2017], medical and biological sciences [@farda-sarbas_wikidata_2019; @burgstaller-muehlbacher_wikidata_2016], etc. or as an indicator of public interest [@mittermeier_using_2021]. On the other hand, studies consider the Wikimedia projects as a research object, e.g. analyzing the contributors’ motivations [@antin_my_2011], comparing their data to traditional databases [@lorini_uneven_2020], evaluating completeness [@royal_whats_2009], accuracy [@giles_internet_2005], topic coverage [@halavais_analysis_2008], local [@ballatore_digital_2017; @ballatore_angeles_2020] and global distribution [@graham_towards_2015; kollektiv_orangotango_uneven_2018], analyzing knowledge construction [@oeberst_knowledge_2014] and social network dynamics [@iba_analyzing_2010], etc. However, using a worldwide, crowdsourced, open database implies characterizing its contributors. Firstly, studies show that UGC is unequally distributed on a global scale: it is generally skewed towards countries from the Global North, whether it be in terms of participation, representation or access [@kollektiv_orangotango_uneven_2018; @graham_towards_2015; @ballatore_digital_2017]. Research conducted on Wikipedia suggests that the platform follows the same pattern. For example, @graham_inequitable_2014 shows that Europe and North America get the greatest number of articles per person. Secondly, participation tends to be skewed towards “a more wealthy, more educated, more Western, more white and more male demographic” [@crampton_beyond_2013, p.132]. For example, research on OpenStreetMap – an open and crowdsourced mapping platform – suggests that it reproduces the socio-economical structures [@bittner_diversity_2017]. The risk is that these crowdsourced platforms reproduce the inequalities, leaving economically and socially deprived areas also digitally deprived [@jokar_arsanjani_impact_2015]. There is also a strong gender asymmetry on the web, contributing to biased data [@stephens_gender_2013; @gardner_quantifying_2020].\
+Like many volunteered mapping platforms, the Wikimedia projects are receiving growing interest from the research community [@farda-sarbas_wikidata_2019]. As such, they are used in various projects: on the one hand, the content is employed directly as a data source, e.g. in history, literacy studies, archeology, philosophy [@zhao_systematic_2023], linguistics [@turki_using_2017], medical and biological sciences [@farda-sarbas_wikidata_2019; @burgstaller-muehlbacher_wikidata_2016], etc. or as an indicator of public interest [@mittermeier_using_2021]. On the other hand, studies consider the Wikimedia projects as a research object, e.g. analyzing the contributors’ motivations [@antin_my_2011], comparing their data to traditional databases [@lorini_uneven_2020], evaluating completeness [@royal_whats_2009], accuracy [@giles_internet_2005], topic coverage [@halavais_analysis_2008], local [@ballatore_digital_2017; @ballatore_angeles_2020] and global distribution [@graham_towards_2015; @kollektiv_orangotango_uneven_2018], analyzing knowledge construction [@oeberst_knowledge_2014] and social network dynamics [@iba_analyzing_2010], etc. However, using a worldwide, crowdsourced, open database implies characterizing its contributors. Firstly, studies show that UGC is unequally distributed on a global scale: it is generally skewed towards countries from the Global North, whether it be in terms of participation, representation or access [@kollektiv_orangotango_uneven_2018; @graham_towards_2015; @ballatore_digital_2017]. Research conducted on Wikipedia suggests that the platform follows the same pattern. For example, @graham_inequitable_2014 shows that Europe and North America get the greatest number of articles per person. Secondly, participation tends to be skewed towards “a more wealthy, more educated, more Western, more white and more male demographic” [@crampton_beyond_2013, p.132]. For example, research on OpenStreetMap – an open and crowdsourced mapping platform – suggests that it reproduces the socio-economical structures [@bittner_diversity_2017]. The risk is that these crowdsourced platforms reproduce the inequalities, leaving economically and socially deprived areas also digitally deprived [@jokar_arsanjani_impact_2015]. There is also a strong gender asymmetry on the web, contributing to biased data [@stephens_gender_2013; @gardner_quantifying_2020].\
 Identifying the data distribution is capital for interpretation and analysis, given that the Wikimedia projects are a part of UGC and are therefore subjects to its biases. The question “who produces the data?” must then be addressed. @lorini_uneven_2020 studied the report of floods on Wikipedia. However, to our knowledge, no study using multiple Wikimedia projects and analyzing the data distribution and production in time as well as in space, using quantitative and textometric methods, has been conducted on this subject.
 
-## Wikimedia for crisis management
+### Wikimedia for crisis management
 
 # Methods
 
-The methods are detailed (for now) in the other pages of this document.
+### Primary census of flood events
 
-## Primary census of flood events
+We collected Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) [@vaudor_glitter_2023].
 
-We collect Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) [@vaudor_glitter_2023].
+![First Wikidata query](figure/fig-graph_query.png)
 
-## Comparison to an institutional database
+We carried out a first Wikidata query to get all instances of floods or subclasses of floods as well as a few descriptors of these. The events can be located through `coords` (geographical coordinates) `loc` (a location -which can be any type of geographical item documented in Wikidata, e.g. a city, region or country- which in turn might provide coordinates-), or simply through the `country` variable -which might also in turn provide coordinates-). We used all these variables to try and provide coordinates for as many events as possible, with the greatest precision possible: we prioritized coords (when available) over coordinates corresponding to location, and coordinates corresponding to location (when available) to coordinates corresponding to country.
 
-We compare this data to the DFO database, trying to establish a link between events described on both datasets, based on distance and time gap.
+![Second Wikidata query](figure/fig-graph_query_dates.png)
+
+We carried out a second Wikidata query for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events' label if present (as labels generally consist of a mention of type of event, time and place).
+
+![Third Wikidata query](figure/fig-graph_query_country.png)
+
+We carried out a third Wikidata query for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI) \[ref\].
+
+### Comparison to the Dartmouth Flood Observatory data
+
+We wanted to confront the data about floods documented through Wikidata (WD) to the data gathered by the Dartmouth Flood Observatory (DFO) [@brakenridge_global_nodate]. We downloaded the DFO dataset and curated it to make it more easily comparable to our WD dataset, especially regarding country labels. We then tried to match each event in WD to one event in DFO through the following algorithm
+
+For each WD event `flood`:
+
+-   calculate the difference in time between DFO events and `flood`
+-   calculate the distance between DFO events and `flood`
+-   check for all DFO events whether the difference in time to `flood` is less than 400 days and the distance to `flood` is less than 400 kms (condition 1)
+-   check for all DFO events whether the difference in time to `flood` is less than 400 days and the countries of occurrence are the same than one of the countries registered for `flood` (condition 2)
+-   filter all DFO events to only keep those verifying condition 1 or condition 2
+-   if several DFO events verify those conditions, retain only the one corresponding to lowest difference in time to `flood`, and consider that this is the DFO event that matches `flood`
+
+## Text analysis of Wikipedia pages
+
+We scraped the text (all the textual content in headers from level one (h1) to level 6 (h6) as well as paragraphs) from all listed Wikipedia pages, using the `rvest` R package [@wickham_rvest_2024]. We then translated them to English (if necessary) through Google Translate using the polyglotr R package [@iwan_polyglotr_2024].
+
+We tokenized the texts with the tidytext R package [@silge_tidytext_2016], lemmatized words and filtered out stop words based on the Iramuteq English dictionnary \[ref\]. We could then identify textual specificities based on various partitions of the corpus [@lafon_pierre_sur_1980, @loiseau_textometry_2022].
 
 # Results
 
+## Online app
+
+The results and tables can be consulted here:
+
+[link to app](https://isig-apps.ens-lyon.fr/apps/lvaudor/glourb_floods_app/){target="_blank"}
+
+The app provides maps and plots regarding all events (i.e. at the global scale) but also displays, for each event in the database, all the raw data included in the analyses.
+
 ## Datasets
 
-We have gathered tables of data organized as follows:
+We have gathered and curated tables of data organized as follows:
 
 ```{r def_show_table}
 source("scripts/show_table.R")
+set.seed(123)
 ```
 
 ### wd_events
@@ -92,7 +127,7 @@ knitr::kable(show_table(wd_events,provide_key="flood"))
 
 ```{r show_wp_pages}
 wp_pages=readRDS("data/wp_pages.RDS")
-knitr::kable(show_table(wp_pages,provide_key=c("flood","article")))
+knitr::kable(show_table(wp_pages,provide_key=c("article")))
 ```
 
 ### wp_revisions
@@ -117,52 +152,42 @@ knitr::kable(show_table(countries, provide_key=c("country","country_label")))
 
 ```
 
-## Basic metrics
+## Wikidata on floods
 
-```{r wde}
-wd_events=readRDS("data/wd_events.RDS")
-Nwde=wd_events %>% nrow()
+The initial query provided **`r nrow(wd_events)` Wikidata flood events**. In terms of spatial precision, most coordinates are inferred from either country or location (the major part of provided locations being countries too).
+
+```{r show_precision_coords}
+readRDS("data/precision_coords.RDS") %>% 
+  knitr::kable()
+readRDS("data/dates_precision.RDS") %>% 
+  group_by(date_from) %>% 
+  tally() %>% 
+  knitr::kable()
+readRDS("data/dates_precision.RDS") %>% 
+  group_by(date_precision) %>% 
+  tally() %>% 
+  knitr::kable()
 ```
+: tables
 
-The initial query provided **`r Nwde` Wikidata flood events**.
 
-```{r wpp}
-wp_pages=readRDS("data/wp_pages.RDS")
-Nwpp=nrow(wp_pages)
-```
+
+## Wikipedia on floods
 
 ```{r wpp_describe}
 Nwde_with_wpp=wp_pages %>% 
   group_by(flood) %>% 
   tally() %>% 
   nrow()
-```
+n_pages_in_english=wp_pages %>% filter(lang=="en") %>% nrow()
+n_pages_not_in_english=nrow(wp_pages)-n_pages_in_english
+n_pages_untranslatable=wp_pages %>% filter(!is.na(text) & is.na(textt)) %>% nrow()
 
-There are **`r Nwpp` Wikipedia pages** associated to these events (i.e. on average `r round(Nwpp/Nwde,2)` Wikipedia pages per event). `r Nwde_with_wpp` flood events (`r round(Nwde_with_wpp/Nwde*100,2)`%) are associated to at least one Wikipedia page.
 
-```{r wpp_describe_text}
-Nwpp_en=wp_pages %>% filter(lang=="en") %>% nrow()
-Nwpp_untranslated=wp_pages %>% 
-  filter(is.na(textt)) %>% 
-  nrow()
-```
-
-`r Nwpp_en` Wikipedia pages (`r round(Nwpp_en/Nwpp*100,2)`%) are in English. Out of the `r Nwpp-Nwpp_en` remaining, we could translate most pages to English, except `r Nwpp_untranslated` pages which were in languages that Google Translate did not support.
-
-```{r wpp_length}
 wpp_length_average=wp_pages %>% pull(length) %>% mean(na.rm=TRUE)
 wpp_length_quant10=wp_pages %>% pull(length) %>% quantile(0.1,na.rm=TRUE)
 wpp_length_quant90=wp_pages %>% pull(length) %>% quantile(0.9,na.rm=TRUE)
-```
 
-The average length of articles (in English or translated to English) is `r round(wpp_length_average)` characters. The 10% shortest articles represent less than `r round(wpp_length_quant10)` characters and the 10% longest ones are more than `r round(wpp_length_quant90)` characters long.
-
-```{r wpw}
-wp_words=readRDS("data/wp_words.RDS")
-#Nwpw=
-```
-
-```{r wpr}
 wp_revisions=readRDS("data/wp_revisions.RDS")
 Nwpr=nrow(wp_revisions)
 
@@ -171,13 +196,7 @@ wp_revisions=wp_revisions %>%
 Nwpr_humans=wp_revisions %>% 
   filter(!bot) %>% 
   nrow()
-```
 
-There are **`r Nwpr` revisions** that produced the Wikipedia pages as they appear to this date, which represents an average `r round(Nwpr/Nwpp)` revisions per page.
-
-`r Nwpr_humans` (`r round(Nwpr_humans/Nwpr*100,2)`%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings "bot" or "Bot").
-
-```{r Nwpu_Nwpuh}
 Nwpu=wp_revisions %>%
   select(user_name) %>%
   unique() %>% 
@@ -189,7 +208,13 @@ Nwpuh=wp_revisions %>%
   nrow()
 ```
 
-There are **`r Nwpu` distinct editors**, `r Nwpuh` (`r round(Nwpuh/Nwpu*100,2)`%) of which appear to be humans. On average, each human editor in our corpus is responsible for `r round(Nwpr_humans/Nwpuh,2)` edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:
+There are **`r nrow(wp_pages)` Wikipedia pages** associated to these events (i.e. on average `r round(nrow(wp_pages)/nrow(wd_events),2)` Wikipedia pages per event). `r wp_pages %>% group_by(flood) %>% tally() %>% nrow()` flood events are associated to at least one Wikipedia page.
+
+`r wp_pages %>% filter(lang=="en") %>% nrow()` Wikipedia pages are in English. Out of the `r n_pages_not_in_english` remaining pages, we could translate most pages to English, except `r n_pages_untranslatable` pages which were in languages that Google Translate did not support. We based all subsequent textometric analyses on the texts in English, either natively so or translated.
+
+The average length of articles (in English or translated to English) is `r round(wpp_length_average)` characters. The 10% shortest articles represent less than `r round(wpp_length_quant10)` characters and the 10% longest ones are more than `r round(wpp_length_quant90)` characters long.
+
+There are **`r Nwpr` revisions** that produced the Wikipedia pages as they appear to this date, which represents an average `r round(Nwpr/nrow(wp_pages))` revisions per page. `r Nwpr_humans` (`r round(Nwpr_humans/Nwpr*100,2)`%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings "bot" or "Bot"). There are **`r Nwpu` distinct editors**, `r Nwpuh` (`r round(Nwpuh/Nwpu*100,2)`%) of which appear to be humans. On average, each human editor in our corpus is responsible for `r round(Nwpr_humans/Nwpuh,2)` edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:
 
 ```{r wp_revisions}
 wp_revisions %>% 
@@ -206,13 +231,11 @@ wp_revisions %>%
   knitr::kable()
 ```
 
-## Wikidata on floods
-
 ```{r wd_stats}
 wm_full=readRDS("data/wm_full.RDS")
 ```
 
-```{r wd_years, fig.width=8,fig.height=4}
+```{r wd_years, fig.width=8,fig.height=4, fig.show='hide'}
 #| label: fig-wd_year
 #| fig-cap: "Distribution of flood events through time A) all events dated with a year-accuracy B) events dated with a year-accuracy starting in 2000"
 wd_events_freq=wd_events %>% 
@@ -230,19 +253,6 @@ figure
 ```
 
 ## Compare to DFO data
-
-```{r nb_corr}
-nb_wm=wm_comp %>% sf::st_drop_geometry() %>% group_by(flood) %>% tally() %>% nrow()
-nb_wm_in_dfo=wm_dfo_corr %>% filter(!is.na(floodcorr)) %>% group_by(flood) %>% tally() %>% nrow()
-nb_dfo=dfo_comp %>% group_by(flood) %>% tally() %>% nrow()
-nb_dfo_in_wd=wm_dfo_corr %>% group_by(floodcorr) %>% tally() %>% nrow()
-```
-
-Based on the dates of observations for the DFO data base, `r nb_wm` out of the `r nrow(wd_events)` flood events in our Wikidata base might fall into it.
-
-Out of `r nb_wm` flood events documented in the WD comparison data subset, `r nb_wm_in_dfo` have at least one correspondence in the DFO comparison data subset (`r round(nb_wm_in_dfo/nb_wm *100,2)`%).
-
-Out of `r nb_dfo` flood events documented in the DFO comparison data subset, `r nb_dfo_in_wd` have at least one correspondence in the WD comparison data subset (`r round(nb_dfo_in_wd/nb_dfo *100,2)`%).
 
 ```{r build_data_compare}
 source("scripts/comp_dfo_wd.R")
@@ -268,7 +278,6 @@ ggplot(wm_dfo_comparison,
   geom_boxplot()+
   scale_y_continuous(trans="log1p")
 ```
-
 
 ```{r plot_deathtoll_length, fig.width=5,figh.height=6}
 # #| label: fig-deathtoll_length
@@ -305,8 +314,6 @@ ggplot(wm_dfo_comparison,
 #   scale_y_continuous(trans="log1p")+
 #   geom_smooth()
 ```
-
-
 
 ## Wikipedia content
 
@@ -364,7 +371,7 @@ rainette_plot(
 ```
 
 ```{r plot_topic_per_length}
-#| label: fig-topic_per_length -->
+#| label: fig-topic_per_length
 #| fig-cap: "Topics identified by an STM process for the Wikipedia articles' corpus"
 tib_classes=wp_segments %>% select(class_name,color) %>% unique()
 tib=wp_segments %>% 
@@ -395,51 +402,109 @@ readRDS("data/wp_pages.RDS") %>%
 tib
 ```
 
-## Map
+### Controversies
 
-```{r leaf_wm_map, fig.width=10,fig.height=10, warning=FALSE, message=FALSE}
-# wm_map=readRDS("data/wm_map.RDS")
-# # Définition d'une échelle colorée 
-# # (en fonction de date de sortie) 
-# pal <- colorNumeric(c("red", "green", "blue"),
-#                     c(1648,1900,1950,1980,2000,2010,2023)) 
-# # Création de la carte 
-# leaf_wm_map=leaflet(wm_map) %>% # déf carte 
-#   addProviderTiles(providers$Esri.WorldTopoMap) %>% # ajout fond de carte
-#   addCircleMarkers(col=~pal(year),
-#                    popup = ~popup
-#                    ) 
-# leaf_wm_map
+```{r plot_nb_of_revisions_and_length,fig.width=5,fig.height=4}
+#| label: fig-nb_of_revisions_and_length
+#| fig-cap: "Length of articles as a function of number of revisions. Beyond a few edits (here, we consider the threshold is 10), there is a linear correlation between length of the article and length of the article. We consider that the difference between observed length and length predicted based on number of edits to represent a deficit in length."
+tib=wp_revisions %>% 
+  mutate(date_page=lubridate::ymd(as.POSIXct(timestamp))) %>% 
+  group_by(article) %>%
+  summarise(date_page=min(date_page),
+            nedits=n()) %>% 
+  left_join(wp_pages %>% select(article,length,lang,local),by="article") %>% 
+  unique() %>% 
+  mutate(simple=lang=="simple")
+tibfitted=tib %>% 
+  filter(nedits>10) %>% 
+  na.omit()
+mylm=lm(log(length)~log(nedits)*simple,data=tibfitted)
+tibfitted=tibfitted %>% 
+  mutate(fitted=exp(predict(mylm,data=tibfitted))) 
+  
+tib=tib %>% 
+  arrange(nedits,simple) %>% 
+  left_join(tibfitted %>% select(article,fitted),by="article") %>% 
+  mutate(def_length=-(log(length)-log(fitted))) 
+wp_pages=left_join(wp_pages,tib %>% select(article,date_page,def_length),
+                   by="article",
+                   relationship="many-to-many")
+saveRDS(wp_pages,"data/wp_pages_def_length.RDS")
+ggplot(tib, aes(x=nedits,y=length,col=simple))+
+  geom_point(alpha=0.1)+
+  scale_x_log10()+
+  scale_y_log10()+
+  geom_path(data=tibfitted, aes(x=nedits,y=fitted))
 ```
 
-## Map comparison to DFO
-
-We tried to find the correspondence between events documented in Wikidata and events documented in the DFO dataset. To do that, for each WD event, we searched for all events in the DFO dataset occurring less than a year and 30 days apart and less than 400 kms away OR occurring less than a year and 30 days apart and in the same country. The limit of one year and 30 days accounts for the sometimes low precision of date (e.g., year) in Wikidata.
-
-```{r map_comp, warning=FALSE, message=FALSE, fig.width=10, fig.height=12}
-# library(leaflet) 
-# # Définition d'une échelle colorée 
-# # (en fonction de date de sortie) 
-# # Création de la carte 
-# joined_events=readRDS("data/joined_events.RDS")
-# pal=colorFactor(c("red","blue"), domain=c("wd","dfo"))
-# comp_map=leaflet(wm_dfo)  %>%
-#   addProviderTiles(providers$Esri.WorldTopoMap) %>% # ajout fond de carte
-#   addCircleMarkers(col=~pal(source),
-#                    popup =~popup,
-#                    radius=3) %>% 
-#   addPolylines(data=joined_events,color="green")
-#   
+```{r plot_age_page_and_def_length_,fig.width=5,fig.height=4}
+#| label: fig-age_page_and_def_length
+#| fig-cap: "Relationship between age of the Wikipedia page (in days) and deficit in length. Older pages tend to correspond to a more important deficit in length: there is a tendency towards more synthesis as the page 'matures'. The residuals of this relationship is considered to be a way to quantify how controversial the edition of the page might have been."
+tib=tib %>% 
+  mutate(age_page=as.numeric(today()-date_page))
+mylm=lm(def_length~age_page,data=tib)
+tib=tib %>% 
+  mutate(controversy=def_length-predict(mylm,data=tib))%>% 
+  mutate(controversy=case_when(controversy>0~controversy/max(controversy,na.rm=TRUE),
+                              controversy<=0~controversy/max(-controversy,na.rm=TRUE),
+                              TRUE~controversy))
+wp_pages=wp_pages %>% 
+  left_join(tib %>% select(article,controversy),
+            by="article",relationship="many-to-many") %>% 
+  unique()
+saveRDS(wp_pages,"wp_pages_controversy.RDS")
+ggplot(tib, aes(x=age_page, y=def_length,col=controversy))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  scale_color_gradient2(low="blue",mid="yellow",high="red")
 
 ```
 
-```{r}
-# #| label: fig-map_comp
-# #| fig-cap: "Comparison of events defined in DFO (red) and Wikidata/Wikipedia (blue). The attempts at finding the correspondence between a Wikidata/Wikipedia event and a corresponding one in the DFO dataset correspond to the lines."
-# comp_map
-```
+<!-- ```{r} -->
 
-*oui je sais ces résultats sont assez vilains pour le moment. Je vais essayer de trouver une meilleure représentation + il faudra discuter les raisons pour lesquelles il est difficile de faire une correspondance -définition des événements différent, souvent dans Wikipedia plusieurs événements sont regroupés par exemple "Inondations de telle année en Europe centrale"-)*
+<!-- wp_pages_controversy=readRDS("data/wp_pages_controversy.RDS") %>%  -->
+
+<!--   na.omit() -->
+
+<!-- # library(randomForest) -->
+
+<!-- # tibrf=wp_pages_controversy %>% na.omit() %>%  -->
+
+<!-- #   select(flood,lang,length,local,controversy) -->
+
+<!-- # rf=randomForest(tibrf %>% select(-controversy), -->
+
+<!-- #                 tibrf$controversy) -->
+
+<!-- flood_controversy=wp_pages_controversy%>%  -->
+
+<!--   select(flood,article,controversy) %>%  -->
+
+<!--   unique() %>%  -->
+
+<!--   group_by(flood) %>%  -->
+
+<!--   mutate(n=n()) %>%  -->
+
+<!--   filter(n>5) %>%  -->
+
+<!--   ungroup() -->
+
+<!-- mod=lm(controversy~flood,data=flood_controversy) -->
+
+<!-- summary(mod) -->
+
+<!-- summary(mod)$coeff %>% -->
+
+<!--   as.data.frame() %>% -->
+
+<!--   rownames_to_column() %>% -->
+
+<!--   as_tibble() %>% -->
+
+<!--   arrange(desc(Estimate)) -->
+
+<!-- ``` -->
 
 # Discussion
 

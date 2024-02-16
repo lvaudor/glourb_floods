@@ -128,10 +128,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./1_collect_wikidata.html" rel="" target="">
- <span class="menu-text">Methods 1</span></a>
-  </li>  
-  <li class="nav-item">
     <a class="nav-link" href="./2_use_wikipedia.html" rel="" target="">
  <span class="menu-text">Methods 2</span></a>
   </li>  
@@ -142,10 +138,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link" href="./4_text_analysis.html" rel="" target="">
  <span class="menu-text">Methods 4</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./5_join_data.html" rel="" target="">
- <span class="menu-text">Methods 5</span></a>
   </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
@@ -163,7 +155,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul class="collapse">
-  <li><a href="#curate-wikidata" id="toc-curate-wikidata" class="nav-link active" data-scroll-target="#curate-wikidata">Curate wikidata</a>
+  <li><a href="#basic-query" id="toc-basic-query" class="nav-link active" data-scroll-target="#basic-query">Basic query</a></li>
+  <li><a href="#curate-wikidata" id="toc-curate-wikidata" class="nav-link" data-scroll-target="#curate-wikidata">Curate wikidata</a>
   <ul class="collapse">
   <li><a href="#add-coordinates" id="toc-add-coordinates" class="nav-link" data-scroll-target="#add-coordinates">Add coordinates</a></li>
   <li><a href="#get-and-clean-dates" id="toc-get-and-clean-dates" class="nav-link" data-scroll-target="#get-and-clean-dates">Get and clean dates</a></li>
@@ -184,15 +177,315 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="curate-wikidata" class="level1">
-<h1>Curate wikidata</h1>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glitter)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sequins)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<section id="basic-query" class="level2">
+<h2 class="anchored" data-anchor-id="basic-query">Basic query</h2>
+<p>We query the Wikidata Triplestore through the {glitter} R package (ref).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>query<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P31/wdt:P279* wd:Q8068"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P31 ?what"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P625 ?coords"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P17 ?country"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P1120 ?deathtoll"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P276 ?loc"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P17 ?country_loc"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?article schema:about ?flood"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(flood,country,what) </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="st">"figure/fig-graph_query.png"</span>,<span class="at">width=</span><span class="dv">600</span>,<span class="at">height=</span><span class="dv">500</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_query</span>(query, <span class="at">labelling=</span><span class="cn">TRUE</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+</div>
+<p>Here are the initial results we get when performing this query:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wd_raw.RDS"</span>)){</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  wd_raw<span class="ot">=</span>query <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">deathtoll=</span><span class="fu">as.numeric</span>(deathtoll))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wd_raw,<span class="st">"data/wd_raw.RDS"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_raw.RDS"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>wd_weird_events<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weird=</span>(what_label <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Bible story"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"deluge myth"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"creation myth"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"episode in Greek mythology"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"reflective writing"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">"non-water flood"</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">any_weird=</span><span class="fu">any</span>(weird), <span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(any_weird)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>wd_raw <span class="ot">=</span> wd_raw <span class="sc">%&gt;%</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(flood <span class="sc">%in%</span> wd_weird_events<span class="sc">$</span>flood))</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wd_raw, <span class="st">"data/wd_raw.RDS"</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>kableExtra<span class="sc">::</span><span class="fu">kable</span>(wd_raw <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">20</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">what</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">flood</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">loc</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">deathtoll</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">country_label</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">flood_label</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">what_label</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">coords</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q6886</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q7788</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q15175</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q19206</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q43934</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q45208</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q6401352</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q148</td>
+<td style="text-align: left;">People's Republic of China</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q6886</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q7788</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q15175</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q19206</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q43934</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q45208</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q14628797</td>
+<td style="text-align: left;">wd:Q6401352</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: left;">wd:Q159</td>
+<td style="text-align: left;">Russia</td>
+<td style="text-align: left;">2013 China–Russia floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q119109771</td>
+<td style="text-align: left;">wd:Q790</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: left;">wd:Q790</td>
+<td style="text-align: left;">Haiti</td>
+<td style="text-align: left;">2023 Haiti floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q122311510</td>
+<td style="text-align: left;">wd:Q10388860</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: left;">wd:Q155</td>
+<td style="text-align: left;">Brazil</td>
+<td style="text-align: left;">2023 Rio Grande do Sul floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q1599758</td>
+<td style="text-align: left;">wd:Q183</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: left;">wd:Q183</td>
+<td style="text-align: left;">Germany</td>
+<td style="text-align: left;">flood disaster</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">Point(9.44786 51.6426)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q113288859</td>
+<td style="text-align: left;">wd:Q843</td>
+<td style="text-align: right;">1666</td>
+<td style="text-align: left;">wd:Q843</td>
+<td style="text-align: left;">Pakistan</td>
+<td style="text-align: left;">2022 Pakistan floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q20630431</td>
+<td style="text-align: left;">wd:Q1061</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: left;">wd:Q668</td>
+<td style="text-align: left;">India</td>
+<td style="text-align: left;">2015 Gujarat flood</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wd:Q8065</td>
+<td style="text-align: left;">wd:Q118433941</td>
+<td style="text-align: left;">wd:Q1263</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: left;">wd:Q38</td>
+<td style="text-align: left;">Italy</td>
+<td style="text-align: left;">2023 Emilia-Romagna floods</td>
+<td style="text-align: left;">natural disaster</td>
+<td style="text-align: left;">NA</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>This table has 1516 rows and documents 792 flood events.</p>
+</section>
+<section id="curate-wikidata" class="level1">
+<h1>Curate wikidata</h1>
 <p>The degree of precision in the geographical location for each of these floods might vary. For each recorded flood event we might have access to all or part of these informations:</p>
 <ul>
 <li>a <strong>location</strong> (<code>loc</code>) which might refer to a scale as varied as continent/sub-continent, country, basin, city, etc.</li>
@@ -203,9 +496,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span> </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(loc)<span class="sc">~</span>country,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">!</span><span class="fu">is.na</span>(loc)<span class="sc">~</span>loc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wd_raw<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(loc)<span class="sc">~</span>country,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">!</span><span class="fu">is.na</span>(loc)<span class="sc">~</span>loc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="add-coordinates" class="level2">
@@ -222,34 +515,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>get_loc_info<span class="ot">=</span><span class="cf">function</span>(loc_id){</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">loc=</span>loc_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P17 ?country_loc"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P625 ?coords_loc"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P31 ?loc_type"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(loc, country_loc, loc_type) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>loc) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>get_loc_info<span class="ot">=</span><span class="cf">function</span>(loc_id){</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">loc=</span>loc_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P17 ?country_loc"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P625 ?coords_loc"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?loc wdt:P31 ?loc_type"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(loc, country_loc, loc_type) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>loc) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  result</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We apply this function to all locations appearing in <code>wd_raw</code>:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/locs.RDS"</span>)){</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  locs<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(loc) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(loc,get_loc_info)) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(data)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(locs, <span class="st">"data/locs.RDS"</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>locs<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/locs.RDS"</span>)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># summarise which loc_types are sub-categories of human settlement</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/locs.RDS"</span>)){</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  locs<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(loc) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(loc,get_loc_info)) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(data)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(locs, <span class="st">"data/locs.RDS"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>locs<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/locs.RDS"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># summarise which loc_types are sub-categories of human settlement</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -260,59 +553,81 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glitter)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>get_country_info<span class="ot">=</span><span class="cf">function</span>(country_id){</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">country=</span>country_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P625 ?coords_country"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P37 ?language_official"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?language_official wdt:P424 ?language_official_code"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P1081 ?HDI"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P2936 ?language_used"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?language_used wdt:P424 ?language_used_code"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(country,language_official,language_used) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">country_label=</span>country_label,</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">language_official=</span>language_official_label,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">language_used=</span>language_used_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>country,<span class="sc">-</span>language_official_label,<span class="sc">-</span>language_used_label)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>query_country<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P625 ?coords_country"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P37 ?language_official"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?language_official wdt:P424 ?language_official_code"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P1081 ?HDI"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P2936 ?language_used"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?language_used wdt:P424 ?language_used_code"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(country,language_official,language_used)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="st">"figure/fig-graph_query_country.png"</span>,<span class="at">width=</span><span class="dv">900</span>,<span class="at">height=</span><span class="dv">300</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_query</span>(query_country)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+</div>
+<p><img src="figure/fig-graph_query_country.png" class="img-fluid"></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glitter)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>get_country_info<span class="ot">=</span><span class="cf">function</span>(country_id){</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span>query_country<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">country=</span>country_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P625 ?coords_country"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P37 ?language_official"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?language_official wdt:P424 ?language_official_code"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P1081 ?HDI"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?country wdt:P2936 ?language_used"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?language_used wdt:P424 ?language_used_code"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_label</span>(country,language_official,language_used) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">country_label=</span>country_label,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">language_official=</span>language_official_label,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>           <span class="at">language_used=</span>language_used_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>country,<span class="sc">-</span>language_official_label,<span class="sc">-</span>language_used_label)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We apply this function to all countries appearing in the raw dataset which might provide us with coordinates for the events, when missing.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/countries.RDS"</span>)){</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  countries<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(country) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(country,get_country_info)) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(data) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">HDI=</span><span class="fu">as.numeric</span>(HDI))</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  getlang<span class="ot">=</span><span class="cf">function</span>(tib){</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    result<span class="ot">=</span><span class="fu">bind_rows</span>(</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">lang_type=</span><span class="st">"official"</span>,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language=</span>tib<span class="sc">$</span>language_official,</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language_code=</span>tib<span class="sc">$</span>language_official_code),</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">lang_type=</span><span class="st">"used"</span>,</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language=</span>tib<span class="sc">$</span>language_used,</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language_code=</span>tib<span class="sc">$</span>language_used_code)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    result<span class="ot">=</span><span class="fu">unique</span>(result)</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(result)</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  countries<span class="ot">=</span>countries <span class="sc">%&gt;%</span> </span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(country,country_label,coords_country,HDI) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">nest</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(data,getlang)) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="at">cols=</span><span class="fu">c</span>(data)) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(countries, <span class="st">"data/countries.RDS"</span>)</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>countries<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/countries.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/countries.RDS"</span>)){</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  countries<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(country) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(country,get_country_info)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(data) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">HDI=</span><span class="fu">as.numeric</span>(HDI))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  getlang<span class="ot">=</span><span class="cf">function</span>(tib){</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    result<span class="ot">=</span><span class="fu">bind_rows</span>(</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">lang_type=</span><span class="st">"official"</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language=</span>tib<span class="sc">$</span>language_official,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language_code=</span>tib<span class="sc">$</span>language_official_code),</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">lang_type=</span><span class="st">"used"</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language=</span>tib<span class="sc">$</span>language_used,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">language_code=</span>tib<span class="sc">$</span>language_used_code)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    result<span class="ot">=</span><span class="fu">unique</span>(result)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(result)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  countries<span class="ot">=</span>countries <span class="sc">%&gt;%</span> </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(country,country_label,coords_country,HDI) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">nest</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map</span>(data,getlang)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="at">cols=</span><span class="fu">c</span>(data)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(country,country_label,<span class="fu">everything</span>())</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(countries, <span class="st">"data/countries.RDS"</span>)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>countries<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/countries.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -322,51 +637,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>floodlocs<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(locs,<span class="at">by=</span><span class="st">"loc"</span>,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country_label=</span><span class="fu">case_when</span>(country_label<span class="sc">==</span><span class="st">""</span><span class="sc">~</span>country_loc_label,</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">is.na</span>(country_label)<span class="sc">~</span>country_loc_label,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                 country_label<span class="sc">!=</span><span class="st">""</span><span class="sc">~</span>country_label)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(country)<span class="sc">~</span>country_loc,</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!</span><span class="fu">is.na</span>(country)<span class="sc">~</span>country)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords_from=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"flood"</span>,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"location"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(flood,flood_label,coords,coords_loc,country,country_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(countries <span class="sc">%&gt;%</span> <span class="fu">select</span>(country,coords_country),</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">by=</span><span class="st">"country"</span>,</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords_from=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords) <span class="sc">&amp;</span> <span class="fu">is.na</span>(coords_loc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(coords_country) <span class="sc">~</span><span class="st">"3) country"</span>,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                               <span class="sc">!</span><span class="fu">is.na</span>(coords_loc)<span class="sc">~</span><span class="st">"2) location"</span>,</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                               <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"1) direct"</span>,</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                               <span class="cn">TRUE</span><span class="sc">~</span><span class="st">"4) no coordinates"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords)<span class="sc">~</span>coords_loc,</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span>coords)) <span class="sc">%&gt;%</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords)<span class="sc">~</span>coords_country,</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span>coords)) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>floodlocs<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(locs,<span class="at">by=</span><span class="st">"loc"</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country_label=</span><span class="fu">case_when</span>(country_label<span class="sc">==</span><span class="st">""</span><span class="sc">~</span>country_loc_label,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">is.na</span>(country_label)<span class="sc">~</span>country_loc_label,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                                 country_label<span class="sc">!=</span><span class="st">""</span><span class="sc">~</span>country_label)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">country=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(country)<span class="sc">~</span>country_loc,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!</span><span class="fu">is.na</span>(country)<span class="sc">~</span>country)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords_from=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"flood"</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"location"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(flood,flood_label,coords,coords_loc,country,country_label,loc_label,loc_type_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(countries <span class="sc">%&gt;%</span> <span class="fu">select</span>(country,coords_country),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">by=</span><span class="st">"country"</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords_from=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords) <span class="sc">&amp;</span> <span class="fu">is.na</span>(coords_loc) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(coords_country) <span class="sc">~</span><span class="st">"3) country"</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                               <span class="sc">!</span><span class="fu">is.na</span>(coords_loc)<span class="sc">~</span><span class="st">"2) location"</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                               <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span><span class="st">"1) direct"</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                               <span class="cn">TRUE</span><span class="sc">~</span><span class="st">"4) no coordinates"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords)<span class="sc">~</span>coords_loc,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span>coords)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">coords=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(coords)<span class="sc">~</span>coords_country,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>                          <span class="sc">!</span><span class="fu">is.na</span>(coords)<span class="sc">~</span>coords)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>The coordinates for the flood events are thus inferred from:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>floodlocs <span class="sc">%&gt;%</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood,coords_from) <span class="sc">%&gt;%</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">coords_from=</span><span class="fu">unique</span>(coords_from),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(coords_from) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>(),<span class="at">.groups=</span><span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>precision_coords<span class="ot">=</span>floodlocs <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc_type_label=</span><span class="fu">paste0</span>(loc_type_label,<span class="at">collapse=</span><span class="st">";"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood,coords_from,loc_type_label) <span class="sc">%&gt;%</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">coords_from=</span><span class="fu">unique</span>(coords_from),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loc_type_label=</span><span class="fu">case_when</span>(coords_from<span class="sc">!=</span><span class="st">"2) location"</span><span class="sc">~</span><span class="st">" "</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>                                  <span class="cn">TRUE</span><span class="sc">~</span>loc_type_label)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">detect_country=</span><span class="fu">str_detect</span>(loc_type_label,<span class="st">"country"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">is_country=</span><span class="fu">case_when</span>(coords_from<span class="sc">!=</span><span class="st">"2) location"</span><span class="sc">~</span><span class="st">" "</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>                              detect_country<span class="sc">~</span><span class="st">"yes"</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                              <span class="sc">!</span>detect_country<span class="sc">~</span><span class="st">"no"</span>,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA_character_</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(coords_from,is_country) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>(),<span class="at">.groups=</span><span class="st">"drop"</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(precision_coords,<span class="st">"data/precision_coords.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 2
-  coords_from           n
-  &lt;chr&gt;             &lt;int&gt;
-1 1) direct            11
-2 2) location         684
-3 3) country           17
-4 4) no coordinates    86</code></pre>
-</div>
 </div>
 </section>
 </section>
@@ -377,46 +696,64 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>get_date_info<span class="ot">=</span><span class="cf">function</span>(flood_id,<span class="at">type=</span><span class="st">"P585"</span>){</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"?flood p:{type}/psv:{type} ?datestatement"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?datestatement wikibase:timeValue ?datetime"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?datestatement wikibase:timePrecision ?precision"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_mutate</span>(<span class="at">date=</span><span class="fu">as.date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>datestatement,<span class="sc">-</span>datetime) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># query_dates=spq_init() %&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add(glue::glue("?flood p:P585/psv:P585 ?time_statement")) %&gt;% </span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add("?time_statement wikibase:timeValue ?time") %&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add("?time_statement wikibase:timePrecision ?time_precision",.required=FALSE) %&gt;%  </span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add(glue::glue("?flood p:P580/psv:P580 ?start_statement")) %&gt;% </span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add("?start_statement wikibase:timeValue ?start") %&gt;%</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add("?start_statement wikibase:timePrecision ?start_precision",.required=FALSE) %&gt;% </span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add(glue::glue("?flood p:P582/psv:P582 ?end_statement")) %&gt;% </span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add("?end_statement wikibase:timeValue ?end") %&gt;%</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   spq_add("?end_statement wikibase:timePrecision ?end_precision",.required=FALSE)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># png("figure/fig-graph_query_dates.png",width=900,height=400)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_query(query_dates)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># dev.off()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>get_date_info<span class="ot">=</span><span class="cf">function</span>(flood_id,<span class="at">type=</span><span class="st">"P585"</span>){</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"?flood p:{type}/psv:{type} ?datestatement"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?datestatement wikibase:timeValue ?datetime"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?datestatement wikibase:timePrecision ?precision"</span>,<span class="at">.required=</span><span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_mutate</span>(<span class="at">date=</span><span class="fu">as.date</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>datestatement,<span class="sc">-</span>datetime) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>(<span class="at">replace_prefixes=</span><span class="cn">TRUE</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  result</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We then apply this function to all locations mentioned in <code>wd_raw</code>:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fill_void<span class="ot">=</span><span class="cf">function</span>(tib,<span class="at">name=</span><span class="st">"date"</span>){</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">nrow</span>(tib)<span class="sc">==</span><span class="dv">0</span>){</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    tib<span class="ot">=</span>tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">flood=</span><span class="cn">NA</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">date=</span><span class="cn">NA</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">precision=</span><span class="cn">NA</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  tib<span class="ot">=</span>tib <span class="sc">%&gt;%</span> <span class="fu">select</span>(date, precision)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(tib)<span class="ot">=</span><span class="fu">c</span>(name,<span class="fu">paste0</span>(name,<span class="st">"_precision"</span>))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(tib)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/dates.RDS"</span>)){</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  dates<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label)<span class="sc">%&gt;%</span> </span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">date=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_date_info)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">start=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_date_info, <span class="at">type=</span><span class="st">"P580"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">end=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_date_info, <span class="at">type=</span><span class="st">"P582"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">date=</span>purrr<span class="sc">::</span><span class="fu">map</span>(date,fill_void)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">start=</span>purrr<span class="sc">::</span><span class="fu">map</span>(start,fill_void,<span class="at">name=</span><span class="st">"start"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">end=</span>purrr<span class="sc">::</span><span class="fu">map</span>(end,fill_void,<span class="at">name=</span><span class="st">"end"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(date,start,end))</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(dates, <span class="st">"data/dates.RDS"</span>)</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fill_void<span class="ot">=</span><span class="cf">function</span>(tib,<span class="at">name=</span><span class="st">"date"</span>){</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">nrow</span>(tib)<span class="sc">==</span><span class="dv">0</span>){</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    tib<span class="ot">=</span>tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">flood=</span><span class="cn">NA</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">date=</span><span class="cn">NA</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">precision=</span><span class="cn">NA</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  tib<span class="ot">=</span>tib <span class="sc">%&gt;%</span> <span class="fu">select</span>(date, precision)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(tib)<span class="ot">=</span><span class="fu">c</span>(name,<span class="fu">paste0</span>(name,<span class="st">"_precision"</span>))</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(tib)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/dates.RDS"</span>)){</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  dates<span class="ot">=</span>wd_raw <span class="sc">%&gt;%</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label)<span class="sc">%&gt;%</span> </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">date=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_date_info)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">start=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_date_info, <span class="at">type=</span><span class="st">"P580"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">end=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_date_info, <span class="at">type=</span><span class="st">"P582"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">date=</span>purrr<span class="sc">::</span><span class="fu">map</span>(date,fill_void)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">start=</span>purrr<span class="sc">::</span><span class="fu">map</span>(start,fill_void,<span class="at">name=</span><span class="st">"start"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">end=</span>purrr<span class="sc">::</span><span class="fu">map</span>(end,fill_void,<span class="at">name=</span><span class="st">"end"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(date,start,end))</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(dates, <span class="st">"data/dates.RDS"</span>)</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>There is a certain heterogeneity in the way information about dates is provided. The flood events’ time of occurrence might be provided through the properties</p>
@@ -435,87 +772,87 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>avdate<span class="ot">=</span><span class="cf">function</span>(date1,date2){</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  date1<span class="ot">=</span><span class="fu">as.numeric</span>(date1)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  date2<span class="ot">=</span><span class="fu">as.numeric</span>(date2)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">as.Date</span>(<span class="fu">mean</span>(<span class="fu">c</span>(date1,date2)))</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>avdate<span class="ot">=</span><span class="cf">function</span>(date1,date2){</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  date1<span class="ot">=</span><span class="fu">as.numeric</span>(date1)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  date2<span class="ot">=</span><span class="fu">as.numeric</span>(date2)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">as.Date</span>(<span class="fu">mean</span>(<span class="fu">c</span>(date1,date2)))</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dates<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dates.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date_precision<span class="sc">&gt;=</span><span class="dv">9</span><span class="sc">|</span><span class="fu">is.na</span>(date_precision)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(date),</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">start=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(start),</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">end=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(end)) <span class="sc">%&gt;%</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_from=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date)<span class="sc">~</span><span class="st">"direct"</span>,</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                            (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span><span class="st">"av_start_end"</span>,</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                            (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(end) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start))<span class="sc">~</span><span class="st">"start"</span>,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>                            (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span><span class="st">"end"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">av_start_end=</span>purrr<span class="sc">::</span><span class="fu">map2</span>(start,end,avdate)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(av_start_end) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date)<span class="sc">~</span>date,</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>                        (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span>av_start_end,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                        (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(end) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start))<span class="sc">~</span>start,</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                        (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span>end)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_label=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(flood_label,<span class="st">"</span><span class="sc">\\</span><span class="st">d{4}"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_label=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date_label)<span class="sc">~</span><span class="fu">paste0</span>(date_label,<span class="st">"-01-01"</span>),</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_label=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date_label)<span class="sc">~</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(date_label),</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_from=</span><span class="fu">case_when</span>((<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(date_label))<span class="sc">~</span><span class="st">"flood_label"</span>,</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span>date_from)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_precision=</span><span class="fu">case_when</span>(date_precision<span class="sc">==</span><span class="dv">9</span><span class="sc">~</span><span class="st">"year"</span>,</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>                                  date_precision<span class="sc">==</span><span class="dv">10</span><span class="sc">~</span><span class="st">"month"</span>,</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>                                  date_precision<span class="sc">==</span><span class="dv">11</span><span class="sc">~</span><span class="st">"day"</span>,</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>                                  <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_precision=</span><span class="fu">case_when</span>(date_from<span class="sc">==</span><span class="st">"flood_label"</span><span class="sc">~</span><span class="st">"year"</span>,</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>                                  date_from<span class="sc">==</span><span class="st">"av_start_end"</span><span class="sc">~</span><span class="st">"day"</span>,</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>                                  date_from<span class="sc">==</span><span class="st">"start"</span><span class="sc">~</span><span class="st">"day"</span>,</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>                                  date_from<span class="sc">==</span><span class="st">"end"</span><span class="sc">~</span><span class="st">"day"</span>,</span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>                                  <span class="cn">TRUE</span><span class="sc">~</span>date_precision)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span><span class="fu">case_when</span>((<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(date_label))<span class="sc">~</span>date_label,</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>                        <span class="cn">TRUE</span><span class="sc">~</span>date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>av_start_end)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>precision_dates<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dates.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date_precision<span class="sc">&gt;=</span><span class="dv">9</span><span class="sc">|</span><span class="fu">is.na</span>(date_precision)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(date),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">start=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(start),</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">end=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(end)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_from=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date)<span class="sc">~</span><span class="st">"1) direct"</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                            (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span><span class="st">"2) av_start_end"</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>                            (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(end) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start))<span class="sc">~</span><span class="st">"3) start_or_end"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>                            (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span><span class="st">"3) start_or_end"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">av_start_end=</span>purrr<span class="sc">::</span><span class="fu">map2</span>(start,end,avdate)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(av_start_end) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date)<span class="sc">~</span>date,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>                        (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span>av_start_end,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>                        (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(end) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(start))<span class="sc">~</span>start,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>                        (<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="fu">is.na</span>(start) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(end))<span class="sc">~</span>end)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_label=</span>stringr<span class="sc">::</span><span class="fu">str_extract</span>(flood_label,<span class="st">"</span><span class="sc">\\</span><span class="st">d{4}"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_label=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date_label)<span class="sc">~</span><span class="fu">paste0</span>(date_label,<span class="st">"-01-01"</span>),</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_label=</span><span class="fu">case_when</span>(<span class="sc">!</span><span class="fu">is.na</span>(date_label)<span class="sc">~</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(date_label),</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_from=</span><span class="fu">case_when</span>((<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(date_label))<span class="sc">~</span><span class="st">"4) flood_label"</span>,</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span>date_from)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_precision=</span><span class="fu">case_when</span>(date_from<span class="sc">==</span><span class="st">"4) flood_label"</span><span class="sc">~</span><span class="dv">9</span>,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>                                  date_from<span class="sc">==</span><span class="st">"2) av_start_end"</span><span class="sc">~</span>start_precision,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>                                  date_from<span class="sc">==</span><span class="st">"3) start_or_end"</span><span class="sc">~</span>start_precision,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>                                  <span class="cn">TRUE</span><span class="sc">~</span>date_precision)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">date_precision=</span><span class="fu">case_when</span>(date_precision<span class="sc">==</span><span class="dv">9</span><span class="sc">~</span><span class="st">"year"</span>,</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>                                  date_precision<span class="sc">==</span><span class="dv">10</span><span class="sc">~</span><span class="st">"month"</span>,</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>                                  date_precision<span class="sc">==</span><span class="dv">11</span><span class="sc">~</span><span class="st">"day"</span>,</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>                                  <span class="cn">TRUE</span><span class="sc">~</span><span class="cn">NA</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date=</span><span class="fu">case_when</span>((<span class="fu">is.na</span>(date) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(date_label))<span class="sc">~</span>date_label,</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>                        <span class="cn">TRUE</span><span class="sc">~</span>date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>av_start_end)</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(precision_dates,<span class="st">"data/precision_dates.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Finally, the dates provided in the dataset for the flood events correspond to the estimate given by:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dates <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date_from) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>precision_dates <span class="sc">%&gt;%</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date_from) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 2
-  date_from        n
-  &lt;chr&gt;        &lt;int&gt;
-1 av_start_end   145
-2 direct         453
-3 flood_label    138
-4 start           45
-5 &lt;NA&gt;            31</code></pre>
+  date_from           n
+  &lt;chr&gt;           &lt;int&gt;
+1 1) direct         453
+2 2) av_start_end   145
+3 3) start_or_end    45
+4 4) flood_label    138
+5 &lt;NA&gt;               31</code></pre>
 </div>
 </div>
 <p>and they correspond to a precision of:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dates <span class="sc">%&gt;%</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date_precision) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>precision_dates <span class="sc">%&gt;%</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date_precision) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 2
   date_precision     n
   &lt;chr&gt;          &lt;int&gt;
-1 day              414
-2 month            122
-3 year             245
+1 day              380
+2 month            147
+3 year             254
 4 &lt;NA&gt;              31</code></pre>
 </div>
 </div>
@@ -528,13 +865,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>wd<span class="ot">=</span>wd_raw  <span class="sc">%&gt;%</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>coords,<span class="sc">-</span>country,<span class="sc">-</span>country_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(floodlocs,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(dates, <span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>wd<span class="ot">=</span>wd_raw  <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>coords,<span class="sc">-</span>country,<span class="sc">-</span>country_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(floodlocs,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(precision_dates, <span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -544,32 +881,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>get_wikisites<span class="ot">=</span><span class="cf">function</span>(flood_id){</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?article schema:about ?flood"</span>) <span class="sc">%&gt;%</span>  </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>flood) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(stringr<span class="sc">::</span><span class="fu">str_detect</span>(article,<span class="st">"wikipedia"</span>))</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>get_wikisites<span class="ot">=</span><span class="cf">function</span>(flood_id){</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?article schema:about ?flood"</span>) <span class="sc">%&gt;%</span>  </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(stringr<span class="sc">::</span><span class="fu">str_detect</span>(article,<span class="st">"wikipedia"</span>))</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  result</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wikisites.RDS"</span>)){</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  wikisites<span class="ot">=</span>wd <span class="sc">%&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">wikisites=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_wikisites)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(wikisites))</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wikisites, <span class="st">"data/wikisites.RDS"</span>)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites_translated.RDS"</span>)<span class="sc">%&gt;%</span> </span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wikisites.RDS"</span>)){</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  wikisites<span class="ot">=</span>wd <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">wikisites=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_wikisites)) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(wikisites))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(wikisites, <span class="st">"data/wikisites.RDS"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites.RDS"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>wikisites<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wikisites_translated.RDS"</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -579,29 +916,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>get_images<span class="ot">=</span><span class="cf">function</span>(flood_id){</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P18 ?image"</span>) <span class="sc">%&gt;%</span>  </span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>flood) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>()</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>get_images<span class="ot">=</span><span class="cf">function</span>(flood_id){</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P18 ?image"</span>) <span class="sc">%&gt;%</span>  </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>()</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  result</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/images.RDS"</span>)){</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  images<span class="ot">=</span>wd <span class="sc">%&gt;%</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">images=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_images)) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(images))</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(images, <span class="st">"data/images.RDS"</span>)</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>images<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/images.RDS"</span>)<span class="sc">%&gt;%</span> </span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/images.RDS"</span>)){</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  images<span class="ot">=</span>wd <span class="sc">%&gt;%</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">images=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_images)) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(images))</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(images, <span class="st">"data/images.RDS"</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>images<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/images.RDS"</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -610,29 +947,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>get_categories<span class="ot">=</span><span class="cf">function</span>(flood_id){</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P373 ?category"</span>) <span class="sc">%&gt;%</span>  </span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>flood) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>()</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  result</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>get_categories<span class="ot">=</span><span class="cf">function</span>(flood_id){</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">spq_init</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_set</span>(<span class="at">flood=</span>flood_id) <span class="sc">%&gt;%</span> </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_add</span>(<span class="st">"?flood wdt:P373 ?category"</span>) <span class="sc">%&gt;%</span>  </span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_select</span>(<span class="sc">-</span>flood) <span class="sc">%&gt;%</span> </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spq_perform</span>()</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  result</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/categories.RDS"</span>)){</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  categories<span class="ot">=</span>wd <span class="sc">%&gt;%</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">categories=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_categories)) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(categories))</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(categories, <span class="st">"data/categories.RDS"</span>)</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>categories<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/categories.RDS"</span>)<span class="sc">%&gt;%</span> </span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/categories.RDS"</span>)){</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  categories<span class="ot">=</span>wd <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(flood,flood_label) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">categories=</span>purrr<span class="sc">::</span><span class="fu">map</span>(flood,get_categories)) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="fu">c</span>(categories))</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(categories, <span class="st">"data/categories.RDS"</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>categories<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/categories.RDS"</span>)<span class="sc">%&gt;%</span> </span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(flood <span class="sc">%in%</span> wd_raw<span class="sc">$</span>flood)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -641,24 +978,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span>wd <span class="sc">%&gt;%</span> </span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>date,<span class="sc">-</span>date_precision) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(dates <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date,date_precision),<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>),</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> </span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wikisites,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(images,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(categories,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>)</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,flood_label,date,country,country_label) <span class="sc">%&gt;%</span></span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wm_full,<span class="st">"data/wm_full.RDS"</span>)</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wd_events,<span class="st">"data/wd_events.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span>wd <span class="sc">%&gt;%</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>date,<span class="sc">-</span>date_precision) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(precision_dates <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date,date_precision),<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>),</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wikisites,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(images,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(categories,<span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>,<span class="st">"flood_label"</span>),</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">relationship =</span><span class="st">"many-to-many"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,flood_label,date,country,country_label) <span class="sc">%&gt;%</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wm_full,<span class="st">"data/wm_full.RDS"</span>)</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wd_events,<span class="st">"data/wd_events.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
