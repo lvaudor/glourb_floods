@@ -34,7 +34,11 @@ library(leaflet)
    summarise(deathtoll=mean(deathtoll),
              class_name=unique(class_name),
              spec=unique(spec),
-             color=unique(color)) %>%
+             color=unique(color),
+             coords_from=first(coords_from),
+             date=first(date),
+             year=first(year),
+             popup=NA) %>% 
    sf::st_centroid()
 
  # %>%
@@ -180,7 +184,7 @@ dfo_raw=dfo_raw %>%
          coords=paste0("Point(",dfo_centroid_x," ",dfo_centroid_y,")"))
 
 dfo_comp=dfo_raw %>%
-  select(flood,flood_label,country_label,deathtoll, start, end,coords) %>%
+  select(flood,flood_label,country_label,start,end,deathtoll,coords) %>%
   mutate(date=purrr::map2(start,end,avdate)) %>%
   tidyr::unnest(date)%>%
   sf::st_as_sf(wkt="coords") %>%
@@ -193,12 +197,12 @@ dfo_comp=readRDS("data/dfo_comp.RDS")
 This dataset documents `r nrow(dfo_comp)` flood events that occurred between `r min(dfo_comp$start)` and `r max(dfo_comp$end)`.
 
 ```{r wm_comp}
-# wm_comp=wm_map %>%
-#   select(flood,flood_label,deathtoll, date ,start, end,popup) %>%
-#   filter(date>lubridate::ymd("1985-01-01") &
-#          date<lubridate::ymd("2021-12-31")) %>%
-#   mutate(source="wd")
-# saveRDS(wm_comp,"data/wm_comp.RDS")
+wm_comp=wm_map %>%
+  select(flood,flood_label,deathtoll, date,popup) %>%
+  filter(date>lubridate::ymd("1985-01-01") &
+         date<lubridate::ymd("2021-12-31")) %>%
+  mutate(source="wd")
+saveRDS(wm_comp,"data/wm_comp.RDS")
 ```
 
 ```{r dfo_comp}
@@ -226,8 +230,8 @@ find_corresponding_flood=function(flood_id,tib=wm_dfo){
     mutate(disttime=as.numeric(disttime),
            distspace=as.numeric(distspace)) %>%
     filter(flood!=flood_id) %>%
-    mutate(cond1=disttime<395 & distspace<400000,
-           cond2=disttime<395 & str_detect(country_label,tib_sub$country_label)) %>%
+    mutate(cond1=disttime<400 & distspace<400000,
+           cond2=disttime<400 & str_detect(country_label,tib_sub$country_label)) %>%
     filter(cond1|cond2) %>%
     select(floodcorr=flood,
            disttime,

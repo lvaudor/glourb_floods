@@ -17,14 +17,12 @@ website:
         text: Article
       - href: about.qmd
         text: About
-      - href: 1_collect_wikidata.qmd
-        text: Methods 1
       - href: 2_use_wikipedia.qmd
-        text: Methods 2
+        text: Methods 1
       - href: 3_curate_wikidata.qmd
-        text: Methods 3
+        text: Methods 2
       - href: 4_text_analysis.qmd
-        text: Methods 4
+        text: Methods 3
 
       
 bibliography: floods.bib

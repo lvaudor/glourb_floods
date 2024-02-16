@@ -33,11 +33,11 @@ We define a translate function, based on the polyglotr package.
 
 ```{r translate_function}
 translate <- function(i){
+    text=wikisites_text$text[i][[1]]
     if(wikisites_text$lang[i]=="en"){return(text)}
     tryCatch(
         #try to do this
-        {text=wikisites_text$text[i][[1]]
-         texts=unlist(stringr::str_split(text,"\n"))
+        {texts=unlist(stringr::str_split(text,"\n"))
          result=purrr::map_chr(texts,
                                polyglotr::google_translate,
                                source_language=wikisites_text$lang[i])
@@ -63,11 +63,11 @@ translate <- function(i){
 ## is language local?
 
 ```{r def_is_language_local}
-is_language_local=function(lang_id,country_id){
+is_language_local=function(lang_id,data){
   result=countries %>% 
-    filter(country==country_id) %>% 
+    filter(country %in% data$country) %>% 
     filter(lang_id==language_code)
-  result=case_when(nrow(result)==1~TRUE,
+  result=case_when(nrow(result)>=1~TRUE,
                    nrow(result)==0~FALSE)
   return(result)
 }
@@ -75,20 +75,25 @@ is_language_local=function(lang_id,country_id){
 countries=readRDS("data/countries.RDS") %>% 
   select(country,language_code) %>% 
   unique()
-wp_pages=readRDS("data/wp_pages.RDS")
-wd_events=readRDS("data/wd_events.RDS") 
-wp_pages_local_articles=wd_events %>% select(flood,country) %>% 
-  left_join(wp_pages %>% select(flood,article,lang),
-            by="flood",relationship="many-to-many") %>% 
-  mutate(local=purrr::map2_lgl(lang,country,is_language_local)) %>% 
-  select(article,local)
-wp_pages=wp_pages %>% 
-  left_join(wp_pages_local_articles,by="article")
-saveRDS(wp_pages,"data/wp_pages.RDS")
+wp_pages=readRDS("data/wp_pages.RDS") %>% 
+  unique()
+if(!("local" %in% colnames(wp_pages))){
+    wd_events=readRDS("data/wd_events.RDS") 
+    wp_pages_local_articles=wd_events %>% select(flood,country) %>% 
+      group_by(flood) %>% 
+      tidyr::nest() %>% 
+      left_join(wp_pages %>% select(flood,article,lang),
+                by="flood",relationship="many-to-many") %>% 
+      mutate(local=purrr::map2_lgl(lang,data,is_language_local)) %>% 
+      select(article,local)
+    wp_pages=wp_pages %>% 
+      left_join(wp_pages_local_articles,by=c("flood","article"))
+    saveRDS(wp_pages,"data/wp_pages.RDS")
+}
 ```
 
+## clean text
 
-##
 ```{r def_clean_banners}
 clean_banners=function(text){
   banner=str_detect(text,"This article|this banner|your knowledge")
@@ -100,7 +105,7 @@ clean_banners=function(text){
     str_replace("You can share your knowledge by.*\\.","") %>% 
     str_replace("This article is based.*$","") %>% 
     str_replace("^(.|\\n)*If you think these points have been resolved, you can remove this banner and improve the formatting of another article\\.","")%>% 
-    str_replace("This .*article.*\\. You can help Wikipedia by expanding it\\.") %>% 
+    str_replace("This .*article.*\\. You can help Wikipedia by expanding it\\.","") %>% 
     str_replace("\\..*\\}","")
   }else{result=text}
   return(result)
@@ -111,14 +116,19 @@ clean_banners=function(text){
 if(!file.exists("data/wikisites_text.RDS")){
   library(rvest)
   # Get text paragraphs from all Wikipedia articles
-  tmp=Sys.time()
+
+  get_text=function(html){
+    html_nodes(html,"h1, h2, h3, h4, h5, h6, p") %>%
+    purrr::map(html_text) %>% 
+    stringr::str_replace("\\[.*\\]$","")
+  }
   wikisites_text=wikisites %>%
     mutate(html=purrr::map(article,read_html)) %>% 
-    mutate(html=purrr::map(html,~html_nodes(.x,"p"))) %>%
-    mutate(text=purrr::map(html,html_text)) %>% 
+    mutate(text=purrr::map(html,safely(get_text))) %>% 
+    mutate(text=purrr::map(text,"result")) %>% 
     select(-html) %>% 
-    mutate(text=purrr::map(text,~paste0(.x,collapse="\n"))) %>% 
-  tmp-Sys.time()
+    mutate(text=purrr::map(text,~paste0(.x,collapse="\n"))) 
+
   
   # Translate them all to English with Google Translate (if possible)
   wikisites_textt=wikisites_text %>% 
@@ -131,34 +141,36 @@ if(!file.exists("data/wikisites_text.RDS")){
     wikisites_textt$textt[i]=result}
   }  
   print(Sys.time()-tmp) 
-saveRDS(wikisites_textt,"data/wp_pages.RDS")
+saveRDS(wikisites_textt,"data/wp_pages_new.RDS")
 
   wp_pages=wikisites_textt %>% 
     mutate(textt=purrr::map_chr(textt,clean_banners)) %>% 
     mutate(textt=stringr::str_replace(textt,"mw-parser-output.*$","")) %>% 
     mutate(length=map_dbl(textt,str_length)) %>% 
     select(-flood_label)
-  saveRDS(wp_pages,"data/wp_pages.RDS")
+  saveRDS(wp_pages,"data/wp_pages_new.RDS")
+  
+##FAIT JUSTE AVANT VACANCES => wp_pages_new.RDS
 }
 
 
 
-wp_pages=readRDS("data/wp_pages.RDS") %>% 
-  filter(flood %in% wd_raw$flood) 
+wp_pages=readRDS("data/wp_pages.RDS")
 ```
 
 ## wp_words
 
 ```{r wikisites_text_to_words}
 if(!file.exists("data/wp_words.RDS")){
-lexicon_en=mixr::get_lexicon("en")
-wp_words=wp_pages %>%
-  tidytext::unnest_tokens(output="word",input="textt",token="words") %>%
-  left_join(lexicon_en,by=c("word")) %>%
-  filter(type!="sw" & lemma!="flood") %>%
-  group_by(flood,flood_label,lemma) %>%
-  summarise(n=n(),.groups="drop") %>%
-  arrange(flood,flood_label,desc(n)) 
+  library(mixr)
+  lexicon_en=get_lexicon("en")
+  wp_words=wp_pages %>%
+    tidytext::unnest_tokens(output="word",input="textt",token="words") %>%
+    left_join(lexicon_en,by=c("word")) %>%
+    filter(type!="sw" & lemma!="flood") %>%
+    group_by(flood,lemma) %>%
+    summarise(n=n(),.groups="drop") %>%
+    arrange(flood,desc(n)) 
 
 wp_words_spec <- mixr::tidy_specificities(wp_words %>% filter(n>3),lemma, flood) %>% 
   filter(spec>2) %>% 
@@ -167,7 +179,7 @@ wp_words_spec <- mixr::tidy_specificities(wp_words %>% filter(n>3),lemma, flood)
 saveRDS(wp_words_spec,"data/wp_words_spec.RDS")
 saveRDS(wp_words,"data/wp_words.RDS")
 wp_20_words_per_event=wp_words %>% 
-  group_by(flood,flood_label) %>% 
+  group_by(flood) %>% 
   arrange(desc(n)) %>% 
   slice_head(n=20) %>% 
   summarise(words=paste(lemma,collapse="; "), .groups="drop")
@@ -281,7 +293,6 @@ saveRDS(wp_pages_class,"data/wp_pages_class.RDS")
   
 
 ```
-
 
 ## wp_revisions
 
