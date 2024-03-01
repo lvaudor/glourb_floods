@@ -24,40 +24,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -186,11 +152,11 @@ div.csl-indent {
   <li><a href="#online-app" id="toc-online-app" class="nav-link" data-scroll-target="#online-app">Online app</a></li>
   <li><a href="#datasets" id="toc-datasets" class="nav-link" data-scroll-target="#datasets">Datasets</a></li>
   <li><a href="#wikidata-on-floods" id="toc-wikidata-on-floods" class="nav-link" data-scroll-target="#wikidata-on-floods">Wikidata on floods</a></li>
-  <li><a href="#wikipedia-on-floods" id="toc-wikipedia-on-floods" class="nav-link" data-scroll-target="#wikipedia-on-floods">Wikipedia on floods</a></li>
   <li><a href="#compare-to-dfo-data" id="toc-compare-to-dfo-data" class="nav-link" data-scroll-target="#compare-to-dfo-data">Compare to DFO data</a></li>
-  <li><a href="#wikipedia-content" id="toc-wikipedia-content" class="nav-link" data-scroll-target="#wikipedia-content">Wikipedia content</a></li>
+  <li><a href="#wikipedia-on-floods" id="toc-wikipedia-on-floods" class="nav-link" data-scroll-target="#wikipedia-on-floods">Wikipedia on floods</a></li>
+  <li><a href="#wikipedia-history-topics-and-curation" id="toc-wikipedia-history-topics-and-curation" class="nav-link" data-scroll-target="#wikipedia-history-topics-and-curation">Wikipedia history, topics and curation</a></li>
   </ul></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -201,27 +167,6 @@ div.csl-indent {
 
 <section id="online-reports-and-narrations-of-flood-events" class="level1">
 <h1>Online reports and narrations of flood events</h1>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glitter)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggpubr)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rainette)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">9999</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_events.RDS"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_full.RDS"</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>wp_20_words_per_event<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_20_words_per_event.RDS"</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span>wm_full <span class="sc">%&gt;%</span> </span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wp_20_words_per_event, <span class="at">by=</span><span class="fu">c</span>(<span class="st">"flood"</span>))</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>dfo_comp<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dfo_comp.RDS"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>wm_comp<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_comp.RDS"</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>wm_dfo<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_dfo.RDS"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>wm_dfo_corr<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_dfo_corr.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 </section>
 <section id="aim-of-the-article" class="level1">
 <h1>Aim of the article</h1>
@@ -234,34 +179,17 @@ div.csl-indent {
 </section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<section id="why-is-it-complicated-to-produce-worldwide-data-about-floods" class="level3">
-<h3 class="anchored" data-anchor-id="why-is-it-complicated-to-produce-worldwide-data-about-floods">Why is it complicated to produce worldwide data about floods</h3>
-<p>Producing a worldwide dataset about flood events poses numerous challenges due to the complexity of semantics, collection, standardization, and accessibility of such data. One primary obstacle is the lack of uniform reporting standards leading to inconsistencies in definitions of flood events and in data collection methods. Varying technological capabilities (in terms of material access and practice’s acculturation)across geographical regions of the world also contribute to disparities in data availability. Disasters like floods might occur in areas where communication and infrastructure are limited, and/or not used for real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or document flood occurrences differently, due to reasons such as insufficient resources and infrastructures, lack of governmental transparency, or competing priorities [add ref]. Additionally, there are inequalities in the geographies of data production that reflect and reproduced global economic core-peripheries <span class="citation" data-cites="graham_inequitable_2014 graham_towards_2015 haklay_why_2016">(<a href="#ref-graham_inequitable_2014" role="doc-biblioref">Graham 2014</a>; <a href="#ref-graham_towards_2015" role="doc-biblioref">Graham, De Sabbata, and Zook 2015</a>; <a href="#ref-haklay_why_2016" role="doc-biblioref">Haklay 2016</a>)</span>. [Ash et al.&nbsp;ref] refers to some “informational magnetism” resulting in the over-representation of the global North (the “core”). As a result, and despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires better data curation; efforts to collaborate and improve information-sharing mechanisms on a global scale; and the development of a critical eye on the reasons for data production, on the geographical contexts in which it has been produced, and on its uses.</p>
-</section>
-<section id="participatory-local-data-about-floods" class="level3">
-<h3 class="anchored" data-anchor-id="participatory-local-data-about-floods">Participatory local data about floods</h3>
-<p>Participatory data collection holds significant potential in enhancing the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale <span class="citation" data-cites="dixon_role_2021 sekajugo_can_2022">(<a href="#ref-dixon_role_2021" role="doc-biblioref">Dixon, Johns, and Fernandez 2021</a>; <a href="#ref-sekajugo_can_2022" role="doc-biblioref">Sekajugo et al. 2022</a>)</span>. By incorporating locpôlesal knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems, controlled by certain systems in power (Nation-states, heterogeneous colaition of technologically savvy individuals, private technology companies). More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding hazards <span class="citation" data-cites="herfort_evolution_2021">(<a href="#ref-herfort_evolution_2021" role="doc-biblioref">Herfort et al. 2021</a>)</span>.</p>
-<p>Communities living in flood-prone regions possess unique, context-specific, even vernacular knowledge about local environmental changes, historical flood memory, vulnerable areas, and coping mechanisms. Engaging these communities in data collection through citizen science initiatives, mobile applications, community mapping, or participatory workshops allows for the collection of granular, real-time information that supplements existing datasets. Ideally, this bottom-up approach not only enhances the accuracy and granularity of flood data but also fosters community empowerment in terms of resilience, engaging all communities to participate, including those excluded from decision-making or digital access (from a material point of view and in terms of skills).</p>
+<p>Producing a global flood event dataset poses numerous challenges due to the complex nature of data semantics, collection, standardization, and accessibility. A primary obstacle is the lack of uniform reporting standards leading to inconsistencies in definitions of flood events and in data collection methods. Varying technological capabilities (material access and practice’s acculturation) across geographical regions of the world also contribute to disparities in data availability. Disasters like floods might occur in areas where communication and infrastructure are limited, and/or not used for real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or document flood occurrences differently, due to reasons such as insufficient resources and infrastructures, lack of governmental transparency, or competing priorities [add ref]. Additionally, there are inequalities in the geographies of data production that reflect and reproduce global economic core-peripheries <span class="citation" data-cites="graham_inequitable_2014 graham_towards_2015 haklay_why_2016">(<a href="#ref-graham_inequitable_2014" role="doc-biblioref">Graham 2014</a>; <a href="#ref-graham_towards_2015" role="doc-biblioref">Graham, De Sabbata, and Zook 2015</a>; <a href="#ref-haklay_why_2016" role="doc-biblioref">Haklay 2016</a>)</span>. [Ash et al.&nbsp;ref] refers to some “informational magnetism” resulting in the over-representation of the global North (the “core”). As a result, and despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires better data curation; global efforts to improve information-sharing mechanisms; and the development of a critical eye on the reasons for data production, on the geographical contexts in which it has been produced, and on its uses.</p>
+<p>Participatory data collection can significantly enhance the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale <span class="citation" data-cites="dixon_role_2021 sekajugo_can_2022">(<a href="#ref-dixon_role_2021" role="doc-biblioref">Dixon, Johns, and Fernandez 2021</a>; <a href="#ref-sekajugo_can_2022" role="doc-biblioref">Sekajugo et al. 2022</a>)</span>. By incorporating local knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems, controlled by certain systems in power (Nation-states, heterogeneous coalition of technologically savvy individuals, private technology companies). More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding hazards <span class="citation" data-cites="herfort_evolution_2021">(<a href="#ref-herfort_evolution_2021" role="doc-biblioref">Herfort et al. 2021</a>)</span>.</p>
+<p>Communities living in flood-prone regions possess unique, context-specific, even vernacular knowledge about local environmental changes, historical flood memory, vulnerable areas, and coping mechanisms. Engaging these communities in data collection through citizen science initiatives, mobile applications, community mapping, or participatory workshops allows for the collection of granular, real-time information that supplements existing datasets. Ideally, this bottom-up approach not only enhances the accuracy and granularity of flood data, but also fosters community empowerment in terms of resilience, by engaging all communities to participate, including those excluded from decision-making or digital access.</p>
 <p>Moreover, participatory data can bridge gaps in official reporting by capturing small-scale or localized flood events that are not publicized and thus recognized by institutions. Integrating participatory data with conventional datasets enables a more comprehensive understanding of flood dynamics, aiding in the development of anticipation policies effective early warning systems, and disaster response plans.</p>
 <p>However, challenges such as ensuring data accuracy, reliability, and standardization persist in participatory approaches. While establishing protocols for data validation and quality control between participatory and formal datasets is important to maximize the potential of participatory data and to maintain data integrity <span class="citation" data-cites="senaratne_review_2017">(<a href="#ref-senaratne_review_2017" role="doc-biblioref">Senaratne et al. 2017</a>)</span>, the participatory data can be standardized. In other words, the subtelties perceived by local communities can be smoothed out (i) in interfaces designed by situated engineers and (ii) in data collection via protocols designed by situated scientists. However, the stakes around data validation and homogenization are particularly high in the prospect of studying floods at a global scale.</p>
-<p>Overall, leveraging participatory data in conjunction with conventional methods has the potential to enrich global flood databases, improve resilience, and empower communities to better respond to and mitigate the impacts of flood events. This collaborative approach can contribute significantly to more holistic and inclusive strategies for managing floods worldwide, to question (i) the data (how, by whom and for what purpose they are collected) and (ii) the collection process (highlighting ethnocentric biases by comparison).</p>
-</section>
-<section id="institutional-global-data-about-floods" class="level3">
-<h3 class="anchored" data-anchor-id="institutional-global-data-about-floods">Institutional global data about floods</h3>
-<p>The Dartmouth Flood Observatory (DFO) is a research group specializing in the collection and analysis of global flood data. Combining remote sensing and news reports’ analysis, the DFO produces detailed information on the extent, frequency, and impacts of floods worldwide <span class="citation" data-cites="kundzewicz_large_2013">(<a href="#ref-kundzewicz_large_2013" role="doc-biblioref">Kundzewicz, Pińskwar, and Brakenridge 2013</a>)</span>. It constitutes an invaluable source of information on the subject, used in many scientific studies on flood events [add refs].</p>
-</section>
-<section id="wikimedia-data" class="level3">
-<h3 class="anchored" data-anchor-id="wikimedia-data">Wikimedia data</h3>
-<p>In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, being one of the largest collaborative encyclopedias, and one of the most used and visited websites globally <span class="citation" data-cites="graham_towards_2015 ballatore_digital_2017">(<a href="#ref-graham_towards_2015" role="doc-biblioref">Graham, De Sabbata, and Zook 2015</a>; <a href="#ref-ballatore_digital_2017" role="doc-biblioref">Ballatore, Graham, and Sen 2017</a>)</span> harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. It can be viewed both as a source of breaking news and as an encyclopedia, providing information and narrative regarding ongoing and past events, in particular crises and controversies <span class="citation" data-cites="moats_following_2019">(<a href="#ref-moats_following_2019" role="doc-biblioref">Moats 2019</a>)</span>. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking information on various topics, including flood events, across the globe. The Wikimedia projects are an example of user-generated content on web 2.0 <span class="citation" data-cites="mandiberg_4_2020">(<a href="#ref-mandiberg_4_2020" role="doc-biblioref">O’Reilly 2020</a>)</span>. Moreover, flood events are generally associated with a location or toponymic information: as such, the produced data can also be included in what <span class="citation" data-cites="goodchild_citizens_2007">Goodchild (<a href="#ref-goodchild_citizens_2007" role="doc-biblioref">2007</a>)</span> calls “volunteered geographic information” (VGI).</p>
-</section>
-<section id="geographies-of-wikimedia" class="level3">
-<h3 class="anchored" data-anchor-id="geographies-of-wikimedia">Geographies of Wikimedia</h3>
+<p>Overall, leveraging participatory data in conjunction with conventional methods can enrich global flood databases, improve resilience, and empower communities to better respond to and mitigate the impacts of flood events. This collaborative approach can contribute significantly to more holistic and inclusive strategies for managing floods worldwide, to question (i) the data (how, by whom and for what purpose they are collected) and (ii) the collection process (highlighting ethnocentric biases by comparison).</p>
+<p>The Dartmouth Flood Observatory (DFO) is a research group specializing in the collection and analysis of global flood data. Combining remote sensing and news reports’ analysis, the DFO produces detailed information on the extent, frequency, and impacts of floods worldwide <span class="citation" data-cites="kundzewicz_large_2013">(<a href="#ref-kundzewicz_large_2013" role="doc-biblioref">Kundzewicz, Pińskwar, and Brakenridge 2013</a>)</span>. It constitutes an invaluable source of information on the subject, used in many scientific studies on flood events <span class="citation" data-cites="winsemius_framework_2013 hu_flood-induced_2018 najibi_recent_2018 tellman_satellite_2021">(<a href="#ref-winsemius_framework_2013" role="doc-biblioref">Winsemius et al. 2013</a>; <a href="#ref-hu_flood-induced_2018" role="doc-biblioref">Hu et al. 2018</a>; <a href="#ref-najibi_recent_2018" role="doc-biblioref">Najibi and Devineni 2018</a>; <a href="#ref-tellman_satellite_2021" role="doc-biblioref">Tellman et al. 2021</a>)</span>.</p>
+<p>In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, as one of the largest collaborative encyclopedias, and one of the most used and visited websites globally <span class="citation" data-cites="graham_towards_2015 ballatore_digital_2017">(<a href="#ref-graham_towards_2015" role="doc-biblioref">Graham, De Sabbata, and Zook 2015</a>; <a href="#ref-ballatore_digital_2017" role="doc-biblioref">Ballatore, Graham, and Sen 2017</a>)</span> harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. It can be viewed both as a source of breaking news and as an encyclopedia, providing information and narrative regarding ongoing and past events, in particular crises and controversies <span class="citation" data-cites="moats_following_2019">(<a href="#ref-moats_following_2019" role="doc-biblioref">Moats 2019</a>)</span>. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking information on various topics, including flood events, across the globe. The Wikimedia projects are an example of user-generated content on web 2.0 <span class="citation" data-cites="mandiberg_4_2020">(<a href="#ref-mandiberg_4_2020" role="doc-biblioref">O’Reilly 2020</a>)</span>. Moreover, flood events are generally associated with a location or toponymic information: as such, the produced data can also be included in what <span class="citation" data-cites="goodchild_citizens_2007">Goodchild (<a href="#ref-goodchild_citizens_2007" role="doc-biblioref">2007</a>)</span> calls “volunteered geographic information” (VGI).</p>
+<p>Wikipedia articles have been studied in the context of managing crises due to its accessibility, comprehensiveness, and real-time updates, either focusing on content creation or consultation. This has been the case for e.g.&nbsp;epidemiologic crises <span class="citation" data-cites="van_velsen_should_2012 colavizza_covid-19_2020">(<a href="#ref-van_velsen_should_2012" role="doc-biblioref">Van Velsen et al. 2012</a>; <a href="#ref-colavizza_covid-19_2020" role="doc-biblioref">Colavizza 2020</a>)</span>, natural disasters, technological accidents and violent conflict <span class="citation" data-cites="keegan_hot_2013">(<a href="#ref-keegan_hot_2013" role="doc-biblioref">Keegan, Gergle, and Contractor 2013</a>)</span>. During flood events, people might seek immediate information regarding safety measures, evacuation procedures, flood-prone areas, and emergency contacts. Wikipedia’s open editing structure allows for rapid dissemination of accurate information, enabling users to access critical details swiftly. Moreover, the collaborative nature of Wikipedia ensures that a vast array of perspectives and expertise contribute to its articles, resulting in comprehensive coverage of flood-related topics, including flood mitigation strategies, historical flood data, and relevant government responses. This breadth of information empowers individuals, communities, and organizations to make informed decisions and take effective action in response to floods, ultimately aiding in crisis management and mitigation efforts. Additionally, Wikipedia’s multilingual support ensures that its resources are accessible to a global audience, facilitating disaster response efforts in diverse regions affected by floods.</p>
 <p>Like many volunteered mapping platforms, the Wikimedia projects are receiving growing interest from the research community <span class="citation" data-cites="farda-sarbas_wikidata_2019">(<a href="#ref-farda-sarbas_wikidata_2019" role="doc-biblioref">Farda-Sarbas and Müller-Birn 2019</a>)</span>. As such, they are used in various projects: on the one hand, the content is employed directly as a data source, e.g.&nbsp;in history, literacy studies, archeology, philosophy <span class="citation" data-cites="zhao_systematic_2023">(<a href="#ref-zhao_systematic_2023" role="doc-biblioref">Zhao 2023</a>)</span>, linguistics <span class="citation" data-cites="turki_using_2017">(<a href="#ref-turki_using_2017" role="doc-biblioref">Turki et al. 2017</a>)</span>, medical and biological sciences <span class="citation" data-cites="farda-sarbas_wikidata_2019 burgstaller-muehlbacher_wikidata_2016">(<a href="#ref-farda-sarbas_wikidata_2019" role="doc-biblioref">Farda-Sarbas and Müller-Birn 2019</a>; <a href="#ref-burgstaller-muehlbacher_wikidata_2016" role="doc-biblioref">Burgstaller-Muehlbacher et al. 2016</a>)</span>, etc. or as an indicator of public interest <span class="citation" data-cites="mittermeier_using_2021">(<a href="#ref-mittermeier_using_2021" role="doc-biblioref">Mittermeier et al. 2021</a>)</span>. On the other hand, studies consider the Wikimedia projects as a research object, e.g.&nbsp;analyzing the contributors’ motivations <span class="citation" data-cites="antin_my_2011">(<a href="#ref-antin_my_2011" role="doc-biblioref">Antin 2011</a>)</span>, comparing their data to traditional databases <span class="citation" data-cites="lorini_uneven_2020">(<a href="#ref-lorini_uneven_2020" role="doc-biblioref">Lorini et al. 2020</a>)</span>, evaluating completeness <span class="citation" data-cites="royal_whats_2009">(<a href="#ref-royal_whats_2009" role="doc-biblioref">Royal and Kapila 2009</a>)</span>, accuracy <span class="citation" data-cites="giles_internet_2005">(<a href="#ref-giles_internet_2005" role="doc-biblioref">Giles 2005</a>)</span>, topic coverage <span class="citation" data-cites="halavais_analysis_2008">(<a href="#ref-halavais_analysis_2008" role="doc-biblioref">Halavais and Lackaff 2008</a>)</span>, local <span class="citation" data-cites="ballatore_digital_2017 ballatore_angeles_2020">(<a href="#ref-ballatore_digital_2017" role="doc-biblioref">Ballatore, Graham, and Sen 2017</a>; <a href="#ref-ballatore_angeles_2020" role="doc-biblioref">Ballatore and De Sabbata 2020</a>)</span> and global distribution <span class="citation" data-cites="graham_towards_2015 kollektiv_orangotango_uneven_2018">(<a href="#ref-graham_towards_2015" role="doc-biblioref">Graham, De Sabbata, and Zook 2015</a>; <a href="#ref-kollektiv_orangotango_uneven_2018" role="doc-biblioref">Graham et al. 2018</a>)</span>, analyzing knowledge construction <span class="citation" data-cites="oeberst_knowledge_2014">(<a href="#ref-oeberst_knowledge_2014" role="doc-biblioref">Oeberst et al. 2014</a>)</span> and social network dynamics <span class="citation" data-cites="iba_analyzing_2010">(<a href="#ref-iba_analyzing_2010" role="doc-biblioref">Iba et al. 2010</a>)</span>, etc. However, using a worldwide, crowdsourced, open database implies characterizing its contributors. Firstly, studies show that UGC is unequally distributed on a global scale: it is generally skewed towards countries from the Global North, whether it be in terms of participation, representation or access <span class="citation" data-cites="kollektiv_orangotango_uneven_2018 graham_towards_2015 ballatore_digital_2017">(<a href="#ref-kollektiv_orangotango_uneven_2018" role="doc-biblioref">Graham et al. 2018</a>; <a href="#ref-graham_towards_2015" role="doc-biblioref">Graham, De Sabbata, and Zook 2015</a>; <a href="#ref-ballatore_digital_2017" role="doc-biblioref">Ballatore, Graham, and Sen 2017</a>)</span>. Research conducted on Wikipedia suggests that the platform follows the same pattern. For example, <span class="citation" data-cites="graham_inequitable_2014">Graham (<a href="#ref-graham_inequitable_2014" role="doc-biblioref">2014</a>)</span> shows that Europe and North America get the greatest number of articles per person. Secondly, participation tends to be skewed towards “a more wealthy, more educated, more Western, more white and more male demographic” <span class="citation" data-cites="crampton_beyond_2013">(<a href="#ref-crampton_beyond_2013" role="doc-biblioref">Crampton et al. 2013, 132</a>)</span>. For example, research on OpenStreetMap – an open and crowdsourced mapping platform – suggests that it reproduces the socio-economical structures <span class="citation" data-cites="bittner_diversity_2017">(<a href="#ref-bittner_diversity_2017" role="doc-biblioref">Bittner 2017</a>)</span>. The risk is that these crowdsourced platforms reproduce the inequalities, leaving economically and socially deprived areas also digitally deprived <span class="citation" data-cites="jokar_arsanjani_impact_2015">(<a href="#ref-jokar_arsanjani_impact_2015" role="doc-biblioref">Mashhadi, Quattrone, and Capra 2015</a>)</span>. There is also a strong gender asymmetry on the web, contributing to biased data <span class="citation" data-cites="stephens_gender_2013 gardner_quantifying_2020">(<a href="#ref-stephens_gender_2013" role="doc-biblioref">Stephens 2013</a>; <a href="#ref-gardner_quantifying_2020" role="doc-biblioref">Gardner et al. 2020</a>)</span>.<br>
 Identifying the data distribution is capital for interpretation and analysis, given that the Wikimedia projects are a part of UGC and are therefore subjects to its biases. The question “who produces the data?” must then be addressed. <span class="citation" data-cites="lorini_uneven_2020">Lorini et al. (<a href="#ref-lorini_uneven_2020" role="doc-biblioref">2020</a>)</span> studied the report of floods on Wikipedia. However, to our knowledge, no study using multiple Wikimedia projects and analyzing the data distribution and production in time as well as in space, using quantitative and textometric methods, has been conducted on this subject.</p>
-</section>
-<section id="wikimedia-for-crisis-management" class="level3">
-<h3 class="anchored" data-anchor-id="wikimedia-for-crisis-management">Wikimedia for crisis management</h3>
-</section>
 </section>
 <section id="methods" class="level1">
 <h1>Methods</h1>
@@ -281,14 +209,14 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <figcaption class="figure-caption">Second Wikidata query</figcaption>
 </figure>
 </div>
-<p>We carried out a second Wikidata query for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events’ label if present (as labels generally consist of a mention of type of event, time and place).</p>
+<p>We carried out a second Wikidata query for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events’ label if present (as labels generally consist of a mention of type of event, time and place). Time-related information on Wikidata are specified with varying precision, which when regarding floods generally vary between dayly precision and yearly precision.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figure/fig-graph_query_country.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">Third Wikidata query</figcaption>
 </figure>
 </div>
-<p>We carried out a third Wikidata query for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI) [ref].</p>
+<p>We carried out a third Wikidata query for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI).</p>
 </section>
 <section id="comparison-to-the-dartmouth-flood-observatory-data" class="level3">
 <h3 class="anchored" data-anchor-id="comparison-to-the-dartmouth-flood-observatory-data">Comparison to the Dartmouth Flood Observatory data</h3>
@@ -306,7 +234,8 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="text-analysis-of-wikipedia-pages" class="level2">
 <h2 class="anchored" data-anchor-id="text-analysis-of-wikipedia-pages">Text analysis of Wikipedia pages</h2>
 <p>We scraped the text (all the textual content in headers from level one (h1) to level 6 (h6) as well as paragraphs) from all listed Wikipedia pages, using the <code>rvest</code> R package <span class="citation" data-cites="wickham_rvest_2024">(<a href="#ref-wickham_rvest_2024" role="doc-biblioref">Wickham 2024</a>)</span>. We then translated them to English (if necessary) through Google Translate using the polyglotr R package <span class="citation" data-cites="iwan_polyglotr_2024">(<a href="#ref-iwan_polyglotr_2024" role="doc-biblioref">Iwan 2024</a>)</span>.</p>
-<p>We tokenized the texts with the tidytext R package <span class="citation" data-cites="silge_tidytext_2016">(<a href="#ref-silge_tidytext_2016" role="doc-biblioref">Silge and Robinson 2016</a>)</span>, lemmatized words and filtered out stop words based on the Iramuteq English dictionnary [ref]. We could then identify textual specificities based on various partitions of the corpus <span class="citation" data-cites="lafon_pierre_sur_1980">Loiseau et al. (<a href="#ref-loiseau_textometry_2022" role="doc-biblioref">2022</a>)</span>.</p>
+<p>We tokenized the texts with the tidytext R package <span class="citation" data-cites="silge_tidytext_2016">(<a href="#ref-silge_tidytext_2016" role="doc-biblioref">Silge and Robinson 2016</a>)</span>, lemmatized words and filtered out stop words based on the Iramuteq English dictionnary <span class="citation" data-cites="ratinaud_iramuteq_2009">(<a href="#ref-ratinaud_iramuteq_2009" role="doc-biblioref">Ratinaud 2009</a>)</span>. We could then identify textual specificities based on various partitions of the corpus <span class="citation" data-cites="lafon_pierre_sur_1980 loiseau_textometry_2022">(<a href="#ref-lafon_pierre_sur_1980" role="doc-biblioref">Lafon, Pierre 1980</a>; <a href="#ref-loiseau_textometry_2022" role="doc-biblioref">Loiseau et al. 2022</a>)</span>.</p>
+<p>We used Reinert’s method <span class="citation" data-cites="reinert_alceste_1990">(<a href="#ref-reinert_alceste_1990" role="doc-biblioref">Reinert 1990</a>)</span> to classify segments of our corpus (consisting in successive parts of the Wikipedia articles, segmented in such a way that each contains 10 lemmatized, content words). To implement that method, we used the rainette package <span class="citation" data-cites="barnier_rainette_2023">(<a href="#ref-barnier_rainette_2023" role="doc-biblioref">Barnier 2023</a>)</span> and used its exploration tools to choose a meaningful and tractable number of classes. Each class is characterized as a collection of over-represented words, and we used them to label each class in a one-worded, synthetic way. We then used these labelled classes to examine the relationship between the flood characteristics and the topic contents of articles.</p>
 </section>
 </section>
 <section id="results" class="level1">
@@ -320,21 +249,9 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="datasets" class="level2">
 <h2 class="anchored" data-anchor-id="datasets">Datasets</h2>
 <p>We have gathered and curated tables of data organized as follows:</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"scripts/show_table.R"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 <section id="wd_events" class="level3">
 <h3 class="anchored" data-anchor-id="wd_events">wd_events</h3>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_events.RDS"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">show_table</span>(wd_events,<span class="at">provide_key=</span><span class="st">"flood"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
@@ -397,11 +314,6 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="wp_pages" class="level3">
 <h3 class="anchored" data-anchor-id="wp_pages">wp_pages</h3>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>wp_pages<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_pages.RDS"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">show_table</span>(wp_pages,<span class="at">provide_key=</span><span class="fu">c</span>(<span class="st">"article"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
@@ -492,11 +404,6 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="wp_revisions" class="level3">
 <h3 class="anchored" data-anchor-id="wp_revisions">wp_revisions</h3>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wp_revisions<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_revisions.RDS"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">show_table</span>(wp_revisions,<span class="at">provide_key=</span><span class="st">"article"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
@@ -587,11 +494,6 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="wp_segments" class="level3">
 <h3 class="anchored" data-anchor-id="wp_segments">wp_segments</h3>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wp_segments<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_segments.RDS"</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">show_table</span>(wp_segments,<span class="at">provide_key=</span><span class="st">"article"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
@@ -661,11 +563,6 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="countries" class="level3">
 <h3 class="anchored" data-anchor-id="countries">countries</h3>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>countries<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/countries.RDS"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">show_table</span>(countries, <span class="at">provide_key=</span><span class="fu">c</span>(<span class="st">"country"</span>,<span class="st">"country_label"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
@@ -735,13 +632,8 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </section>
 <section id="wikidata-on-floods" class="level2">
 <h2 class="anchored" data-anchor-id="wikidata-on-floods">Wikidata on floods</h2>
-<p>The initial query provided <strong>1018 Wikidata flood events</strong>. In terms of spatial precision, most coordinates are inferred from either country or location (the major part of provided locations being countries too).</p>
+<p>The initial query provided <strong>1018 Wikidata flood events</strong>. In terms of spatial precision, most coordinates are inferred from either variable country or variable location (the major part of provided locations being countries too). The date of most events is documented either directly or through the label of the event. Most events’ dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/precision_coords.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
@@ -780,74 +672,48 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </tbody>
 </table>
 </div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/dates_precision.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date_from) <span class="sc">%&gt;%</span> </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th style="text-align: left;">date_from</th>
-<th style="text-align: right;">n</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">av_start_end</td>
-<td style="text-align: right;">145</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">direct</td>
-<td style="text-align: right;">453</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">flood_label</td>
-<td style="text-align: right;">138</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">start</td>
-<td style="text-align: right;">45</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">NA</td>
-<td style="text-align: right;">31</td>
-</tr>
-</tbody>
-</table>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/dates_precision.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date_precision) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<table class="table table-sm table-striped small">
-<thead>
-<tr class="header">
 <th style="text-align: left;">date_precision</th>
 <th style="text-align: right;">n</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td style="text-align: left;">av_start_end</td>
 <td style="text-align: left;">day</td>
-<td style="text-align: right;">414</td>
+<td style="text-align: right;">145</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">direct</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: right;">224</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">direct</td>
 <td style="text-align: left;">month</td>
 <td style="text-align: right;">122</td>
 </tr>
-<tr class="odd">
+<tr class="even">
+<td style="text-align: left;">direct</td>
 <td style="text-align: left;">year</td>
-<td style="text-align: right;">245</td>
+<td style="text-align: right;">107</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">flood_label</td>
+<td style="text-align: left;">year</td>
+<td style="text-align: right;">138</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">start</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: right;">45</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NA</td>
 <td style="text-align: left;">NA</td>
 <td style="text-align: right;">31</td>
 </tr>
@@ -855,66 +721,39 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </table>
 </div>
 </div>
-<p>: tables</p>
+</section>
+<section id="compare-to-dfo-data" class="level2">
+<h2 class="anchored" data-anchor-id="compare-to-dfo-data">Compare to DFO data</h2>
+<p>We compare the number of events in both datasets (WD and DFO) according to Human Development Index of the country where the event took place.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-freq_events_in_datasets" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-freq_events_in_datasets-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-HDI_deathtoll_data" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-HDI_deathtoll_data-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-HDI_deathtoll_data">Figure&nbsp;2</a> shows that events in Wikidata are generally associated with higher deathtoll compared to those documented in DFO only or DFO and WD both. For DFO-documented events, the lower the HDI class, the higher the deathtoll, while for WD-documented events, the few events which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries. <em>(and I don’t quite know how to explain that… maybe a tendency to overestimation or to consider “far-reaching” consequences?)</em></p>
 </section>
 <section id="wikipedia-on-floods" class="level2">
 <h2 class="anchored" data-anchor-id="wikipedia-on-floods">Wikipedia on floods</h2>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Nwde_with_wpp<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>n_pages_in_english<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> <span class="fu">filter</span>(lang<span class="sc">==</span><span class="st">"en"</span>) <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>n_pages_not_in_english<span class="ot">=</span><span class="fu">nrow</span>(wp_pages)<span class="sc">-</span>n_pages_in_english</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>n_pages_untranslatable<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(text) <span class="sc">&amp;</span> <span class="fu">is.na</span>(textt)) <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>wpp_length_average<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> <span class="fu">pull</span>(length) <span class="sc">%&gt;%</span> <span class="fu">mean</span>(<span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>wpp_length_quant10<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> <span class="fu">pull</span>(length) <span class="sc">%&gt;%</span> <span class="fu">quantile</span>(<span class="fl">0.1</span>,<span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>wpp_length_quant90<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> <span class="fu">pull</span>(length) <span class="sc">%&gt;%</span> <span class="fu">quantile</span>(<span class="fl">0.9</span>,<span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>wp_revisions<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_revisions.RDS"</span>)</span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>Nwpr<span class="ot">=</span><span class="fu">nrow</span>(wp_revisions)</span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>wp_revisions<span class="ot">=</span>wp_revisions <span class="sc">%&gt;%</span> </span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">bot=</span>stringr<span class="sc">::</span><span class="fu">str_detect</span>(user_name,<span class="st">"B|bot"</span>))</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>Nwpr_humans<span class="ot">=</span>wp_revisions <span class="sc">%&gt;%</span> </span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>bot) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>Nwpu<span class="ot">=</span>wp_revisions <span class="sc">%&gt;%</span></span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(user_name) <span class="sc">%&gt;%</span></span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>Nwpuh<span class="ot">=</span>wp_revisions <span class="sc">%&gt;%</span> </span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>bot) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(user_name) <span class="sc">%&gt;%</span></span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 <p>There are <strong>2630 Wikipedia pages</strong> associated to these events (i.e.&nbsp;on average 2.58 Wikipedia pages per event). 727 flood events are associated to at least one Wikipedia page.</p>
 <p>455 Wikipedia pages are in English. Out of the 2175 remaining pages, we could translate most pages to English, except 175 pages which were in languages that Google Translate did not support. We based all subsequent textometric analyses on the texts in English, either natively so or translated.</p>
 <p>The average length of articles (in English or translated to English) is 4348 characters. The 10% shortest articles represent less than 448 characters and the 10% longest ones are more than 9362 characters long.</p>
 <p>There are <strong>216245 revisions</strong> that produced the Wikipedia pages as they appear to this date, which represents an average 82 revisions per page. 175107 (80.98%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings “bot” or “Bot”). There are <strong>44109 distinct editors</strong>, 40101 (90.91%) of which appear to be humans. On average, each human editor in our corpus is responsible for 4.37 edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wp_revisions <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>bot) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(user_name) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">number_of_articles_edited=</span><span class="fu">n_distinct</span>(article),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nusertot=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">number_of_articles_edited=</span><span class="fu">cut</span>(number_of_articles_edited,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">100</span>,<span class="dv">400</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(number_of_articles_edited,nusertot) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">number_of_editors=</span><span class="fu">n</span>(),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proportion_of_editors=</span><span class="fu">round</span>(number_of_editors<span class="sc">/</span>nusertot<span class="sc">*</span><span class="dv">100</span>,<span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(number_of_articles_edited,number_of_editors,proportion_of_editors) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
@@ -959,382 +798,80 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </table>
 </div>
 </div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>wm_full<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_full.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wd_events_freq<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cat_year=</span><span class="fu">cut</span>(year,<span class="at">breaks=</span><span class="fu">c</span>(<span class="dv">1000</span>,<span class="dv">1200</span>,<span class="dv">1400</span>,<span class="dv">1600</span>,<span class="dv">1800</span>,<span class="dv">1950</span>,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                                    <span class="dv">2000</span>,<span class="dv">2023</span>),<span class="at">dig.lab=</span><span class="dv">10</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cat_year) <span class="sc">%&gt;%</span> <span class="fu">tally</span>()</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p1<span class="ot">=</span><span class="fu">ggplot</span>(wd_events_freq, <span class="fu">aes</span>(<span class="at">x=</span>cat_year,<span class="at">y=</span>n))<span class="sc">+</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>p2<span class="ot">=</span><span class="fu">ggplot</span>(wd_events <span class="sc">%&gt;%</span> <span class="fu">filter</span>(year<span class="sc">&gt;=</span><span class="dv">2000</span>), <span class="fu">aes</span>(<span class="at">x=</span>year))<span class="sc">+</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">breaks=</span><span class="dv">2000</span><span class="sc">:</span><span class="dv">2023</span>)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>figure <span class="ot">&lt;-</span> <span class="fu">ggarrange</span>(p1,p2,</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>),</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>figure</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 </section>
-<section id="compare-to-dfo-data" class="level2">
-<h2 class="anchored" data-anchor-id="compare-to-dfo-data">Compare to DFO data</h2>
+<section id="wikipedia-history-topics-and-curation" class="level2">
+<h2 class="anchored" data-anchor-id="wikipedia-history-topics-and-curation">Wikipedia history, topics and curation</h2>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"scripts/comp_dfo_wd.R"</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>wm_dfo_comparison<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_dfo_comparison.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total_length=</span><span class="fu">ceiling</span>(total_length<span class="sc">/</span><span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<p>We compare the number of events in both datasets (WD and DFO) according to Human Development Index of the country where the event took place.</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(wm_dfo_comparison,</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x=</span>HDI_class,<span class="at">fill=</span>in_data))<span class="sc">+</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div id="fig-freq_events_in_datasets" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-freq_events_in_datasets-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;1: Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile).</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(wm_dfo_comparison, </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x=</span>HDI_class,<span class="at">y=</span>deathtoll,<span class="at">fill=</span>in_data))<span class="sc">+</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()<span class="sc">+</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">trans=</span><span class="st">"log1p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 463 rows containing non-finite values (`stat_boxplot()`).</code></pre>
-</div>
-<div class="cell-output-display">
-<div id="fig-HDI_deathtoll_data" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-HDI_deathtoll_data-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;2: Deathtoll per event according to HDI class and occurrence in one or both datasets. This shows that Wikidata tends to over-represent events with important deathtoll, and/or overestimate deathtolls. This is particularly the case for events occurring in low HDI countries.</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell" data-figh.height="6">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># #| label: fig-deathtoll_length</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># #| fig-cap: "Length of articles vs deathtoll"</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># dat=wm_dfo_comparison %&gt;%</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(deathtoll,</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co">#          HDI_class,</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co">#          HDI,</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co">#          total_length,</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co">#          in_data) %&gt;% </span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   na.omit() %&gt;% unique() %&gt;%</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(in_data %in% c("wd","in_both"))</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co">#  v=var(dat$total_length)</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># mu=mean(dat$total_length)</span></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co">#  thetastart=(mu^2)/(v-mu)</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co">#  myglm=MASS::glm.nb(total_length ~ deathtoll*HDI_class,</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="co">#                   data = dat,</span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="co">#                   init.theta=1)</span></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># # fscale=function(x){log10(x+1)}</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co"># # anova(myglm)</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co"># dat=dat %&gt;%</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(fitted_raw=predict(myglm,data=wm_dfo_comparison),</span></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="co">#          fitted=exp(fitted_raw))</span></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co"># datfit=dat %&gt;%</span></span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(HDI_class,deathtoll,fitted) %&gt;%</span></span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(deathtoll)</span></span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(dat, </span></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co">#        aes(x=deathtoll,y=total_length))+ </span></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(col=in_data),alpha=0.5)+</span></span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_path(data=datfit,aes(x=deathtoll,y=fitted,group=HDI_class))+</span></span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   facet_wrap(facets=vars(HDI_class))+</span></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_x_continuous(trans="log1p")+</span></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_y_continuous(trans="log1p")+</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_smooth()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
-<section id="wikipedia-content" class="level2">
-<h2 class="anchored" data-anchor-id="wikipedia-content">Wikipedia content</h2>
-<section id="news-or-encyclopedia" class="level3">
-<h3 class="anchored" data-anchor-id="news-or-encyclopedia">News or encyclopedia?</h3>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>flood_date_precision<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_full.RDS"</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date_precision) <span class="sc">%&gt;%</span> <span class="fu">unique</span>()</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>truc<span class="ot">=</span>wp_revisions <span class="sc">%&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wp_pages <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,article),</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">by=</span><span class="st">"article"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wd_events <span class="sc">%&gt;%</span> <span class="fu">select</span>(flood,date),<span class="at">by=</span><span class="st">"flood"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(flood_date_precision,<span class="at">by=</span><span class="st">"flood"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">timestamp=</span><span class="fu">as.POSIXct</span>(timestamp)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">timestamp=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(timestamp)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff=</span><span class="fu">difftime</span>(timestamp,date,<span class="at">units=</span><span class="st">"days"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">delay=</span><span class="fu">as.numeric</span>(diff)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">delay=</span>delay<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span>lubridate<span class="sc">::</span><span class="fu">year</span>(date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year=</span><span class="fu">cut</span>(year,<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>,<span class="dv">2000</span>,<span class="dv">2004</span>,<span class="dv">2008</span>,<span class="dv">2012</span>,<span class="dv">2018</span>,<span class="dv">2022</span>,<span class="dv">2024</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">delay=</span><span class="fu">cut</span>(delay,<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>,<span class="dv">0</span>,<span class="fl">0.125</span>,<span class="fl">0.25</span>,<span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">10</span>,<span class="dv">15</span>,<span class="dv">25</span>,<span class="sc">+</span><span class="cn">Inf</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ntot=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,delay,ntot,date_precision) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>(),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop=</span>n<span class="sc">/</span>ntot) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(truc ,<span class="fu">aes</span>(<span class="at">x=</span>delay,<span class="at">y=</span>prop,<span class="at">fill=</span>date_precision))<span class="sc">+</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>()<span class="sc">+</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows=</span><span class="fu">vars</span>(year))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-delay_revisions" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-delay_revisions-1.png" class="img-fluid figure-img" width="960"></p>
-<figcaption class="figure-caption">Figure&nbsp;3: Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The delay might be negative (the edits about an event began before the recorded, average date for the event, hinting to an event with long duration). The color indicates the precision of the event date as stated by Wikidata (it can be accurate to the day, month or year).</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;3: Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The delay might be negative (the edits about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-delay_revisions">Figure&nbsp;3</a> shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.</p>
-</section>
-<section id="topics" class="level3">
-<h3 class="anchored" data-anchor-id="topics">Topics</h3>
-<!-- We applied a structural topic modelling (STM) algorithm to identify topics in the Wikipedia text corpus and selected a number of topics of 6 [@weston_selecting_2023]. The STM method provides topics characterized by a set of most probable words (see fig. @fig-topic_terms). To help with the interpretation of subsequent results and figures, and although the corpus does not exhibit very distinct topics (which is unsurprising given the inherent specificity and formal homogeneity of the corpus) we propose a short label for each topic ("spatial range", "weather", "hydrology", "management", "historical importance", "human toll") -->
+<p><a href="#fig-delay_revisions">Figure&nbsp;3</a> shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest. <em>Notez que je ne l’ai pas fait pour l’instant car je croule déjà sous les données, mais il serait possible (et pas trop compliqué) de récupérer les statistiques de consultation de chacune des pages (et donc de considérer l’intérêt porté à un article du point de vue du lecteur plutôt que du point de vue du créateur de contenu…). Est-ce que vous pensez que je dois me lancer là-dedans?</em></p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>res<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/res_rainette_wp.RDS"</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>corpus<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/corpus.RDS"</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>dtm<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dtm.RDS"</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co">#rainette_explor(res,dtm,corpus)</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rainette_plot</span>(</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  res, dtm, <span class="at">k =</span> <span class="dv">6</span>,</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_terms =</span> <span class="dv">20</span>,</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">free_scales =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="st">"chi2"</span>,</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_negative =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">text_size =</span> <span class="dv">12</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/plot_class_rainette-1.png" class="img-fluid" width="960"></p>
+<div id="fig-topics" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-topics-1.png" class="img-fluid figure-img" width="960"></p>
+<figcaption class="figure-caption">Figure&nbsp;4: Topics identified by the Reinert classification method. Based on the over-represented terms in each cluster we propose the following labelling of the classes: ‘governance’ for cluster1, ‘relief’ for cluster2, ‘damage’ for cluster3, ‘hydrology’ for cluster4, ‘anticipation’ for cluster5, and ‘weather’ for cluster6.</figcaption>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tib_classes<span class="ot">=</span>wp_segments <span class="sc">%&gt;%</span> <span class="fu">select</span>(class_name,color) <span class="sc">%&gt;%</span> <span class="fu">unique</span>()</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>tib<span class="ot">=</span>wp_segments <span class="sc">%&gt;%</span> </span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(article,class_name) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tally</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(article) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ntot=</span><span class="fu">sum</span>(n)) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ntotcat=</span><span class="fu">cut</span>(ntot,<span class="at">breaks=</span><span class="fu">quantile</span>(ntot,<span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.25</span>)))) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ntotcat,class_name) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">sum</span>(n),<span class="at">.groups=</span><span class="st">"drop"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tib,<span class="fu">aes</span>(<span class="at">x=</span>class_name,<span class="at">y=</span>n))<span class="sc">+</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="fu">aes</span>(<span class="at">fill=</span>class_name))<span class="sc">+</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows=</span><span class="fu">vars</span>(ntotcat),<span class="at">scales=</span><span class="st">"free"</span>)<span class="sc">+</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">breaks=</span>tib_classes<span class="sc">$</span>class_name, <span class="at">values=</span>tib_classes<span class="sc">$</span>color)<span class="sc">+</span></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()<span class="sc">+</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-topic_per_length" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-topic_per_length-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;4: Topics identified by an STM process for the Wikipedia articles’ corpus</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;5: Link between total article’s length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1&lt;k&lt;=4 segments while the 25% longest represent 26&lt;k&lt;860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The red dots correspond to the median proportions of topics throughout all articles irrespective of articles’ length.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-topic_per_length">Figure&nbsp;4</a> shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather, hydrology), and justifying reporting that event based on the damage it caused, while longer articles might convey more extensive reports on the management of the crisis (anticipation, governance, relief).</p>
+<p><a href="#fig-topic_per_length">Figure&nbsp;5</a> shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather), and justifying reporting that event based on its consequences (damage), while longer articles might convey more extensive reports on the physical causes (hydrology) and management of the crisis (anticipation, governance, relief).</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRDS</span>(<span class="st">"data/wp_pages.RDS"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(local) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">meanlength=</span><span class="fu">mean</span>(length,<span class="at">na.rm=</span><span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 2
-  local meanlength
-  &lt;lgl&gt;      &lt;dbl&gt;
-1 FALSE      3159.
-2 TRUE       6911.</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>tib</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 24 × 3
-   ntotcat class_name       n
-   &lt;fct&gt;   &lt;fct&gt;        &lt;int&gt;
- 1 (1,8]   anticipation    28
- 2 (1,8]   damage        1032
- 3 (1,8]   governance     211
- 4 (1,8]   hydrology      748
- 5 (1,8]   relief         493
- 6 (1,8]   weather       1547
- 7 (8,17]  anticipation    29
- 8 (8,17]  damage        1741
- 9 (8,17]  governance     677
-10 (8,17]  hydrology     1552
-# ℹ 14 more rows</code></pre>
-</div>
-</div>
-</section>
-<section id="controversies" class="level3">
-<h3 class="anchored" data-anchor-id="controversies">Controversies</h3>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tib<span class="ot">=</span>wp_revisions <span class="sc">%&gt;%</span> </span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date_page=</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="fu">as.POSIXct</span>(timestamp))) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(article) <span class="sc">%&gt;%</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">date_page=</span><span class="fu">min</span>(date_page),</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">nedits=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wp_pages <span class="sc">%&gt;%</span> <span class="fu">select</span>(article,length,lang,local),<span class="at">by=</span><span class="st">"article"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">simple=</span>lang<span class="sc">==</span><span class="st">"simple"</span>)</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>tibfitted<span class="ot">=</span>tib <span class="sc">%&gt;%</span> </span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(nedits<span class="sc">&gt;</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>mylm<span class="ot">=</span><span class="fu">lm</span>(<span class="fu">log</span>(length)<span class="sc">~</span><span class="fu">log</span>(nedits)<span class="sc">*</span>simple,<span class="at">data=</span>tibfitted)</span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>tibfitted<span class="ot">=</span>tibfitted <span class="sc">%&gt;%</span> </span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fitted=</span><span class="fu">exp</span>(<span class="fu">predict</span>(mylm,<span class="at">data=</span>tibfitted))) </span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>tib<span class="ot">=</span>tib <span class="sc">%&gt;%</span> </span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(nedits,simple) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(tibfitted <span class="sc">%&gt;%</span> <span class="fu">select</span>(article,fitted),<span class="at">by=</span><span class="st">"article"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">def_length=</span><span class="sc">-</span>(<span class="fu">log</span>(length)<span class="sc">-</span><span class="fu">log</span>(fitted))) </span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>wp_pages<span class="ot">=</span><span class="fu">left_join</span>(wp_pages,tib <span class="sc">%&gt;%</span> <span class="fu">select</span>(article,date_page,def_length),</span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>                   <span class="at">by=</span><span class="st">"article"</span>,</span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>                   <span class="at">relationship=</span><span class="st">"many-to-many"</span>)</span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_pages,<span class="st">"data/wp_pages_def_length.RDS"</span>)</span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tib, <span class="fu">aes</span>(<span class="at">x=</span>nedits,<span class="at">y=</span>length,<span class="at">col=</span>simple))<span class="sc">+</span></span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha=</span><span class="fl">0.1</span>)<span class="sc">+</span></span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>()<span class="sc">+</span></span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>()<span class="sc">+</span></span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">data=</span>tibfitted, <span class="fu">aes</span>(<span class="at">x=</span>nedits,<span class="at">y=</span>fitted))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 335 rows containing missing values (`geom_point()`).</code></pre>
-</div>
 <div class="cell-output-display">
-<div id="fig-nb_of_revisions_and_length" class="quarto-figure quarto-figure-center anchored">
+<div id="fig-curation" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-nb_of_revisions_and_length-1.png" class="img-fluid figure-img" width="480"></p>
-<figcaption class="figure-caption">Figure&nbsp;5: Length of articles as a function of number of revisions. Beyond a few edits (here, we consider the threshold is 10), there is a linear correlation between length of the article and length of the article. We consider that the difference between observed length and length predicted based on number of edits to represent a deficit in length.</figcaption>
+<p><img src="index_files/figure-html/fig-curation-1.png" class="img-fluid figure-img" width="864"></p>
+<figcaption class="figure-caption">Figure&nbsp;6: a) Mean length of edits as a function of number of edits. A relative length of edit for each article is calculated based on this relationship. b) Relative length of edit as a function of total length. A measure of article curation (independent of total length) is calculated based on this relationship. The articles in language ‘simple’ (for ‘simple English’) being destined to be particularly synthetic, we did not take include them in the model.</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<p><a href="#fig-curation">Figure&nbsp;6</a> .a shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page ‘matures’, with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). By construction and as shown by <a href="#fig-curation">Figure&nbsp;6</a> .b, the relative edit length is highly correlated to total article length, though we would like to dispose of a length-independent curation measure for further analyses purposes. Hence we calculate the curation score based on the residuals of the linear relationship of the relative edit length to total length (both log-transformed). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles). We argue that this could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tib<span class="ot">=</span>tib <span class="sc">%&gt;%</span> </span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age_page=</span><span class="fu">as.numeric</span>(<span class="fu">today</span>()<span class="sc">-</span>date_page))</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>mylm<span class="ot">=</span><span class="fu">lm</span>(def_length<span class="sc">~</span>age_page,<span class="at">data=</span>tib)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>tib<span class="ot">=</span>tib <span class="sc">%&gt;%</span> </span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">controversy=</span>def_length<span class="sc">-</span><span class="fu">predict</span>(mylm,<span class="at">data=</span>tib))<span class="sc">%&gt;%</span> </span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">controversy=</span><span class="fu">case_when</span>(controversy<span class="sc">&gt;</span><span class="dv">0</span><span class="sc">~</span>controversy<span class="sc">/</span><span class="fu">max</span>(controversy,<span class="at">na.rm=</span><span class="cn">TRUE</span>),</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>                              controversy<span class="sc">&lt;=</span><span class="dv">0</span><span class="sc">~</span>controversy<span class="sc">/</span><span class="fu">max</span>(<span class="sc">-</span>controversy,<span class="at">na.rm=</span><span class="cn">TRUE</span>),</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>                              <span class="cn">TRUE</span><span class="sc">~</span>controversy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: There was 1 warning in `mutate()`.
-ℹ In argument: `controversy = def_length - predict(mylm, data = tib)`.
-Caused by warning in `def_length - predict(mylm, data = tib)`:
-! la taille d'un objet plus long n'est pas multiple de la taille d'un objet plus court</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>wp_pages<span class="ot">=</span>wp_pages <span class="sc">%&gt;%</span> </span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(tib <span class="sc">%&gt;%</span> <span class="fu">select</span>(article,controversy),</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">by=</span><span class="st">"article"</span>,<span class="at">relationship=</span><span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wp_pages,<span class="st">"wp_pages_controversy.RDS"</span>)</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tib, <span class="fu">aes</span>(<span class="at">x=</span>age_page, <span class="at">y=</span>def_length,<span class="at">col=</span>controversy))<span class="sc">+</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>)<span class="sc">+</span></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low=</span><span class="st">"blue"</span>,<span class="at">mid=</span><span class="st">"yellow"</span>,<span class="at">high=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 908 rows containing non-finite values (`stat_smooth()`).</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: The following aesthetics were dropped during statistical transformation: colour
-ℹ This can happen when ggplot fails to infer the correct grouping structure in
-  the data.
-ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
-  variable into a factor?</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 908 rows containing missing values (`geom_point()`).</code></pre>
-</div>
 <div class="cell-output-display">
-<div id="fig-age_page_and_def_length" class="quarto-figure quarto-figure-center anchored">
+<div id="fig-curation_topics" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-age_page_and_def_length-1.png" class="img-fluid figure-img" width="480"></p>
-<figcaption class="figure-caption">Figure&nbsp;6: Relationship between age of the Wikipedia page (in days) and deficit in length. Older pages tend to correspond to a more important deficit in length: there is a tendency towards more synthesis as the page ‘matures’. The residuals of this relationship is considered to be a way to quantify how controversial the edition of the page might have been.</figcaption>
+<p><img src="index_files/figure-html/fig-curation_topics-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;7: Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<!-- ```{r} -->
-<!-- wp_pages_controversy=readRDS("data/wp_pages_controversy.RDS") %>%  -->
-<!--   na.omit() -->
-<!-- # library(randomForest) -->
-<!-- # tibrf=wp_pages_controversy %>% na.omit() %>%  -->
-<!-- #   select(flood,lang,length,local,controversy) -->
-<!-- # rf=randomForest(tibrf %>% select(-controversy), -->
-<!-- #                 tibrf$controversy) -->
-<!-- flood_controversy=wp_pages_controversy%>%  -->
-<!--   select(flood,article,controversy) %>%  -->
-<!--   unique() %>%  -->
-<!--   group_by(flood) %>%  -->
-<!--   mutate(n=n()) %>%  -->
-<!--   filter(n>5) %>%  -->
-<!--   ungroup() -->
-<!-- mod=lm(controversy~flood,data=flood_controversy) -->
-<!-- summary(mod) -->
-<!-- summary(mod)$coeff %>% -->
-<!--   as.data.frame() %>% -->
-<!--   rownames_to_column() %>% -->
-<!--   as_tibble() %>% -->
-<!--   arrange(desc(Estimate)) -->
-<!-- ``` -->
+<p><a href="#fig-curation_topics">Figure&nbsp;7</a> shows that articles with high levels of curation tend to deal with topics such as relief (diff=0.0454944, p-value=0.00007), and governance (diff=0.0281336, p-value=0.00133), while weather ((diff=-0.0227273, p-value=0.02902)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g.&nbsp;reports on weather.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-curation_causes" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-curation_causes-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption class="figure-caption">Figure&nbsp;8: a) Effect of the article being in a local language on curation. b) Effect of deathtoll and of the article being in a local language on curation.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-curation_causes">Figure&nbsp;8</a> .a shows that the articles’ being written in a local language (considering the event location) tends to be associated with a lower level of article curation (effect estimate= -0.084, t value=-10, Pr(&gt;|t|)=0). This could be due to local articles being used more as information or managing crises tools than educational or encyclopedic carefully curated sources of knowledge. This hypothesis is reinforced by <a href="#fig-curation_causes">Figure&nbsp;8</a> .b which shows that the higher the deathtoll of an event, the less curated the local articles (slope for local articles -0.02, t value= -4.32, Pr(&gt;|t|)=0.00002).</p>
 </section>
 </section>
-</section>
-<section id="discussion" class="level1">
-<h1>Discussion</h1>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
 <p>This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity <span class="citation" data-cites="lorini_uneven_2020 ruprechter_poor_2023">(<a href="#ref-lorini_uneven_2020" role="doc-biblioref">Lorini et al. 2020</a>; <a href="#ref-ruprechter_poor_2023" role="doc-biblioref">Ruprechter, Burghardt, and Helic 2023</a>)</span> due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.</p>
-<p>Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. The interconnected nature of Wikidata’s model (as a knowledge graph) as well as their link to other data silos indeed allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context (in particular through the integration of Wikipedia discourse elements and Wikimedia Commons images) as well as the difficulties inherent to identifying particular flood events based solely on presumably objective information, such as coordinates and dates for these events.</p>
+<p>Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Neverthelss, the interconnected nature of Wikidata’s model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.</p>
 
 
 
@@ -1350,14 +887,20 @@ Ballatore, Andrea, and Stefano De Sabbata. 2020. <span>“Los <span>Angeles</spa
 <div id="ref-ballatore_digital_2017" class="csl-entry" role="listitem">
 Ballatore, Andrea, Mark Graham, and Shilad Sen. 2017. <span>“Digital <span>Hegemonies</span>: <span>The</span> <span>Localness</span> of <span>Search</span> <span>Engine</span> <span>Results</span>.”</span> <em>Annals of the American Association of Geographers</em> 107 (5): 1194–1215. <a href="https://doi.org/10.1080/24694452.2017.1308240">https://doi.org/10.1080/24694452.2017.1308240</a>.
 </div>
+<div id="ref-barnier_rainette_2023" class="csl-entry" role="listitem">
+Barnier, Julien. 2023. <em>Rainette: <span>The</span> <span>Reinert</span> <span>Method</span> for <span>Textual</span> <span>Data</span> <span>Clustering</span></em>. <a href="https://juba.github.io/rainette/">https://juba.github.io/rainette/</a>.
+</div>
 <div id="ref-bittner_diversity_2017" class="csl-entry" role="listitem">
 Bittner, Christian. 2017. <span>“Diversity in Volunteered Geographic Information: Comparing <span>OpenStreetMap</span> and <span>Wikimapia</span> in <span>Jerusalem</span>.”</span> <em>GeoJournal</em> 82 (5): 887–906. <a href="https://doi.org/10.1007/s10708-016-9721-3">https://doi.org/10.1007/s10708-016-9721-3</a>.
 </div>
 <div id="ref-brakenridge_global_nodate" class="csl-entry" role="listitem">
-Brakenridge, G. Robert. n.d. <span>“Global <span>Active</span> <span>Archive</span> of <span>Large</span> <span>Flood</span> <span>Events</span>.”</span> Dartmouth Flood Observatory, University of Colorado, USA. Accessed December 1, 2023. <a href="http://floodobservatory.colorado.edu/ Archives/">http://floodobservatory.colorado.edu/ Archives/</a>.
+Brakenridge, G. Robert. n.d. <span>“Global <span>Active</span> <span>Archive</span> of <span>Large</span> <span>Flood</span> <span>Events</span>.”</span> Dartmouth Flood Observatory, University of Colorado, USA. Accessed December 1, 2023. <a href="https://floodobservatory.colorado.edu/Archives/index.html">https://floodobservatory.colorado.edu/Archives/index.html</a>.
 </div>
 <div id="ref-burgstaller-muehlbacher_wikidata_2016" class="csl-entry" role="listitem">
 Burgstaller-Muehlbacher, Sebastian, Andra Waagmeester, Elvira Mitraka, Julia Turner, Tim Putman, Justin Leong, Chinmay Naik, et al. 2016. <span>“Wikidata as a Semantic Framework for the <span>Gene</span> <span>Wiki</span> Initiative.”</span> <em>Database</em> 2016: baw015. <a href="https://doi.org/10.1093/database/baw015">https://doi.org/10.1093/database/baw015</a>.
+</div>
+<div id="ref-colavizza_covid-19_2020" class="csl-entry" role="listitem">
+Colavizza, Giovanni. 2020. <span>“<span>COVID</span>-19 Research in <span>Wikipedia</span>.”</span> <em>Quantitative Science Studies</em> 1 (4): 1349–80. <a href="https://doi.org/10.1162/qss_a_00080">https://doi.org/10.1162/qss_a_00080</a>.
 </div>
 <div id="ref-crampton_beyond_2013" class="csl-entry" role="listitem">
 Crampton, Jeremy W., Mark Graham, Ate Poorthuis, Taylor Shelton, Monica Stephens, Matthew W. Wilson, and Matthew Zook. 2013. <span>“Beyond the Geotag: Situating <span>‘Big Data’</span> and Leveraging the Potential of the Geoweb.”</span> <em>Cartography and Geographic Information Science</em> 40 (2): 130–39. <a href="https://doi.org/10.1080/15230406.2013.777137">https://doi.org/10.1080/15230406.2013.777137</a>.
@@ -1395,11 +938,17 @@ Halavais, Alexander, and Derek Lackaff. 2008. <span>“An <span>Analysis</span> 
 <div id="ref-herfort_evolution_2021" class="csl-entry" role="listitem">
 Herfort, Benjamin, Sven Lautenbach, João Porto De Albuquerque, Jennings Anderson, and Alexander Zipf. 2021. <span>“The Evolution of Humanitarian Mapping Within the <span>OpenStreetMap</span> Community.”</span> <em>Scientific Reports</em> 11 (1): 3037. <a href="https://doi.org/10.1038/s41598-021-82404-z">https://doi.org/10.1038/s41598-021-82404-z</a>.
 </div>
+<div id="ref-hu_flood-induced_2018" class="csl-entry" role="listitem">
+Hu, Pan, Qiang Zhang, Peijun Shi, Bo Chen, and Jiayi Fang. 2018. <span>“Flood-Induced Mortality Across the Globe: <span>Spatiotemporal</span> Pattern and Influencing Factors.”</span> <em>Science of The Total Environment</em> 643 (December): 171–82. <a href="https://doi.org/10.1016/j.scitotenv.2018.06.197">https://doi.org/10.1016/j.scitotenv.2018.06.197</a>.
+</div>
 <div id="ref-iba_analyzing_2010" class="csl-entry" role="listitem">
 Iba, Takashi, Keiichi Nemoto, Bernd Peters, and Peter A. Gloor. 2010. <span>“Analyzing the <span>Creative</span> <span>Editing</span> <span>Behavior</span> of <span>Wikipedia</span> <span>Editors</span>.”</span> <em>Procedia - Social and Behavioral Sciences</em> 2 (4): 6441–56. <a href="https://doi.org/10.1016/j.sbspro.2010.04.054">https://doi.org/10.1016/j.sbspro.2010.04.054</a>.
 </div>
 <div id="ref-iwan_polyglotr_2024" class="csl-entry" role="listitem">
 Iwan, Tomer. 2024. <em>Polyglotr: <span>Translate</span> <span>Text</span></em>. <a href="https://github.com/Tomeriko96/polyglotr/">https://github.com/Tomeriko96/polyglotr/</a>.
+</div>
+<div id="ref-keegan_hot_2013" class="csl-entry" role="listitem">
+Keegan, Brian, Darren Gergle, and Noshir Contractor. 2013. <span>“Hot <span>Off</span> the <span>Wiki</span>: <span>Structures</span> and <span>Dynamics</span> of <span>Wikipedia</span>’s <span>Coverage</span> of <span>Breaking</span> <span>News</span> <span>Events</span>.”</span> <em>American Behavioral Scientist</em> 57 (5): 595–622. <a href="https://doi.org/10.1177/0002764212469367">https://doi.org/10.1177/0002764212469367</a>.
 </div>
 <div id="ref-kundzewicz_large_2013" class="csl-entry" role="listitem">
 Kundzewicz, Zbigniew W., Iwona Pińskwar, and G. Robert Brakenridge. 2013. <span>“Large Floods in <span>Europe</span>, 1985–2009.”</span> <em>Hydrological Sciences Journal</em> 58 (1): 1–7. <a href="https://doi.org/10.1080/02626667.2012.745082">https://doi.org/10.1080/02626667.2012.745082</a>.
@@ -1422,11 +971,20 @@ Mittermeier, John C., Ricardo Correia, Rich Grenyer, Tuuli Toivonen, and Uri Rol
 <div id="ref-moats_following_2019" class="csl-entry" role="listitem">
 Moats, David. 2019. <span>“Following the <span>Fukushima</span> <span>Disaster</span> on (and Against) <span>Wikipedia</span>: <span>A</span> <span>Methodological</span> <span>Note</span> about <span>STS</span> <span>Research</span> and <span>Online</span> <span>Platforms</span>.”</span> <em>Science, Technology, &amp; Human Values</em> 44 (6): 938–64. <a href="https://doi.org/10.1177/0162243918815234">https://doi.org/10.1177/0162243918815234</a>.
 </div>
+<div id="ref-najibi_recent_2018" class="csl-entry" role="listitem">
+Najibi, Nasser, and Naresh Devineni. 2018. <span>“Recent Trends in the Frequency and Duration of Global Floods.”</span> <em>Earth System Dynamics</em> 9 (2): 757–83. <a href="https://doi.org/10.5194/esd-9-757-2018">https://doi.org/10.5194/esd-9-757-2018</a>.
+</div>
 <div id="ref-mandiberg_4_2020" class="csl-entry" role="listitem">
 O’Reilly, Tim. 2020. <span>“4. <span>What</span> <span>Is</span> <span>Web</span> 2.0: <span>Design</span> <span>Patterns</span> and <span>Business</span> <span>Models</span> for the <span>Next</span> <span>Generation</span> of <span>Software</span>.”</span> In <em>The <span>Social</span> <span>Media</span> <span>Reader</span></em>, edited by Michael Mandiberg, 32–52. New York University Press. <a href="https://doi.org/10.18574/nyu/9780814763025.003.0008">https://doi.org/10.18574/nyu/9780814763025.003.0008</a>.
 </div>
 <div id="ref-oeberst_knowledge_2014" class="csl-entry" role="listitem">
 Oeberst, Aileen, Iassen Halatchliyski, Joachim Kimmerle, and Ulrike Cress. 2014. <span>“Knowledge <span>Construction</span> in <span>Wikipedia</span>: <span>A</span> <span>Systemic</span>-<span>Constructivist</span> <span>Analysis</span>.”</span> <em>Journal of the Learning Sciences</em> 23 (2): 149–76. <a href="https://doi.org/10.1080/10508406.2014.888352">https://doi.org/10.1080/10508406.2014.888352</a>.
+</div>
+<div id="ref-ratinaud_iramuteq_2009" class="csl-entry" role="listitem">
+Ratinaud, Pierre. 2009. <span>“Iramuteq: <span>Interface</span> de <span>R</span> Pour Les <span>Analyses</span> <span>Multidimensionnelles</span> de <span>Textes</span> Et de <span>Questionnaires</span>.”</span> <a href="http://www.iramuteq.org">http://www.iramuteq.org</a>.
+</div>
+<div id="ref-reinert_alceste_1990" class="csl-entry" role="listitem">
+Reinert, Max. 1990. <span>“Alceste Une Méthodologie d’analyse Des Données Textuelles Et Une Application: <span>Aurelia</span> <span>De</span> <span>Gerard</span> <span>De</span> <span>Nerval</span>.”</span> <em>Bulletin of Sociological Methodology/Bulletin de Méthodologie Sociologique</em> 26 (1): 24–54. <a href="https://doi.org/10.1177/075910639002600103">https://doi.org/10.1177/075910639002600103</a>.
 </div>
 <div id="ref-royal_whats_2009" class="csl-entry" role="listitem">
 Royal, Cindy, and Deepina Kapila. 2009. <span>“What’s on <span>Wikipedia</span>, and <span>What</span>’s <span>Not</span> . . . ?: <span>Assessing</span> <span>Completeness</span> of <span>Information</span>.”</span> <em>Social Science Computer Review</em> 27 (1): 138–48. <a href="https://doi.org/10.1177/0894439308321890">https://doi.org/10.1177/0894439308321890</a>.
@@ -1446,14 +1004,23 @@ Silge, Julia, and David Robinson. 2016. <span>“Tidytext: <span>Text</span> <sp
 <div id="ref-stephens_gender_2013" class="csl-entry" role="listitem">
 Stephens, Monica. 2013. <span>“Gender and the <span>GeoWeb</span>: Divisions in the Production of User-Generated Cartographic Information.”</span> <em>GeoJournal</em> 78 (6): 981–96. <a href="https://doi.org/10.1007/s10708-013-9492-z">https://doi.org/10.1007/s10708-013-9492-z</a>.
 </div>
+<div id="ref-tellman_satellite_2021" class="csl-entry" role="listitem">
+Tellman, B., J. A. Sullivan, C. Kuhn, A. J. Kettner, C. S. Doyle, G. R. Brakenridge, T. A. Erickson, and D. A. Slayback. 2021. <span>“Satellite Imaging Reveals Increased Proportion of Population Exposed to Floods.”</span> <em>Nature</em> 596 (7870): 80–86. <a href="https://doi.org/10.1038/s41586-021-03695-w">https://doi.org/10.1038/s41586-021-03695-w</a>.
+</div>
 <div id="ref-turki_using_2017" class="csl-entry" role="listitem">
 Turki, Houcemeddine, Denny Vrandecic, Helmi Hamdi, and Imed Adel. 2017. <span>“Using <span>WikiData</span> as a <span>Multi</span>-Lingual <span>Multi</span>-Dialectal <span>Dictionary</span> for <span>Arabic</span> <span>Dialects</span>.”</span> In <em>2017 <span>IEEE</span>/<span>ACS</span> 14th <span>International</span> <span>Conference</span> on <span>Computer</span> <span>Systems</span> and <span>Applications</span> (<span>AICCSA</span>)</em>, 437–42. Hammamet: IEEE. <a href="https://doi.org/10.1109/AICCSA.2017.115">https://doi.org/10.1109/AICCSA.2017.115</a>.
+</div>
+<div id="ref-van_velsen_should_2012" class="csl-entry" role="listitem">
+Van Velsen, Lex, Julia E. W. C Van Gemert-Pijnen, Desirée J. M. A Beaujean, Jobke Wentzel, and Jim E Van Steenbergen. 2012. <span>“Should <span>Health</span> <span>Organizations</span> <span>Use</span> <span>Web</span> 2.0 <span>Media</span> in <span>Times</span> of an <span>Infectious</span> <span>Disease</span> <span>Crisis</span>? <span>An</span> <span>In</span>-Depth <span>Qualitative</span> <span>Study</span> of <span>Citizens</span>’ <span>Information</span> <span>Behavior</span> <span>During</span> an <span>EHEC</span> <span>Outbreak</span>.”</span> <em>Journal of Medical Internet Research</em> 14 (6): e181. <a href="https://doi.org/10.2196/jmir.2123">https://doi.org/10.2196/jmir.2123</a>.
 </div>
 <div id="ref-vaudor_glitter_2023" class="csl-entry" role="listitem">
 Vaudor, Lise, and Maëlle Salmon. 2023. <em>Glitter: Glitter Makes <span>SPARQL</span></em>. <a href="https://lvaudor.github.io/glitter/">https://lvaudor.github.io/glitter/</a>.
 </div>
 <div id="ref-wickham_rvest_2024" class="csl-entry" role="listitem">
 Wickham, Hadley. 2024. <em>Rvest: <span>Easily</span> <span>Harvest</span> (<span>Scrape</span>) <span>Web</span> <span>Pages</span></em>. <a href="https://rvest.tidyverse.org/">https://rvest.tidyverse.org/</a>.
+</div>
+<div id="ref-winsemius_framework_2013" class="csl-entry" role="listitem">
+Winsemius, H. C., L. P. H. Van Beek, B. Jongman, P. J. Ward, and A. Bouwman. 2013. <span>“A Framework for Global River Flood Risk Assessments.”</span> <em>Hydrology and Earth System Sciences</em> 17 (5): 1871–92. <a href="https://doi.org/10.5194/hess-17-1871-2013">https://doi.org/10.5194/hess-17-1871-2013</a>.
 </div>
 <div id="ref-zhao_systematic_2023" class="csl-entry" role="listitem">
 Zhao, Fudie. 2023. <span>“A Systematic Review of <span>Wikidata</span> in <span>Digital</span> <span>Humanities</span> Projects.”</span> <em>Digital Scholarship in the Humanities</em> 38 (2): 852–74. <a href="https://doi.org/10.1093/llc/fqac083">https://doi.org/10.1093/llc/fqac083</a>.

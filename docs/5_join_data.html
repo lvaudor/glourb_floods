@@ -99,7 +99,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<link rel="stylesheet" href="styles.scss">
 </head>
 
 <body class="nav-fixed">
@@ -120,28 +119,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html" rel="" target="">
+    <a class="nav-link" href="./index.docx" rel="" target="">
  <span class="menu-text">Article</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
+    <a class="nav-link" href="./about.docx" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./1_collect_wikidata.html" rel="" target="">
+    <a class="nav-link" href="./2_use_wikipedia.docx" rel="" target="">
  <span class="menu-text">Methods 1</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./2_use_wikipedia.html" rel="" target="">
+    <a class="nav-link" href="./3_curate_wikidata.docx" rel="" target="">
  <span class="menu-text">Methods 2</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./3_curate_wikidata.html" rel="" target="">
+    <a class="nav-link" href="./4_text_analysis.docx" rel="" target="">
  <span class="menu-text">Methods 3</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./4_text_analysis.html" rel="" target="">
- <span class="menu-text">Methods 4</span></a>
   </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
@@ -155,29 +150,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul class="collapse">
-  <li><a href="#wikidata-map" id="toc-wikidata-map" class="nav-link active" data-scroll-target="#wikidata-map">Wikidata Map</a></li>
-  <li><a href="#data-from-institutionnally-curated-databases" id="toc-data-from-institutionnally-curated-databases" class="nav-link" data-scroll-target="#data-from-institutionnally-curated-databases">Data from institutionnally curated databases</a>
-  <ul class="collapse">
-  <li><a href="#data-from-the-dartmouth-flood-observatory" id="toc-data-from-the-dartmouth-flood-observatory" class="nav-link" data-scroll-target="#data-from-the-dartmouth-flood-observatory">Data from the Dartmouth Flood Observatory</a></li>
-  <li><a href="#basic-stats" id="toc-basic-stats" class="nav-link" data-scroll-target="#basic-stats">Basic stats</a></li>
-  <li><a href="#number-of-correspondences" id="toc-number-of-correspondences" class="nav-link" data-scroll-target="#number-of-correspondences">Number of correspondences</a></li>
-  <li><a href="#why-are-flood-events-documented-in-wikidata" id="toc-why-are-flood-events-documented-in-wikidata" class="nav-link" data-scroll-target="#why-are-flood-events-documented-in-wikidata">Why are flood events documented in Wikidata</a></li>
-  </ul></li>
-  </ul>
-</nav>
-    </div>
+        
+    <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="5_join_data.docx"><i class="bi bi-file-word"></i>MS Word</a></li></ul></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
 
 <div class="cell" data-warnings="false">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>wd_events<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wd_events.RDS"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>flood_class<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wp_pages_class.RDS"</span>) <span class="sc">%&gt;%</span> </span>
@@ -198,10 +178,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"what"</span>),</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>         <span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"start"</span>),</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>         <span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"end"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in left_join(., flood_class, by = "flood"): Detected an unexpected many-to-many relationship between `x` and `y`.
-ℹ Row 933 of `x` matches multiple rows in `y`.
+ℹ Row 1213 of `x` matches multiple rows in `y`.
 ℹ Row 207 of `y` matches multiple rows in `x`.
 ℹ If a many-to-many relationship is expected, set `relationship =
   "many-to-many"` to silence this warning.</code></pre>
@@ -211,8 +190,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Wikidata Map</h1>
 <p>wm_map corresponds to a dataset with one row=one event (we summarise coordinates into a single centroid) and a popup variable.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> wm_map<span class="ot">=</span>wm_full <span class="sc">%&gt;%</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(coords)) <span class="sc">%&gt;%</span></span>
@@ -273,12 +250,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a> <span class="co">#                                 TRUE~popup)) %&gt;%</span></span>
 <span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a> <span class="co">#  mutate(popup=paste0("&lt;style&gt; div.leaflet-popup-content {width:1200}&lt;/style&gt;",popup)) %&gt;%</span></span>
 <span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a> <span class="co">#  sf::st_centroid()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>We will jitter the coordinates in order to not have exactly overlapping coordinates on the map.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tcoords<span class="ot">=</span>wm_map <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_coordinates</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span></span>
@@ -309,7 +283,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data=</span>purrr<span class="sc">::</span><span class="fu">map2</span>(data,n,jitter_coord)) <span class="sc">%&gt;%</span></span>
 <span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">unnest</span>(<span class="at">cols=</span><span class="fu">c</span>(data)) <span class="sc">%&gt;%</span></span>
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: `cols` is now required when using `unnest()`.
 ℹ Please use `cols = c()`.</code></pre>
@@ -317,8 +290,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Re-generate data geometry from jittered coords</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wm_map<span class="ot">=</span>wm_map <span class="sc">%&gt;%</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>long,<span class="sc">-</span>lat</span>
@@ -332,11 +303,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">deathtoll=</span><span class="fu">case_when</span>(<span class="fu">is.na</span>(deathtoll)<span class="sc">~</span><span class="dv">0</span>,</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                             <span class="cn">TRUE</span><span class="sc">~</span>deathtoll))</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wm_map,<span class="st">"data/wm_map.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définition d'une échelle colorée</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (en fonction de date de sortie)</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">colorNumeric</span>(<span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"blue"</span>),</span>
@@ -347,7 +315,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addCircleMarkers</span>(<span class="at">col=</span><span class="sc">~</span>color,</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                   <span class="at">radius =</span><span class="sc">~</span><span class="fu">log</span>(deathtoll<span class="sc">+</span><span class="dv">1</span>)</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                   )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="data-from-institutionnally-curated-databases" class="level1">
@@ -355,19 +322,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="data-from-the-dartmouth-flood-observatory" class="level2">
 <h2 class="anchored" data-anchor-id="data-from-the-dartmouth-flood-observatory">Data from the Dartmouth Flood Observatory</h2>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>avdate<span class="ot">=</span><span class="cf">function</span>(date1,date2){</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  date1<span class="ot">=</span><span class="fu">as.numeric</span>(date1)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  date2<span class="ot">=</span><span class="fu">as.numeric</span>(date2)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  result<span class="ot">=</span><span class="fu">as.Date</span>(<span class="fu">mean</span>(<span class="fu">c</span>(date1,date2)))</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dfo_raw<span class="ot">=</span>readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"data/FloodArchive.csv"</span>,</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">locale =</span> <span class="fu">locale</span>(<span class="at">decimal_mark =</span> <span class="st">","</span>))</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dfo_raw)<span class="ot">=</span><span class="fu">c</span>(<span class="st">"index"</span>,<span class="st">"GlideNumber"</span>,<span class="st">"dfo_country"</span>,<span class="st">"dfo_other_country"</span>,</span>
@@ -391,23 +353,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dfo_comp,<span class="st">"data/dfo_comp_befcorrection.RDS"</span>)</span>
 <span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"scripts/correct_dfo_countries.R"</span>)</span>
 <span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>dfo_comp<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/dfo_comp.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>This dataset documents 5129 flood events that occurred between 1985-01-01 and 2021-10-09.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wm_comp<span class="ot">=</span>wm_map <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(flood,flood_label,deathtoll, date,popup) <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date<span class="sc">&gt;</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="st">"1985-01-01"</span>) <span class="sc">&amp;</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>         date<span class="sc">&lt;</span>lubridate<span class="sc">::</span><span class="fu">ymd</span>(<span class="st">"2021-12-31"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">source=</span><span class="st">"wd"</span>)</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wm_comp,<span class="st">"data/wm_comp.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dfo_comp<span class="ot">=</span>dfo_comp <span class="sc">%&gt;%</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">source=</span><span class="st">"dfo"</span>,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">geometry=</span>coords) <span class="sc">%&gt;%</span></span>
@@ -417,15 +373,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">                            &lt;p&gt;deathtoll:{deathtoll}&lt;/p&gt;"</span>))</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>wm_dfo<span class="ot">=</span><span class="fu">bind_rows</span>(wm_comp,dfo_comp)</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(wm_dfo,<span class="st">"data/wm_dfo.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="basic-stats" class="level2">
 <h2 class="anchored" data-anchor-id="basic-stats">Basic stats</h2>
 <p>Based on the spatial and temporal data in both datasets, we try to find correspondences between the events described in Wikidata and those described in the Dartmouth Flood Observatory.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>find_corresponding_flood<span class="ot">=</span><span class="cf">function</span>(flood_id,<span class="at">tib=</span>wm_dfo){</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  tib_sub<span class="ot">=</span>tib <span class="sc">%&gt;%</span> <span class="fu">filter</span>(flood<span class="sc">==</span>flood_id)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  tib_dist<span class="ot">=</span>tib <span class="sc">%&gt;%</span></span>
@@ -434,8 +387,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">disttime=</span><span class="fu">as.numeric</span>(disttime),</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">distspace=</span><span class="fu">as.numeric</span>(distspace)) <span class="sc">%&gt;%</span></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(flood<span class="sc">!=</span>flood_id) <span class="sc">%&gt;%</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cond1=</span>disttime<span class="sc">&lt;</span><span class="dv">395</span> <span class="sc">&amp;</span> distspace<span class="sc">&lt;</span><span class="dv">400000</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">cond2=</span>disttime<span class="sc">&lt;</span><span class="dv">395</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(country_label,tib_sub<span class="sc">$</span>country_label)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cond1=</span>disttime<span class="sc">&lt;</span><span class="dv">400</span> <span class="sc">&amp;</span> distspace<span class="sc">&lt;</span><span class="dv">400000</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">cond2=</span>disttime<span class="sc">&lt;</span><span class="dv">400</span> <span class="sc">&amp;</span> <span class="fu">str_detect</span>(country_label,tib_sub<span class="sc">$</span>country_label)) <span class="sc">%&gt;%</span></span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(cond1<span class="sc">|</span>cond2) <span class="sc">%&gt;%</span></span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="at">floodcorr=</span>flood,</span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>           disttime,</span>
@@ -458,12 +411,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(tib_dist)</span>
 <span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>For each flood event defined in the WD dataset, we filter the DFO dataset to only keep the event corresponding to the minimum distance in space and time, then we consider the events concur if they occurred less than 400 days apart and 400 kms away. This is a rather loose correspondence which is explained by the sometimes low precision in the WD information corresponding to time or coordinates of occurrence (not to mention the inherent difficulty, for contributors of both datasets, of associating a flood event to a precise time and place).</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"data/wm_dfo_corr.RDS"</span>)){</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  wm_dfo_proj<span class="ot">=</span> wm_dfo <span class="sc">%&gt;%</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    sf<span class="sc">::</span><span class="fu">st_set_crs</span>(<span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
@@ -479,12 +429,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"data/wm_dfo_corr.RDS"</span>)</span>
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>wm_dfo_corr<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_dfo_corr.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>We create lines to join events from one dataset to the other.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_dfo_corr<span class="ot">=</span><span class="fu">readRDS</span>(<span class="st">"data/wm_dfo_corr.RDS"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>()</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>joined_events<span class="ot">=</span><span class="fu">bind_rows</span>(</span>
@@ -501,30 +448,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_cast</span>(<span class="st">"LINESTRING"</span>)</span>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>joined_events<span class="ot">=</span>joined_events[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">nrow</span>(joined_events)<span class="sc">-</span><span class="dv">1</span>),]</span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(joined_events,<span class="st">"data/joined_events.RDS"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="number-of-correspondences" class="level2">
 <h2 class="anchored" data-anchor-id="number-of-correspondences">Number of correspondences</h2>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Nwd_in_range<span class="ot">=</span>wd_events <span class="sc">%&gt;%</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year<span class="sc">&gt;=</span><span class="dv">1985</span> <span class="sc">&amp;</span> year<span class="sc">&lt;=</span><span class="dv">2021</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">length</span>(<span class="fu">unique</span>(flood))) <span class="sc">%&gt;%</span></span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>Based on the dates of observations for the DFO data base, 414 out of the 1018 flood events in our Wikidata base might fall into it.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>nb_wm<span class="ot">=</span>wm_comp <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> <span class="fu">tally</span>() <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>nb_wm_in_dfo<span class="ot">=</span>wm_dfo_corr <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> <span class="fu">tally</span>() <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>nb_dfo<span class="ot">=</span>dfo_comp <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(flood) <span class="sc">%&gt;%</span> <span class="fu">tally</span>() <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>nb_dfo_in_wd<span class="ot">=</span>wm_dfo_corr <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(floodcorr) <span class="sc">%&gt;%</span> <span class="fu">tally</span>() <span class="sc">%&gt;%</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>Out of 387 flood events documented in the WD comparison data subset, 296 have at least one correspondence in the DFO comparison data subset (76.49%).</p>
 <p>Out of 5129 flood events documented in the DFO comparison data subset, 281 have at least one correspondence in the WD comparison data subset (5.48%).</p>
@@ -533,49 +473,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="why-are-flood-events-documented-in-wikidata">Why are flood events documented in Wikidata</h2>
 <p>1st hypothesis: number of dead explains the occurrence of the event in WD. =&gt; nope, actually it’s the opposite because events are documented in rich countries in which the number of dead is lower. How to account for this effect?</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#severity</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>dfo_raw <span class="sc">%&gt;%</span>  <span class="fu">pull</span>(severity) <span class="sc">%&gt;%</span> <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.242495</code></pre>
 </div>
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dfo_raw <span class="sc">%&gt;%</span> <span class="fu">filter</span>(flood <span class="sc">%in%</span> wm_dfo_corr<span class="sc">$</span>floodcorr) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(severity) <span class="sc">%&gt;%</span> <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.492883</code></pre>
 </div>
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#deathtoll</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>dfo_raw <span class="sc">%&gt;%</span>  <span class="fu">pull</span>(deathtoll) <span class="sc">%&gt;%</span> <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 134.199</code></pre>
 </div>
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dfo_raw <span class="sc">%&gt;%</span> <span class="fu">filter</span>(flood <span class="sc">%in%</span> wm_dfo_corr<span class="sc">$</span>floodcorr) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(deathtoll) <span class="sc">%&gt;%</span> <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 102.089</code></pre>
 </div>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dfo_comp<span class="sc">$</span>deathtoll)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 134.2184</code></pre>
 </div>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tib_wd_in_dfo<span class="ot">=</span>wm_dfo_corr <span class="sc">%&gt;%</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(country_label,flood) <span class="sc">%&gt;%</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
@@ -592,7 +515,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>truc<span class="ot">=</span><span class="fu">left_join</span>(tib_dfo,tib_wd_in_dfo,<span class="at">by=</span><span class="st">"country_label"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop=</span>n_wd_in_dfo<span class="sc">/</span>n_dfo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 
 
