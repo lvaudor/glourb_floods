@@ -70,8 +70,8 @@ wm_dfo_comparison=wd_events %>%
   mutate(in_data=case_when(is.na(flood) & !is.na(flood_dfo)~"dfo",
                            !is.na(flood) & is.na(flood_dfo)~"wd",
                            !is.na(flood) & !is.na(flood_dfo)~"in_both")) %>% 
-  mutate(deathtoll=case_when(is.na(deathtoll)~deathtoll_dfo,
-                             TRUE~deathtoll))
+  mutate(deathtoll=case_when(!is.na(deathtoll_dfo)~deathtoll_dfo,
+                             is.na(deathtoll_dfo)~deathtoll))
 
 saveRDS(wm_dfo_comparison,"data/wm_dfo_comparison.RDS")
 }
