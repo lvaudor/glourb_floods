@@ -29,36 +29,26 @@ This study's objectives are to
 
 # Introduction
 
-### Why is it complicated to produce worldwide data about floods
+Producing a global flood event dataset poses numerous challenges due to the complex nature of data semantics, collection, standardization, and accessibility. A primary obstacle is the lack of uniform reporting standards leading to inconsistencies in definitions of flood events and in data collection methods. Varying technological capabilities (material access and practice's acculturation) across geographical regions of the world also contribute to disparities in data availability. Disasters like floods might occur in areas where communication and infrastructure are limited, and/or not used for real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or document flood occurrences differently, due to reasons such as insufficient resources and infrastructures, lack of governmental transparency, or competing priorities \[add ref\]. Additionally, there are inequalities in the geographies of data production that reflect and reproduce global economic core-peripheries [@graham_inequitable_2014; @graham_towards_2015; @haklay_why_2016]. \[Ash et al. ref\] refers to some "informational magnetism" resulting in the over-representation of the global North (the "core"). As a result, and despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires better data curation; global efforts to improve information-sharing mechanisms; and the development of a critical eye on the reasons for data production, on the geographical contexts in which it has been produced, and on its uses.
 
-Producing a worldwide dataset about flood events poses numerous challenges due to the complexity of semantics, collection, standardization, and accessibility of such data. One primary obstacle is the lack of uniform reporting standards leading to inconsistencies in definitions of flood events and in data collection methods. Varying technological capabilities (in terms of material access and practice's acculturation)across geographical regions of the world also contribute to disparities in data availability. Disasters like floods might occur in areas where communication and infrastructure are limited, and/or not used for real-time data collection. Political, social, and economic factors also play a role, as some regions may under-report or document flood occurrences differently, due to reasons such as insufficient resources and infrastructures, lack of governmental transparency, or competing priorities \[add ref\]. Additionally, there are inequalities in the geographies of data production that reflect and reproduced global economic core-peripheries [@graham_inequitable_2014; @graham_towards_2015; @haklay_why_2016]. \[Ash et al. ref\] refers to some "informational magnetism" resulting in the over-representation of the global North (the "core"). As a result, and despite advancements in satellite technology and remote sensing, ensuring comprehensive, accurate, and up-to-date global flood data remains a persistent challenge that requires better data curation; efforts to collaborate and improve information-sharing mechanisms on a global scale; and the development of a critical eye on the reasons for data production, on the geographical contexts in which it has been produced, and on its uses.
+Participatory data collection can significantly enhance the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale [@dixon_role_2021; @sekajugo_can_2022]. By incorporating local knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems, controlled by certain systems in power (Nation-states, heterogeneous coalition of technologically savvy individuals, private technology companies). More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding hazards [@herfort_evolution_2021].
 
-### Participatory local data about floods
-
-Participatory data collection holds significant potential in enhancing the understanding and management of flood events. This approach involves engaging local communities, citizens, and grassroots organizations in the collection, analysis, and sharing of data related to flood occurrences. Examples of such initiatives show the potential of participatory data to complement institutional data about floods at a local scale [@dixon_role_2021; @sekajugo_can_2022]. By incorporating locpôlesal knowledge, experiences, and observations, participatory methods complement traditional data sources, offering valuable insights into flood-prone areas that might be overlooked by centralized or remote monitoring systems, controlled by certain systems in power (Nation-states, heterogeneous colaition of technologically savvy individuals, private technology companies). More broadly, volunteered geographical data at a local scale has been shown to be a valuable source of data regarding hazards [@herfort_evolution_2021].
-
-Communities living in flood-prone regions possess unique, context-specific, even vernacular knowledge about local environmental changes, historical flood memory, vulnerable areas, and coping mechanisms. Engaging these communities in data collection through citizen science initiatives, mobile applications, community mapping, or participatory workshops allows for the collection of granular, real-time information that supplements existing datasets. Ideally, this bottom-up approach not only enhances the accuracy and granularity of flood data but also fosters community empowerment in terms of resilience, engaging all communities to participate, including those excluded from decision-making or digital access (from a material point of view and in terms of skills).
+Communities living in flood-prone regions possess unique, context-specific, even vernacular knowledge about local environmental changes, historical flood memory, vulnerable areas, and coping mechanisms. Engaging these communities in data collection through citizen science initiatives, mobile applications, community mapping, or participatory workshops allows for the collection of granular, real-time information that supplements existing datasets. Ideally, this bottom-up approach not only enhances the accuracy and granularity of flood data, but also fosters community empowerment in terms of resilience, by engaging all communities to participate, including those excluded from decision-making or digital access.
 
 Moreover, participatory data can bridge gaps in official reporting by capturing small-scale or localized flood events that are not publicized and thus recognized by institutions. Integrating participatory data with conventional datasets enables a more comprehensive understanding of flood dynamics, aiding in the development of anticipation policies effective early warning systems, and disaster response plans.
 
 However, challenges such as ensuring data accuracy, reliability, and standardization persist in participatory approaches. While establishing protocols for data validation and quality control between participatory and formal datasets is important to maximize the potential of participatory data and to maintain data integrity [@senaratne_review_2017], the participatory data can be standardized. In other words, the subtelties perceived by local communities can be smoothed out (i) in interfaces designed by situated engineers and (ii) in data collection via protocols designed by situated scientists. However, the stakes around data validation and homogenization are particularly high in the prospect of studying floods at a global scale.
 
-Overall, leveraging participatory data in conjunction with conventional methods has the potential to enrich global flood databases, improve resilience, and empower communities to better respond to and mitigate the impacts of flood events. This collaborative approach can contribute significantly to more holistic and inclusive strategies for managing floods worldwide, to question (i) the data (how, by whom and for what purpose they are collected) and (ii) the collection process (highlighting ethnocentric biases by comparison).
+Overall, leveraging participatory data in conjunction with conventional methods can enrich global flood databases, improve resilience, and empower communities to better respond to and mitigate the impacts of flood events. This collaborative approach can contribute significantly to more holistic and inclusive strategies for managing floods worldwide, to question (i) the data (how, by whom and for what purpose they are collected) and (ii) the collection process (highlighting ethnocentric biases by comparison).
 
-### Institutional global data about floods
+The Dartmouth Flood Observatory (DFO) is a research group specializing in the collection and analysis of global flood data. Combining remote sensing and news reports' analysis, the DFO produces detailed information on the extent, frequency, and impacts of floods worldwide [@kundzewicz_large_2013]. It constitutes an invaluable source of information on the subject, used in many scientific studies on flood events [@winsemius_framework_2013; @hu_flood-induced_2018; @najibi_recent_2018; @tellman_satellite_2021].
 
-The Dartmouth Flood Observatory (DFO) is a research group specializing in the collection and analysis of global flood data. Combining remote sensing and news reports' analysis, the DFO produces detailed information on the extent, frequency, and impacts of floods worldwide [@kundzewicz_large_2013]. It constitutes an invaluable source of information on the subject, used in many scientific studies on flood events \[add refs\].
+In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, as one of the largest collaborative encyclopedias, and one of the most used and visited websites globally [@graham_towards_2015; @ballatore_digital_2017] harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. It can be viewed both as a source of breaking news and as an encyclopedia, providing information and narrative regarding ongoing and past events, in particular crises and controversies [@moats_following_2019]. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking information on various topics, including flood events, across the globe. The Wikimedia projects are an example of user-generated content on web 2.0 [@mandiberg_4_2020]. Moreover, flood events are generally associated with a location or toponymic information: as such, the produced data can also be included in what @goodchild_citizens_2007 calls "volunteered geographic information" (VGI).
 
-### Wikimedia data
-
-In parallel to that kind of research-related, expert database on the subject, the Wikimedia project stands as a remarkable source of structured or semi-structured participatory data with its vast array of user-generated content across platforms like Wikipedia, Wikidata, and Wikimedia Commons. Wikipedia, being one of the largest collaborative encyclopedias, and one of the most used and visited websites globally [@graham_towards_2015; @ballatore_digital_2017] harnesses the collective knowledge of volunteers worldwide who contribute, edit, and curate articles on diverse subjects, including geographical features, history, and environmental events such as floods. It can be viewed both as a source of breaking news and as an encyclopedia, providing information and narrative regarding ongoing and past events, in particular crises and controversies [@moats_following_2019]. Wikidata, an open database, provides structured data that can be used to categorize and link information, potentially cataloging flood events, affected regions, and relevant details. Wikimedia Commons serves as a repository for multimedia files, housing images, maps, and other visual resources related to floods, contributing to a more comprehensive understanding of such events. The open nature of Wikimedia projects allows for continual updates and contributions, making it a valuable resource for researchers, policymakers, and the public seeking information on various topics, including flood events, across the globe. The Wikimedia projects are an example of user-generated content on web 2.0 [@mandiberg_4_2020]. Moreover, flood events are generally associated with a location or toponymic information: as such, the produced data can also be included in what @goodchild_citizens_2007 calls "volunteered geographic information" (VGI).
-
-### Geographies of Wikimedia
+Wikipedia articles have been studied in the context of managing crises due to its accessibility, comprehensiveness, and real-time updates, either focusing on content creation or consultation. This has been the case for e.g. epidemiologic crises [@van_velsen_should_2012; @colavizza_covid-19_2020], natural disasters, technological accidents and violent conflict [@keegan_hot_2013]. During flood events, people might seek immediate information regarding safety measures, evacuation procedures, flood-prone areas, and emergency contacts. Wikipedia's open editing structure allows for rapid dissemination of accurate information, enabling users to access critical details swiftly. Moreover, the collaborative nature of Wikipedia ensures that a vast array of perspectives and expertise contribute to its articles, resulting in comprehensive coverage of flood-related topics, including flood mitigation strategies, historical flood data, and relevant government responses. This breadth of information empowers individuals, communities, and organizations to make informed decisions and take effective action in response to floods, ultimately aiding in crisis management and mitigation efforts. Additionally, Wikipedia's multilingual support ensures that its resources are accessible to a global audience, facilitating disaster response efforts in diverse regions affected by floods.
 
 Like many volunteered mapping platforms, the Wikimedia projects are receiving growing interest from the research community [@farda-sarbas_wikidata_2019]. As such, they are used in various projects: on the one hand, the content is employed directly as a data source, e.g. in history, literacy studies, archeology, philosophy [@zhao_systematic_2023], linguistics [@turki_using_2017], medical and biological sciences [@farda-sarbas_wikidata_2019; @burgstaller-muehlbacher_wikidata_2016], etc. or as an indicator of public interest [@mittermeier_using_2021]. On the other hand, studies consider the Wikimedia projects as a research object, e.g. analyzing the contributors’ motivations [@antin_my_2011], comparing their data to traditional databases [@lorini_uneven_2020], evaluating completeness [@royal_whats_2009], accuracy [@giles_internet_2005], topic coverage [@halavais_analysis_2008], local [@ballatore_digital_2017; @ballatore_angeles_2020] and global distribution [@graham_towards_2015; @kollektiv_orangotango_uneven_2018], analyzing knowledge construction [@oeberst_knowledge_2014] and social network dynamics [@iba_analyzing_2010], etc. However, using a worldwide, crowdsourced, open database implies characterizing its contributors. Firstly, studies show that UGC is unequally distributed on a global scale: it is generally skewed towards countries from the Global North, whether it be in terms of participation, representation or access [@kollektiv_orangotango_uneven_2018; @graham_towards_2015; @ballatore_digital_2017]. Research conducted on Wikipedia suggests that the platform follows the same pattern. For example, @graham_inequitable_2014 shows that Europe and North America get the greatest number of articles per person. Secondly, participation tends to be skewed towards “a more wealthy, more educated, more Western, more white and more male demographic” [@crampton_beyond_2013, p.132]. For example, research on OpenStreetMap – an open and crowdsourced mapping platform – suggests that it reproduces the socio-economical structures [@bittner_diversity_2017]. The risk is that these crowdsourced platforms reproduce the inequalities, leaving economically and socially deprived areas also digitally deprived [@jokar_arsanjani_impact_2015]. There is also a strong gender asymmetry on the web, contributing to biased data [@stephens_gender_2013; @gardner_quantifying_2020].\
 Identifying the data distribution is capital for interpretation and analysis, given that the Wikimedia projects are a part of UGC and are therefore subjects to its biases. The question “who produces the data?” must then be addressed. @lorini_uneven_2020 studied the report of floods on Wikipedia. However, to our knowledge, no study using multiple Wikimedia projects and analyzing the data distribution and production in time as well as in space, using quantitative and textometric methods, has been conducted on this subject.
-
-### Wikimedia for crisis management
 
 # Methods
 
@@ -72,11 +62,11 @@ We carried out a first Wikidata query to get all instances of floods or subclass
 
 ![Second Wikidata query](figure/fig-graph_query_dates.png)
 
-We carried out a second Wikidata query for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events' label if present (as labels generally consist of a mention of type of event, time and place).
+We carried out a second Wikidata query for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events' label if present (as labels generally consist of a mention of type of event, time and place). Time-related information on Wikidata are specified with varying precision, which when regarding floods generally vary between dayly precision and yearly precision.
 
 ![Third Wikidata query](figure/fig-graph_query_country.png)
 
-We carried out a third Wikidata query for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI) \[ref\].
+We carried out a third Wikidata query for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI).
 
 ### Comparison to the Dartmouth Flood Observatory data
 
@@ -95,7 +85,9 @@ For each WD event `flood`:
 
 We scraped the text (all the textual content in headers from level one (h1) to level 6 (h6) as well as paragraphs) from all listed Wikipedia pages, using the `rvest` R package [@wickham_rvest_2024]. We then translated them to English (if necessary) through Google Translate using the polyglotr R package [@iwan_polyglotr_2024].
 
-We tokenized the texts with the tidytext R package [@silge_tidytext_2016], lemmatized words and filtered out stop words based on the Iramuteq English dictionnary \[ref\]. We could then identify textual specificities based on various partitions of the corpus [@lafon_pierre_sur_1980, @loiseau_textometry_2022].
+We tokenized the texts with the tidytext R package [@silge_tidytext_2016], lemmatized words and filtered out stop words based on the Iramuteq English dictionnary [@ratinaud_iramuteq_2009]. We could then identify textual specificities based on various partitions of the corpus [@lafon_pierre_sur_1980; @loiseau_textometry_2022].
+
+We used Reinert's method [@reinert_alceste_1990] to classify segments of our corpus (consisting in successive parts of the Wikipedia articles, segmented in such a way that each contains 10 lemmatized, content words). To implement that method, we used the rainette package [@barnier_rainette_2023] and used its exploration tools to choose a meaningful and tractable number of classes. Each class is characterized as a collection of over-represented words, and we used them to label each class in a one-worded, synthetic way. We then used these labelled classes to examine the relationship between the flood characteristics and the topic contents of articles.
 
 # Results
 
@@ -154,23 +146,59 @@ knitr::kable(show_table(countries, provide_key=c("country","country_label")))
 
 ## Wikidata on floods
 
-The initial query provided **`r nrow(wd_events)` Wikidata flood events**. In terms of spatial precision, most coordinates are inferred from either country or location (the major part of provided locations being countries too).
+The initial query provided **`r nrow(wd_events)` Wikidata flood events**. In terms of spatial precision, most coordinates are inferred from either variable country or variable location (the major part of provided locations being countries too). The date of most events is documented either directly or through the label of the event. Most events' dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.
 
 ```{r show_precision_coords}
 readRDS("data/precision_coords.RDS") %>% 
   knitr::kable()
 readRDS("data/dates_precision.RDS") %>% 
-  group_by(date_from) %>% 
-  tally() %>% 
-  knitr::kable()
-readRDS("data/dates_precision.RDS") %>% 
-  group_by(date_precision) %>% 
+  group_by(date_from,date_precision) %>% 
   tally() %>% 
   knitr::kable()
 ```
-: tables
 
+## Compare to DFO data
 
+```{r build_data_compare}
+source("scripts/comp_dfo_wd.R")
+wm_dfo_comparison=readRDS("data/wm_dfo_comparison.RDS") %>% 
+  mutate(total_length=ceiling(total_length/1000))
+```
+
+We compare the number of events in both datasets (WD and DFO) according to Human Development Index of the country where the event took place.
+
+```{r plot_freq_events_in_datasets,fig.width=6,fig.height=3}
+#| label: fig-freq_events_in_datasets
+#| fig-cap: "Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile)."
+ggplot(wm_dfo_comparison,
+       aes(x=HDI_class,fill=in_data))+
+  geom_bar(position=position_dodge())+
+  scale_fill_manual(values=c("dfo"="#607d73",
+                             "in_both"="#9ecfbd",
+                             "wd"="#e7cee4"))
+```
+
+```{r plot_HDI_deathtoll_data, warning=FALSE, message=FALSE}
+#| label: fig-HDI_deathtoll_data
+#| fig-cap: "Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class."
+
+wm_dfo_comparison_summary=wm_dfo_comparison %>% 
+  group_by(HDI_class,in_data) %>% 
+  tally()
+ggplot(wm_dfo_comparison, 
+       aes(x=HDI_class,y=deathtoll,fill=in_data))+
+  geom_boxplot()+
+  geom_text(data=wm_dfo_comparison_summary,
+            aes(x=HDI_class,y=-0.5,label=n),
+            position=position_dodge(width=0.8),
+            size=3)+
+  scale_y_continuous(trans="log1p")+
+  scale_fill_manual(values=c("dfo"="#607d73",
+                             "in_both"="#9ecfbd",
+                             "wd"="#e7cee4"))
+```
+
+@fig-HDI_deathtoll_data shows that events in Wikidata are generally associated with higher deathtoll compared to those documented in DFO only or DFO and WD both. For DFO-documented events, the lower the HDI class, the higher the deathtoll, while for WD-documented events, the few events which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries. *(and I don't quite know how to explain that... maybe a tendency to overestimation or to consider "far-reaching" consequences?)*
 
 ## Wikipedia on floods
 
@@ -252,76 +280,11 @@ figure <- ggarrange(p1,p2,
 figure
 ```
 
-## Compare to DFO data
-
-```{r build_data_compare}
-source("scripts/comp_dfo_wd.R")
-wm_dfo_comparison=readRDS("data/wm_dfo_comparison.RDS") %>% 
-  mutate(total_length=ceiling(total_length/1000))
-```
-
-We compare the number of events in both datasets (WD and DFO) according to Human Development Index of the country where the event took place.
-
-```{r plot_freq_events_in_datasets}
-#| label: fig-freq_events_in_datasets
-#| fig-cap: "Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile)."
-ggplot(wm_dfo_comparison,
-       aes(x=HDI_class,fill=in_data))+
-  geom_bar()
-```
-
-```{r plot_HDI_deathtoll_data}
-#| label: fig-HDI_deathtoll_data
-#| fig-cap: "Deathtoll per event according to HDI class and occurrence in one or both datasets. This shows that Wikidata tends to over-represent events with important deathtoll, and/or overestimate deathtolls. This is particularly the case for events occurring in low HDI countries."
-ggplot(wm_dfo_comparison, 
-       aes(x=HDI_class,y=deathtoll,fill=in_data))+
-  geom_boxplot()+
-  scale_y_continuous(trans="log1p")
-```
-
-```{r plot_deathtoll_length, fig.width=5,figh.height=6}
-# #| label: fig-deathtoll_length
-# #| fig-cap: "Length of articles vs deathtoll"
-# 
-# dat=wm_dfo_comparison %>%
-#   select(deathtoll,
-#          HDI_class,
-#          HDI,
-#          total_length,
-#          in_data) %>% 
-#   na.omit() %>% unique() %>%
-#   filter(in_data %in% c("wd","in_both"))
-#  v=var(dat$total_length)
-# mu=mean(dat$total_length)
-#  thetastart=(mu^2)/(v-mu)
-#  myglm=MASS::glm.nb(total_length ~ deathtoll*HDI_class,
-#                   data = dat,
-#                   init.theta=1)
-# # fscale=function(x){log10(x+1)}
-# # anova(myglm)
-# dat=dat %>%
-#   mutate(fitted_raw=predict(myglm,data=wm_dfo_comparison),
-#          fitted=exp(fitted_raw))
-# datfit=dat %>%
-#   select(HDI_class,deathtoll,fitted) %>%
-#   arrange(deathtoll)
-# ggplot(dat, 
-#        aes(x=deathtoll,y=total_length))+ 
-#   geom_point(aes(col=in_data),alpha=0.5)+
-#   geom_path(data=datfit,aes(x=deathtoll,y=fitted,group=HDI_class))+
-#   facet_wrap(facets=vars(HDI_class))+
-#   scale_x_continuous(trans="log1p")+
-#   scale_y_continuous(trans="log1p")+
-#   geom_smooth()
-```
-
-## Wikipedia content
-
-### News or encyclopedia?
+## Wikipedia history, topics and curation
 
 ```{r delay_revisions,fig.width=10,fig.height=8, warning=FALSE, message=FALSE}
 #| label: fig-delay_revisions
-#| fig-cap: "Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The delay might be negative (the edits about an event began before the recorded, average date for the event, hinting to an event with long duration). The color indicates the precision of the event date as stated by Wikidata (it can be accurate to the day, month or year)."
+#| fig-cap: "Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The delay might be negative (the edits about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year)."
 flood_date_precision=readRDS("data/wm_full.RDS") %>% select(flood,date_precision) %>% unique()
 truc=wp_revisions %>%
   left_join(wp_pages %>% select(flood,article),
@@ -348,13 +311,11 @@ ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
   facet_grid(rows=vars(year))
 ```
 
-@fig-delay_revisions shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.
-
-### Topics
-
-<!-- We applied a structural topic modelling (STM) algorithm to identify topics in the Wikipedia text corpus and selected a number of topics of 6 [@weston_selecting_2023]. The STM method provides topics characterized by a set of most probable words (see fig. @fig-topic_terms). To help with the interpretation of subsequent results and figures, and although the corpus does not exhibit very distinct topics (which is unsurprising given the inherent specificity and formal homogeneity of the corpus) we propose a short label for each topic ("spatial range", "weather", "hydrology", "management", "historical importance", "human toll") -->
+@fig-delay_revisions shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest. *Notez que je ne l'ai pas fait pour l'instant car je croule déjà sous les données, mais il serait possible (et pas trop compliqué) de récupérer les statistiques de consultation de chacune des pages (et donc de considérer l'intérêt porté à un article du point de vue du lecteur plutôt que du point de vue du créateur de contenu...). Est-ce que vous pensez que je dois me lancer là-dedans?*
 
 ```{r plot_class_rainette, fig.width=10, fig.height=8}
+#| label: fig-topics
+#| fig-cap: "Topics identified by the Reinert classification method. Based on the over-represented terms in each cluster we propose the following labelling of the classes: 'governance' for cluster1, 'relief' for cluster2, 'damage' for cluster3, 'hydrology' for cluster4, 'anticipation' for cluster5, and 'weather' for cluster6."
 res=readRDS("data/res_rainette_wp.RDS")
 corpus=readRDS("data/corpus.RDS")
 dtm=readRDS("data/dtm.RDS")
@@ -372,142 +333,186 @@ rainette_plot(
 
 ```{r plot_topic_per_length}
 #| label: fig-topic_per_length
-#| fig-cap: "Topics identified by an STM process for the Wikipedia articles' corpus"
-tib_classes=wp_segments %>% select(class_name,color) %>% unique()
-tib=wp_segments %>% 
+#| fig-cap: "Link between total article's length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1<k<=4 segments while the 25% longest represent 26<k<860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The red dots correspond to the median proportions of topics throughout all articles irrespective of articles' length."
+tib_classes=wp_segments %>% select(class,class_name,color) %>% unique()
+tib_count_class=wp_segments %>% 
   group_by(article,class_name) %>% 
-  tally() %>% 
-  ungroup() %>% 
+  tally()
+tib=crossing(wp_pages %>% select(article) %>% unique(),
+             tib_classes %>% select(class_name)) %>% 
+  left_join(tib_count_class,by=c("article","class_name")) %>% 
+  mutate(n=replace_na(n,0)) %>% 
   group_by(article) %>% 
   mutate(ntot=sum(n)) %>% 
   ungroup() %>% 
-  mutate(ntotcat=cut(ntot,breaks=quantile(ntot,seq(0,1,by=0.25)))) %>% 
-  group_by(ntotcat,class_name) %>% 
-  summarise(n=sum(n),.groups="drop") %>% 
+  mutate(ntotcat=cut(ntot,breaks=quantile(ntot,seq(0,1,by=0.25))),
+         prop=n/ntot) %>%
+  ungroup() %>% 
   na.omit()
-ggplot(tib,aes(x=class_name,y=n))+
-  geom_col(aes(fill=class_name))+
+tib_summary=tib %>% 
+  group_by(class_name) %>% 
+  summarise(medianprop=median(prop))
+ggplot(tib,aes(x=class_name,y=prop))+
+  geom_boxplot(aes(fill=class_name))+
   facet_grid(rows=vars(ntotcat),scales="free")+
   scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
   coord_flip()+
+  geom_point(data=tib_summary,aes(x=class_name,y=medianprop),col="red")+
   theme(legend.position="none")
 ```
 
-@fig-topic_per_length shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather, hydrology), and justifying reporting that event based on the damage it caused, while longer articles might convey more extensive reports on the management of the crisis (anticipation, governance, relief).
+@fig-topic_per_length shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather), and justifying reporting that event based on its consequences (damage), while longer articles might convey more extensive reports on the physical causes (hydrology) and management of the crisis (anticipation, governance, relief).
 
-```{r}
-readRDS("data/wp_pages.RDS") %>% 
-  group_by(local) %>% 
-  summarise(meanlength=mean(length,na.rm=TRUE))
-tib
-```
-
-### Controversies
-
-```{r plot_nb_of_revisions_and_length,fig.width=5,fig.height=4}
-#| label: fig-nb_of_revisions_and_length
-#| fig-cap: "Length of articles as a function of number of revisions. Beyond a few edits (here, we consider the threshold is 10), there is a linear correlation between length of the article and length of the article. We consider that the difference between observed length and length predicted based on number of edits to represent a deficit in length."
+```{r plot_curation,fig.width=9,fig.height=4, warning=FALSE, message=FALSE}
+#| label: fig-curation
+#| fig-cap: "a) Mean length of edits as a function of number of edits. A relative length of edit for each article is calculated based on this relationship. b) Relative length of edit as a function of total length. A measure of article curation (independent of total length) is calculated based on this relationship. The articles in language 'simple' (for 'simple English') being destined to be particularly synthetic, we did not take include them in the model." 
+wp_pages=readRDS("data/wp_pages.RDS")
 tib=wp_revisions %>% 
   mutate(date_page=lubridate::ymd(as.POSIXct(timestamp))) %>% 
   group_by(article) %>%
   summarise(date_page=min(date_page),
-            nedits=n()) %>% 
+            n_edits=n()) %>% 
   left_join(wp_pages %>% select(article,length,lang,local),by="article") %>% 
   unique() %>% 
-  mutate(simple=lang=="simple")
+  filter(lang!="simple") %>% 
+  mutate(mean_edit_length=length/n_edits)
 tibfitted=tib %>% 
-  filter(nedits>10) %>% 
+  filter(n_edits>10) %>% 
   na.omit()
-mylm=lm(log(length)~log(nedits)*simple,data=tibfitted)
+
+mylm=lm(log(mean_edit_length)~log(n_edits), data=tibfitted)
 tibfitted=tibfitted %>% 
-  mutate(fitted=exp(predict(mylm,data=tibfitted))) 
-  
+  mutate(fitted=predict(mylm,
+                        newdata=tibfitted)) %>% 
+  mutate(fitted=exp(fitted))
 tib=tib %>% 
-  arrange(nedits,simple) %>% 
   left_join(tibfitted %>% select(article,fitted),by="article") %>% 
-  mutate(def_length=-(log(length)-log(fitted))) 
-wp_pages=left_join(wp_pages,tib %>% select(article,date_page,def_length),
+  mutate(rel_edit_length=log(mean_edit_length)-log(fitted))
+
+wp_pages=left_join(wp_pages,tib %>% select(article,date_page,n_edits,rel_edit_length),
                    by="article",
                    relationship="many-to-many")
-saveRDS(wp_pages,"data/wp_pages_def_length.RDS")
-ggplot(tib, aes(x=nedits,y=length,col=simple))+
-  geom_point(alpha=0.1)+
+saveRDS(wp_pages,"data/wp_pages_synthesis.RDS")
+p1=ggplot(tib,
+       aes(x=n_edits,y=mean_edit_length,col=rel_edit_length))+
+  geom_point()+
   scale_x_log10()+
   scale_y_log10()+
-  geom_path(data=tibfitted, aes(x=nedits,y=fitted))
-```
+  geom_smooth(data=tib %>% filter(n_edits>=10),
+              method="lm",
+              col="dark grey")+
+  scale_color_gradient2(low="green",mid="white",high="purple")
 
-```{r plot_age_page_and_def_length_,fig.width=5,fig.height=4}
-#| label: fig-age_page_and_def_length
-#| fig-cap: "Relationship between age of the Wikipedia page (in days) and deficit in length. Older pages tend to correspond to a more important deficit in length: there is a tendency towards more synthesis as the page 'matures'. The residuals of this relationship is considered to be a way to quantify how controversial the edition of the page might have been."
-tib=tib %>% 
-  mutate(age_page=as.numeric(today()-date_page))
-mylm=lm(def_length~age_page,data=tib)
-tib=tib %>% 
-  mutate(controversy=def_length-predict(mylm,data=tib))%>% 
-  mutate(controversy=case_when(controversy>0~controversy/max(controversy,na.rm=TRUE),
-                              controversy<=0~controversy/max(-controversy,na.rm=TRUE),
-                              TRUE~controversy))
-wp_pages=wp_pages %>% 
-  left_join(tib %>% select(article,controversy),
-            by="article",relationship="many-to-many") %>% 
-  unique()
-saveRDS(wp_pages,"wp_pages_controversy.RDS")
-ggplot(tib, aes(x=age_page, y=def_length,col=controversy))+
+wp_pages2=wp_pages %>% 
+  filter(!is.na(rel_edit_length),!is.na(length),lang!="simple")
+wp_pages2=wp_pages2 %>% 
+  mutate(fitted_rel_edit_length=predict(lm(rel_edit_length~log(length),data=wp_pages2),data=wp_pages2)) %>% 
+  mutate(curation=rel_edit_length-fitted_rel_edit_length) %>% 
+  mutate(curation=case_when(curation>0~curation/max(curation,na.rm=TRUE),
+                             curation<=0~curation/max(-curation,na.rm=TRUE),
+                              TRUE~curation))
+wp_pages=wp_pages %>%
+  left_join(wp_pages2 %>% select(article,curation),by=c("article"))
+saveRDS(wp_pages,"data/wp_pages_curation.RDS")
+library(ggnewscale)
+p2=ggplot(wp_pages,
+       aes(x=length,y=rel_edit_length,col=curation))+
   geom_point()+
-  geom_smooth(method="lm")+
-  scale_color_gradient2(low="blue",mid="yellow",high="red")
-
+  scale_x_log10()+
+  geom_smooth(method="lm",
+              col="dark grey")+
+  scale_color_gradient2(low="blue",mid="yellow",high="red")+
+  new_scale_color()+
+  geom_rug(aes(y=rel_edit_length,col=rel_edit_length), sides="l")+
+    
+  scale_color_gradient2(low="green",mid="white",high="purple")
+cowplot::plot_grid(p1, p2, labels = c('a', 'b'))
 ```
 
-<!-- ```{r} -->
+@fig-curation .a shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page 'matures', with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). By construction and as shown by @fig-curation .b, the relative edit length is highly correlated to total article length, though we would like to dispose of a length-independent curation measure for further analyses purposes. Hence we calculate the curation score based on the residuals of the linear relationship of the relative edit length to total length (both log-transformed). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles). We argue that this could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.
 
-<!-- wp_pages_controversy=readRDS("data/wp_pages_controversy.RDS") %>%  -->
 
-<!--   na.omit() -->
 
-<!-- # library(randomForest) -->
+```{r curation_topics,fig.width=7,fig.height=5}
+#| label: fig-curation_topics
+#| fig-cap: "Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test." 
 
-<!-- # tibrf=wp_pages_controversy %>% na.omit() %>%  -->
+tib_classes=wp_segments %>% select(class,class_name,color) %>% unique()
+tib_count_class=wp_segments %>% 
+  group_by(article,class_name) %>% 
+  tally()
+tib=crossing(wp_pages %>% select(article,curation) %>%
+               filter(!is.na(curation)) %>%  unique(),
+             tib_classes %>% select(class_name)) %>% 
+  left_join(tib_count_class,by=c("article","class_name")) %>% 
+  mutate(n=replace_na(n,0)) %>% 
+  group_by(article) %>% 
+  mutate(ntot=sum(n)) %>% 
+  ungroup() %>% 
+  mutate(highcuration=cut(curation,
+                          c(-1,quantile(curation,0.66666),1),
+                          labels=c("FALSE","TRUE")),
+         prop=n/ntot) %>%
+  ungroup() %>% 
+  na.omit()
+tib_summary=tib %>% 
+  group_by(class_name) %>%
+  tidyr::nest() %>% 
+  mutate(signif=purrr::map_dbl(data,~wilcox.test(prop~highcuration, data=.x)$p.value),
+         diff=purrr::map_dbl(data,
+                             function(dat){dat %>%
+                                 group_by(highcuration) %>% 
+                                 summarise(x=median(prop)) %>%
+                                 select(x) %>%
+                                 pull() %>% 
+                                 diff()})) %>% 
+  mutate(signifc=case_when(signif<0.001~"***",
+                          signif<0.01~"**",
+                          signif<0.05~"*",
+                          signif<0.1 ~".",
+                          TRUE~"")) %>% 
+  mutate(label=paste0("diff=",round(diff,3),signifc))
+ggplot(tib,aes(x=class_name,fill=class_name,y=prop))+
+  geom_boxplot(aes(fill=class_name,color=highcuration))+
+  scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
+  scale_color_manual(values=c("grey40","black"))+
+  coord_flip()+
+  geom_text(data=tib_summary,
+            aes(x=class_name, y=-0.25,label=label),
+             hjust=0)+
+  guides(fill = FALSE)
 
-<!-- #   select(flood,lang,length,local,controversy) -->
+```
+@fig-curation_topics shows that articles with high levels of curation tend to deal with topics such as relief (diff=`r tib_summary %>% filter(class_name=="relief") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="relief") %>% pull(signif) %>% round(5)`), and governance (diff=`r tib_summary %>% filter(class_name=="governance") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="governance") %>% pull(signif) %>% round(5)`), while weather ((diff=`r tib_summary %>% filter(class_name=="weather") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="weather") %>% pull(signif) %>% round(5)`)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g. reports on weather.
 
-<!-- # rf=randomForest(tibrf %>% select(-controversy), -->
 
-<!-- #                 tibrf$controversy) -->
+```{r curation_causes, fig.width=8, fig.height=3}
+#| label: fig-curation_causes
+#| fig-cap: "a) Effect of the article being in a local language on curation. b) Effect of deathtoll and of the article being in a local language on curation." 
+tt=wp_pages2 %>% 
+  left_join(wm_full %>%
+              select(flood,country,deathtoll,year) %>% 
+              unique()) %>%
+  left_join(countries %>% select(country,HDI) %>% unique()) %>% 
+  mutate(year=cut(year,c(0,1950,1980,2000,2010,2020)))
+lm1=lm(curation~local,data=tt)%>% summary()
+lm2=lm(curation~local*log(deathtoll+1),data=tt) %>% summary()
+p1=ggplot(tt,aes(x=local, y=curation,fill=local))+
+  geom_boxplot()+theme(legend.position="none")+
+  geom_text(data=tt %>% group_by(local) %>% tally(),
+            aes(x=local, y = -1.2, label=paste0("n=",n)))
+p2=ggplot(tt %>% filter(n_edits>10),
+       aes(x=deathtoll,y=curation, col=local))+
+  geom_point(alpha=0.2)+
+  scale_x_continuous(trans="log1p", breaks=c(0,1,10,100,1000,10000,100000,10^6))+
+  geom_smooth(method="lm")
+cowplot::plot_grid(p1, p2, labels = c('a', 'b'), rel_widths=c(1,2))
+```
 
-<!-- flood_controversy=wp_pages_controversy%>%  -->
+@fig-curation_causes .a shows that the articles' being written in a local language (considering the event location) tends to be associated with a lower level of article curation (effect estimate= `r round(lm1$coef[2,1],3)`, t value=`r round(lm1$coef[2,3])`, Pr(\>\|t\|)=`r round(lm1$coef[2,4])`). This could be due to local articles being used more as information or managing crises tools than educational or encyclopedic carefully curated sources of knowledge. This hypothesis is reinforced by @fig-curation_causes .b which shows that the higher the deathtoll of an event, the less curated the local articles (slope for local articles `r round(lm2$coef[4,1],2)`, t value= `r round(lm2$coef[4,3],2)`, Pr(\>\|t\|)=`r round(lm2$coef[4,4],5)`).
 
-<!--   select(flood,article,controversy) %>%  -->
-
-<!--   unique() %>%  -->
-
-<!--   group_by(flood) %>%  -->
-
-<!--   mutate(n=n()) %>%  -->
-
-<!--   filter(n>5) %>%  -->
-
-<!--   ungroup() -->
-
-<!-- mod=lm(controversy~flood,data=flood_controversy) -->
-
-<!-- summary(mod) -->
-
-<!-- summary(mod)$coeff %>% -->
-
-<!--   as.data.frame() %>% -->
-
-<!--   rownames_to_column() %>% -->
-
-<!--   as_tibble() %>% -->
-
-<!--   arrange(desc(Estimate)) -->
-
-<!-- ``` -->
-
-# Discussion
+# Conclusion
 
 This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity [@lorini_uneven_2020; @ruprechter_poor_2023] due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.
 
-Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. The interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos indeed allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context (in particular through the integration of Wikipedia discourse elements and Wikimedia Commons images) as well as the difficulties inherent to identifying particular flood events based solely on presumably objective information, such as coordinates and dates for these events.
+Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Neverthelss, the interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.
