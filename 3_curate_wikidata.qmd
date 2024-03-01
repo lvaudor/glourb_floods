@@ -20,7 +20,7 @@ query=spq_init() %>%
     spq_add("?loc wdt:P17 ?country_loc") %>% 
     spq_add("?article schema:about ?flood",.required=FALSE) %>% 
     spq_label(flood,country,what) 
-png("figure/fig-graph_query.png",width=600,height=500)
+png("figure/fig-graph_query.png",width=5400,height=4800,res=600)
 plot_query(query, labelling=TRUE)
 dev.off()
 }
@@ -131,7 +131,7 @@ query_country=spq_init() %>%
     spq_add("?country wdt:P2936 ?language_used") %>% 
     spq_add("?language_used wdt:P424 ?language_used_code") %>% 
     spq_label(country,language_official,language_used)
-png("figure/fig-graph_query_country.png",width=900,height=300)
+png("figure/fig-graph_query_country.png",width=7200,height=3600,res=600)
 plot_query(query_country)
 dev.off()
 ```
@@ -255,19 +255,19 @@ Each flood event in Wikidata might come with all or part of the information rega
 We write a function which collects this information for each flood event.
 
 ```{r query_dates}
-# query_dates=spq_init() %>%
-#   spq_add(glue::glue("?flood p:P585/psv:P585 ?time_statement")) %>% 
-#   spq_add("?time_statement wikibase:timeValue ?time") %>%
-#   spq_add("?time_statement wikibase:timePrecision ?time_precision",.required=FALSE) %>%  
-#   spq_add(glue::glue("?flood p:P580/psv:P580 ?start_statement")) %>% 
-#   spq_add("?start_statement wikibase:timeValue ?start") %>%
-#   spq_add("?start_statement wikibase:timePrecision ?start_precision",.required=FALSE) %>% 
-#   spq_add(glue::glue("?flood p:P582/psv:P582 ?end_statement")) %>% 
-#   spq_add("?end_statement wikibase:timeValue ?end") %>%
-#   spq_add("?end_statement wikibase:timePrecision ?end_precision",.required=FALSE)
-# png("figure/fig-graph_query_dates.png",width=900,height=400)
-# plot_query(query_dates)
-# dev.off()
+query_dates=spq_init() %>%
+  spq_add(glue::glue("?flood p:P585/psv:P585 ?time_statement")) %>%
+  spq_add("?time_statement wikibase:timeValue ?time") %>%
+  spq_add("?time_statement wikibase:timePrecision ?time_precision",.required=FALSE) %>%
+  spq_add(glue::glue("?flood p:P580/psv:P580 ?start_statement")) %>%
+  spq_add("?start_statement wikibase:timeValue ?start") %>%
+  spq_add("?start_statement wikibase:timePrecision ?start_precision",.required=FALSE) %>%
+  spq_add(glue::glue("?flood p:P582/psv:P582 ?end_statement")) %>%
+  spq_add("?end_statement wikibase:timeValue ?end") %>%
+  spq_add("?end_statement wikibase:timePrecision ?end_precision",.required=FALSE)
+png("figure/fig-graph_query_dates.png",width=6000,height=4200,res=600)
+plot_query(query_dates)
+dev.off()
 ```
 
 ```{r def_get_date_info}
