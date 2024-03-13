@@ -242,7 +242,7 @@ precision and yearly precision.
 We carried out a third Wikidata query for each country listed by the
 first query, to gather information about their coordinates, the
 languages used by their population (either official or used languages),
-and Human Development Index (HDI) \[ref\].
+and Human Development Index (HDI).
 
 ### Comparison to the Dartmouth Flood Observatory data
 
@@ -948,8 +948,9 @@ id="fig-curation_topics"
 alt="Figure 7: Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test." />
 
 [Figure 7](#fig-curation_topics) shows that articles with high levels of
-curation tend to deal with topics such as relief (diff=0.045***), and
-governance (diff=0.028**), while weather (diff=-0.023*) is a bit less
+curation tend to deal with topics such as relief (diff=0.0454944,
+p-value=0.00007), and governance (diff=0.0281336, p-value=0.00133),
+while weather ((diff=-0.0227273, p-value=0.02902)) is a bit less
 addressed. This hints at relief and governance being sensitive topics,
 which probably require and elicit more careful editing, discussion and
 fact-checking than e.g. reports on weather.
