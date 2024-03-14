@@ -8,7 +8,7 @@ wd_raw=readRDS("data/wd_raw.RDS")
 
 We translate all Wikipedia pages' titles and texts to English (when Google translate allows it).
 
-```{r}
+```{r }
 if(!file.exists("data/wikisites_translated.RDS")){
   wikisites=readRDS("data/wikisites.RDS") %>% 
      mutate(lang=stringr::str_extract(article,"(?<=https://)([[:alpha:]]|-)*(?=\\.)"))%>%
@@ -192,8 +192,6 @@ wp_words=readRDS("data/wp_words.RDS") %>%
 ## Classification of segment's topics
 
 ```{r prepare_class_rainette}
-
-
 if(!file.exists("data/wp_segments.RDS")){
   library(quanteda)
   library(rainette)
@@ -304,9 +302,7 @@ saveRDS(wp_revisions,"data/wp_revisions.RDS")
 
 # Get consultation stats on all pages
 
-```{r consult_stats}
-wp_pages=readRDS("data/wp_pages.RDS")
-
+```{r get_page_views}
 get_page_views=function(title,lang){
   # Définir la plage de dates pour laquelle vous souhaitez récupérer les statistiques
   start_date <- "20000101"
@@ -332,13 +328,72 @@ get_page_views=function(title,lang){
   }  
   return(data_views)
 }
+```
 
-wp_pages_views=wp_pages %>%
-  dplyr::select(article,title,lang) %>% 
-  dplyr::mutate(data=purrr::map2(.x=title,.y=lang, get_page_views)) %>% 
-  tidyr::unnest(c(data))
+```{r wp_views_monthly}
+if(!file.exists("data/wp_views_monthly.RDS")){
+  wp_pages_curation=readRDS("data/wp_pages_curation.RDS")
+  wp_views_daily = wp_pages_curation %>%
+    dplyr::select(article,title,lang) %>% 
+    dplyr::mutate(data=purrr::map2(.x=title,.y=lang, get_page_views)) %>% 
+    tidyr::unnest(c(data)) %>% 
+    mutate(timestamp=stringr::str_replace(timestamp,"00$","")) %>% 
+    mutate(day=lubridate::ymd(timestamp)) %>% 
+    mutate(month=round_date(day,"month"))
+  saveRDS(wp_views_daily,"data/wp_views_daily.RDS")
+  wp_views_monthly=wp_views_daily %>% 
+    group_by(article,title,lang,month) %>%
+    summarise(nviews=sum(views),.groups="drop") 
+  saveRDS(wp_views_monthly, "data/wp_views_monthly.RDS")
+}
+```
 
-saveRDS(wp_pages_views,"data/wp_pages_views.RDS")
+```{r wp_pages_complete}
+if(!file.exists("data/wp_pages_complete.RDS")){
+    wp_views_monthly=readRDS("data/wp_views_monthly.RDS")
+    wp_views_tot=wp_views_monthly %>% 
+      group_by(article) %>% 
+      mutate(rank=1:n()) %>% 
+      tidyr::nest() %>% 
+      mutate(data1=purrr::map(data,~filter(.x,rank<=3))) %>% 
+      mutate(data1=purrr::map(data1,~summarise(.x, n_views_f3months=sum(nviews))),
+             data2=purrr::map(data,~summarise(.x, n_views_tot=sum(nviews))),
+             data3=purrr::map(data,~summarise(.x, n_months=n()))) %>% 
+      select(-data) %>% 
+      unnest(c(data1,data2,data3)) %>% 
+      mutate(n_views_mean=n_views_tot/n_months)
+    
+    wm_full=readRDS("data/wm_full.RDS") %>% select(flood,deathtoll) %>% unique()
+    wp_pages_complete=readRDS("data/wp_pages_curation.RDS") %>% 
+      left_join(wp_views_tot,by=c("article")) %>% 
+      left_join(wm_full,by="flood")
+    saveRDS(wp_pages_complete,"data/wp_pages_complete.RDS")
+}
+wp_pages_complete=readRDS("data/wp_pages_complete.RDS")
+```
+```{r}
+# ggplot(wp_pages_complete, aes(x=local,n_views_mean, fill=local))+
+#   geom_boxplot()+
+#   scale_y_log10()
 
 ```
 
+```{r}
+# ggplot(wp_pages_complete,aes(x=n_edits,y=n_views_tot, col=local))+
+#   geom_point()+
+#   scale_x_log10()+scale_y_log10()+
+#   geom_smooth()
+```
+
+```{r}
+# ggplot(wp_pages,aes(x=deathtoll,y=n_views_f3months, col=local))+
+#   geom_point()+
+#   scale_x_log10()+scale_y_log10()+
+#   geom_smooth(method="lm")
+# 
+# 
+# ggplot(wp_pages,aes(x=deathtoll,y=n_views_tot, col=local))+
+#   geom_point()+
+#   scale_x_log10()+scale_y_log10()+
+#   geom_smooth(method="lm")
+```
