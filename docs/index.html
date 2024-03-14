@@ -153,8 +153,9 @@ div.csl-indent {
   <li><a href="#datasets" id="toc-datasets" class="nav-link" data-scroll-target="#datasets">Datasets</a></li>
   <li><a href="#wikidata-on-floods" id="toc-wikidata-on-floods" class="nav-link" data-scroll-target="#wikidata-on-floods">Wikidata on floods</a></li>
   <li><a href="#compare-to-dfo-data" id="toc-compare-to-dfo-data" class="nav-link" data-scroll-target="#compare-to-dfo-data">Compare to DFO data</a></li>
-  <li><a href="#wikipedia-on-floods" id="toc-wikipedia-on-floods" class="nav-link" data-scroll-target="#wikipedia-on-floods">Wikipedia on floods</a></li>
-  <li><a href="#wikipedia-history-topics-and-curation" id="toc-wikipedia-history-topics-and-curation" class="nav-link" data-scroll-target="#wikipedia-history-topics-and-curation">Wikipedia history, topics and curation</a></li>
+  <li><a href="#wikipedia-articles-description" id="toc-wikipedia-articles-description" class="nav-link" data-scroll-target="#wikipedia-articles-description">Wikipedia articles’ description</a></li>
+  <li><a href="#wikipedia-articles-history" id="toc-wikipedia-articles-history" class="nav-link" data-scroll-target="#wikipedia-articles-history">Wikipedia articles’ history</a></li>
+  <li><a href="#wikipedia-articles-topics" id="toc-wikipedia-articles-topics" class="nav-link" data-scroll-target="#wikipedia-articles-topics">Wikipedia articles’ topics</a></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
@@ -747,8 +748,8 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </div>
 <p><a href="#fig-HDI_deathtoll_data">Figure&nbsp;2</a> shows that events in Wikidata are generally associated with higher deathtoll compared to those documented in DFO only or DFO and WD both. For DFO-documented events, the lower the HDI class, the higher the deathtoll, while for WD-documented events, the few events which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries. <em>(and I don’t quite know how to explain that… maybe a tendency to overestimation or to consider “far-reaching” consequences?)</em></p>
 </section>
-<section id="wikipedia-on-floods" class="level2">
-<h2 class="anchored" data-anchor-id="wikipedia-on-floods">Wikipedia on floods</h2>
+<section id="wikipedia-articles-description" class="level2">
+<h2 class="anchored" data-anchor-id="wikipedia-articles-description">Wikipedia articles’ description</h2>
 <p>There are <strong>2630 Wikipedia pages</strong> associated to these events (i.e.&nbsp;on average 2.58 Wikipedia pages per event). 727 flood events are associated to at least one Wikipedia page.</p>
 <p>455 Wikipedia pages are in English. Out of the 2175 remaining pages, we could translate most pages to English, except 175 pages which were in languages that Google Translate did not support. We based all subsequent textometric analyses on the texts in English, either natively so or translated.</p>
 <p>The average length of articles (in English or translated to English) is 4348 characters. The 10% shortest articles represent less than 448 characters and the 10% longest ones are more than 9362 characters long.</p>
@@ -799,19 +800,23 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </div>
 </div>
 </section>
-<section id="wikipedia-history-topics-and-curation" class="level2">
-<h2 class="anchored" data-anchor-id="wikipedia-history-topics-and-curation">Wikipedia history, topics and curation</h2>
+<section id="wikipedia-articles-history" class="level2">
+<h2 class="anchored" data-anchor-id="wikipedia-articles-history">Wikipedia articles’ history</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-delay_revisions" class="quarto-figure quarto-figure-center anchored">
+<div id="fig-delays" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-delay_revisions-1.png" class="img-fluid figure-img" width="960"></p>
-<figcaption class="figure-caption">Figure&nbsp;3: Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The delay might be negative (the edits about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).</figcaption>
+<p><img src="index_files/figure-html/fig-delays-1.png" class="img-fluid figure-img" width="1344"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: Time delay (in years) between events and A) revisions to the Wikipedia articles documenting them B) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-delay_revisions">Figure&nbsp;3</a> shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest. <em>Notez que je ne l’ai pas fait pour l’instant car je croule déjà sous les données, mais il serait possible (et pas trop compliqué) de récupérer les statistiques de consultation de chacune des pages (et donc de considérer l’intérêt porté à un article du point de vue du lecteur plutôt que du point de vue du créateur de contenu…). Est-ce que vous pensez que je dois me lancer là-dedans?</em></p>
+<p><a href="#fig-delays">Figure&nbsp;3</a> shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. Views, on the other hand, are distributed more evenly through time. For instance, most views about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact.</p>
+<!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
+</section>
+<section id="wikipedia-articles-topics" class="level2">
+<h2 class="anchored" data-anchor-id="wikipedia-articles-topics">Wikipedia articles’ topics</h2>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-topics" class="quarto-figure quarto-figure-center anchored">

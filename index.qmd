@@ -200,7 +200,7 @@ ggplot(wm_dfo_comparison,
 
 @fig-HDI_deathtoll_data shows that events in Wikidata are generally associated with higher deathtoll compared to those documented in DFO only or DFO and WD both. For DFO-documented events, the lower the HDI class, the higher the deathtoll, while for WD-documented events, the few events which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries. *(and I don't quite know how to explain that... maybe a tendency to overestimation or to consider "far-reaching" consequences?)*
 
-## Wikipedia on floods
+## Wikipedia articles' description
 
 ```{r wpp_describe}
 Nwde_with_wpp=wp_pages %>% 
@@ -280,11 +280,46 @@ figure <- ggarrange(p1,p2,
 figure
 ```
 
-## Wikipedia history, topics and curation
+## Wikipedia articles' history
 
-```{r delay_revisions,fig.width=10,fig.height=8, warning=FALSE, message=FALSE}
-#| label: fig-delay_revisions
-#| fig-cap: "Time delay (in years) between events and revisions to the Wikipedia articles documenting them. The delay might be negative (the edits about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year)."
+```{r delays,fig.width=14,fig.height=8, warning=FALSE, message=FALSE}
+#| label: fig-delays
+#| fig-cap: "Time delay (in years) between events and A) revisions to the Wikipedia articles documenting them B) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year)."
+
+timebreaks=c(-Inf,2000,2010,2020,2024)
+labels=c("0","1.5 months","3 months",
+         "6 months","1 year","2 years","5 years",
+         "10 years","15 years","25 years")
+flood_date_precision=readRDS("data/wm_full.RDS") %>% select(flood,date_precision) %>% unique()
+wp_views_daily=readRDS("data/wp_views_daily.RDS")
+truc=wp_views_daily %>%
+  left_join(wp_pages %>% select(flood,article),
+            by="article") %>% 
+  left_join(wd_events %>% select(flood,date),by="flood") %>%
+  left_join(flood_date_precision,by="flood") %>% 
+  mutate(diff=difftime(day,date,units="days")) %>% 
+  mutate(delay=as.numeric(diff)) %>% 
+  mutate(delay=delay/365.25) %>% 
+  mutate(year=lubridate::year(date)) %>% 
+  mutate(year=cut(year,timebreaks)) %>% 
+  mutate(delay=as.numeric(cut(delay,
+                              c(-Inf,0,0.125,0.25,0.5,1,2,5,10,15,25,+Inf),
+                              labels=c(1:11)))) %>% 
+  group_by(year) %>% 
+  mutate(ntot=sum(views,na.rm=TRUE)) %>% 
+  ungroup() %>% 
+  group_by(year,delay,ntot,date_precision) %>% 
+  summarise(n=sum(views,na.rm=TRUE),.groups="drop") %>% 
+  mutate(prop=n/ntot)%>% 
+  na.omit()
+p1=ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
+  geom_col()+
+  facet_grid(rows=vars(year))+
+  scale_x_continuous(breaks=(1:10)+0.5,
+                     labels=labels) +
+  
+  ylab("proportion of views")
+
 flood_date_precision=readRDS("data/wm_full.RDS") %>% select(flood,date_precision) %>% unique()
 truc=wp_revisions %>%
   left_join(wp_pages %>% select(flood,article),
@@ -297,8 +332,10 @@ truc=wp_revisions %>%
   mutate(delay=as.numeric(diff)) %>% 
   mutate(delay=delay/365.25) %>% 
   mutate(year=lubridate::year(date)) %>% 
-  mutate(year=cut(year,c(-Inf,2000,2004,2008,2012,2018,2022,2024))) %>% 
-  mutate(delay=cut(delay,c(-Inf,0,0.125,0.25,0.5,1,2,5,10,15,25,+Inf))) %>% 
+  mutate(year=cut(year,timebreaks)) %>% 
+  mutate(delay=as.numeric(cut(delay,
+                              c(-Inf,0,0.125,0.25,0.5,1,2,5,10,15,25,+Inf),
+                              labels=c(1:11)))) %>% 
   group_by(year) %>% 
   mutate(ntot=n()) %>% 
   ungroup() %>% 
@@ -306,12 +343,24 @@ truc=wp_revisions %>%
   summarise(n=n(),.groups="drop") %>% 
   mutate(prop=n/ntot) %>% 
   na.omit()
-ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
+p2=ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
   geom_col()+
-  facet_grid(rows=vars(year))
+  facet_grid(rows=vars(year))+
+  scale_x_continuous(breaks=(1:10)+0.5,
+                     labels=labels)+
+  ylab("proportion of edits")
+figure <- ggarrange(p2,p1,
+                    labels = c("A", "B"),
+                    ncol = 2, nrow = 1,
+                    common.legend=TRUE)
+figure
 ```
 
-@fig-delay_revisions shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events can be viewed as news rather than encyclopedic reports on past events. Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest. *Notez que je ne l'ai pas fait pour l'instant car je croule déjà sous les données, mais il serait possible (et pas trop compliqué) de récupérer les statistiques de consultation de chacune des pages (et donc de considérer l'intérêt porté à un article du point de vue du lecteur plutôt que du point de vue du créateur de contenu...). Est-ce que vous pensez que je dois me lancer là-dedans?*
+@fig-delays shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. Views, on the other hand, are distributed more evenly through time. For instance, most views about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact. 
+
+<!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
+
+## Wikipedia articles' topics
 
 ```{r plot_class_rainette, fig.width=10, fig.height=8}
 #| label: fig-topics
@@ -431,8 +480,6 @@ cowplot::plot_grid(p1, p2, labels = c('a', 'b'))
 
 @fig-curation .a shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page 'matures', with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). By construction and as shown by @fig-curation .b, the relative edit length is highly correlated to total article length, though we would like to dispose of a length-independent curation measure for further analyses purposes. Hence we calculate the curation score based on the residuals of the linear relationship of the relative edit length to total length (both log-transformed). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles). We argue that this could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.
 
-
-
 ```{r curation_topics,fig.width=7,fig.height=5}
 #| label: fig-curation_topics
 #| fig-cap: "Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test." 
@@ -483,8 +530,8 @@ ggplot(tib,aes(x=class_name,fill=class_name,y=prop))+
   guides(fill = FALSE)
 
 ```
-@fig-curation_topics shows that articles with high levels of curation tend to deal with topics such as relief (diff=`r tib_summary %>% filter(class_name=="relief") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="relief") %>% pull(signif) %>% round(5)`), and governance (diff=`r tib_summary %>% filter(class_name=="governance") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="governance") %>% pull(signif) %>% round(5)`), while weather ((diff=`r tib_summary %>% filter(class_name=="weather") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="weather") %>% pull(signif) %>% round(5)`)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g. reports on weather.
 
+@fig-curation_topics shows that articles with high levels of curation tend to deal with topics such as relief (diff=`r tib_summary %>% filter(class_name=="relief") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="relief") %>% pull(signif) %>% round(5)`), and governance (diff=`r tib_summary %>% filter(class_name=="governance") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="governance") %>% pull(signif) %>% round(5)`), while weather ((diff=`r tib_summary %>% filter(class_name=="weather") %>% pull(diff)`, p-value=`r tib_summary %>% filter(class_name=="weather") %>% pull(signif) %>% round(5)`)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g. reports on weather.
 
 ```{r curation_causes, fig.width=8, fig.height=3}
 #| label: fig-curation_causes
