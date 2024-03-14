@@ -132,7 +132,7 @@ query_country=spq_init() %>%
     spq_add("?language_used wdt:P424 ?language_used_code") %>% 
     spq_label(country,language_official,language_used)
 png("figure/fig-graph_query_country.png",width=7200,height=3600,res=600)
-plot_query(query_country)
+plot_query(query_country, labelling=TRUE)
 dev.off()
 ```
 
@@ -266,7 +266,7 @@ query_dates=spq_init() %>%
   spq_add("?end_statement wikibase:timeValue ?end") %>%
   spq_add("?end_statement wikibase:timePrecision ?end_precision",.required=FALSE)
 png("figure/fig-graph_query_dates.png",width=6000,height=4200,res=600)
-plot_query(query_dates)
+plot_query(query_dates,labelling=TRUE)
 dev.off()
 ```
 
