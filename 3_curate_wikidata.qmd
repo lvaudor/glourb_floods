@@ -9,8 +9,8 @@ library(sequins)
 We query the Wikidata Triplestore through the {glitter} R package (ref).
 
 ```{r initial_query}
-if(!file.exists("figure/fig-graph_query.png")){
-query=spq_init() %>%
+if(!file.exists("figure/fig-graph_query_complete.png")){
+query_basis=spq_init() %>%
     spq_add("?flood wdt:P31/wdt:P279* wd:Q8068") %>% 
     spq_add("?flood wdt:P31 ?what") %>%
     spq_add("?flood wdt:P625 ?coords",.required=FALSE) %>%
@@ -20,8 +20,29 @@ query=spq_init() %>%
     spq_add("?loc wdt:P17 ?country_loc") %>% 
     spq_add("?article schema:about ?flood",.required=FALSE) %>% 
     spq_label(flood,country,what) 
-png("figure/fig-graph_query.png",width=5400,height=4800,res=600)
-plot_query(query, labelling=TRUE)
+query_country=spq_init() %>%
+    spq_add("?country wdt:P625 ?coords_country") %>%
+    spq_add("?country wdt:P37 ?language_official") %>% 
+    spq_add("?language_official wdt:P424 ?language_official_code") %>% 
+    spq_add("?country wdt:P1081 ?HDI") %>%
+    spq_add("?country wdt:P2936 ?language_used") %>% 
+    spq_add("?language_used wdt:P424 ?language_used_code") %>% 
+    spq_label(country,language_official,language_used)
+query_dates=spq_init() %>%
+  spq_add(glue::glue("?flood p:P585/psv:P585 ?time_statement")) %>%
+  spq_add("?time_statement wikibase:timeValue ?time") %>%
+  spq_add("?time_statement wikibase:timePrecision ?time_precision",.required=FALSE) %>%
+  spq_add(glue::glue("?flood p:P580/psv:P580 ?start_statement")) %>%
+  spq_add("?start_statement wikibase:timeValue ?start") %>%
+  spq_add("?start_statement wikibase:timePrecision ?start_precision",.required=FALSE) %>%
+  spq_add(glue::glue("?flood p:P582/psv:P582 ?end_statement")) %>%
+  spq_add("?end_statement wikibase:timeValue ?end") %>%
+  spq_add("?end_statement wikibase:timePrecision ?end_precision",.required=FALSE)
+png("figure/fig-graph_query_complete.png",width=5400,height=14400,res=600)
+p1=plot_query(query_basis, labelling=TRUE)
+p2=plot_query(query_dates, labelling=TRUE)
+p3=plot_query(query_country, labelling=TRUE)
+ggpubr::ggarrange(p1,p2,p3,nrow=3,ncol=1,labels=c("a","b","c"))
 dev.off()
 }
 ```
@@ -488,6 +509,18 @@ categories=readRDS("data/categories.RDS")%>%
   filter(flood %in% wd_raw$flood)
 ```
 
+## Add source to deathtoll estimate
+
+```{r deathtoll_source}
+complement_wd_events=spq_init() %>%
+  spq_prefix(prefixes=c(prov="http://www.w3.org/ns/prov#")) %>% 
+   spq_add("?flood wdt:P31/wdt:P279* wd:Q8068") %>% 
+  spq_add("?flood p:P1120 ?statement") %>%
+  spq_add("?statement prov:wasDerivedFrom ?deathtoll_source") %>% 
+  spq_perform(replace_prefixes=TRUE)
+```
+
+
 ## Join everything
 
 ```{r}
@@ -503,7 +536,8 @@ wm_full=wd_events %>%
             relationship ="many-to-many") %>% 
   left_join(categories,by=c("flood","flood_label"),
             relationship ="many-to-many")
-wd_events=wd_events %>% select(flood,flood_label,date,country,country_label) %>%
+wd_events=wd_events %>%
+  select(flood,flood_label,date,country,country_label,deathtoll) %>%
   mutate(year=lubridate::year(date)) %>% 
   unique()
 

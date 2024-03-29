@@ -196,28 +196,16 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <h1>Methods</h1>
 <section id="primary-census-of-flood-events" class="level3">
 <h3 class="anchored" data-anchor-id="primary-census-of-flood-events">Primary census of flood events</h3>
-<p>We collected Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) <span class="citation" data-cites="vaudor_glitter_2023">(<a href="#ref-vaudor_glitter_2023" role="doc-biblioref">Vaudor and Salmon 2023</a>)</span>.</p>
-<div class="quarto-figure quarto-figure-center">
+<p>We collected Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) <span class="citation" data-cites="vaudor_glitter_2023">(<a href="#ref-vaudor_glitter_2023" role="doc-biblioref">Vaudor and Salmon 2023</a>)</span>. Wikidata is a free and collaborative knowledge base, structured as a graph of interconnected items representing physical entities, events, concepts or topics, associated to a unique identifier. These items are linked through properties forming statements describing the relationships between items and/or attributes. Each query we run on Wikidata can hence be viewed as a graph query, where we retrieve items and attributes and the relationships between them.</p>
+<div id="fig-queries" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="figure/fig-graph_query.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">First Wikidata query</figcaption>
+<p><img src="figure/fig-graph_query_complete.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Wikidata queries represented as graphs. When properties were part of the Wikidata (wd) namespace, labels explaining their nature were displayed, instead of their codified property identifiers (e.g.&nbsp;“instance of” instead of “wd:P31”)</figcaption>
 </figure>
 </div>
-<p>We carried out a first Wikidata query to get all instances of floods or subclasses of floods as well as a few descriptors of these. The events can be located through <code>coords</code> (geographical coordinates) <code>loc</code> (a location -which can be any type of geographical item documented in Wikidata, e.g.&nbsp;a city, region or country- which in turn might provide coordinates-), or simply through the <code>country</code> variable -which might also in turn provide coordinates-). We used all these variables to try and provide coordinates for as many events as possible, with the greatest precision possible: we prioritized coords (when available) over coordinates corresponding to location, and coordinates corresponding to location (when available) to coordinates corresponding to country.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figure/fig-graph_query_dates.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Second Wikidata query</figcaption>
-</figure>
-</div>
-<p>We carried out a second Wikidata query for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events’ label if present (as labels generally consist of a mention of type of event, time and place). Time-related information on Wikidata are specified with varying precision, which when regarding floods generally vary between dayly precision and yearly precision.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="figure/fig-graph_query_country.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Third Wikidata query</figcaption>
-</figure>
-</div>
-<p>We carried out a third Wikidata query for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI).</p>
+<p>We carried out a first Wikidata query (<strong>?@fig-queries.a</strong>) to get all instances of floods or subclasses of floods as well as a few descriptors of these. The events can be located through <code>coords</code> (geographical coordinates) <code>loc</code> (a location -which can be any type of geographical item documented in Wikidata, e.g.&nbsp;a city, region or country- which in turn might provide coordinates-), or simply through the <code>country</code> variable -which might also in turn provide coordinates-). We used all these variables to try and provide coordinates for as many events as possible, with the greatest precision possible: we prioritized <code>coords</code> (when available) over coordinates corresponding to location, and coordinates corresponding to location (when available) to coordinates corresponding to country.</p>
+<p>We carried out a second Wikidata query (<strong>?@fig-queries.b</strong>) for each flood listed by this first query, to gather information about its time of occurrence (wdt:P585), start time (wdt:P580) and end time (wdt:P582). We hence tried to provide a date for each of the events using either one of these informations, prioritizing the date provided by time of occurrence (if available) over the average date between start time and end time (if both were available), average date between start time and end time over start time or end time (if only one was available), and start time or end time over four-digit words in the events’ label if present (as labels generally consist of a mention of type of event, time and place). Time-related information on Wikidata are specified with varying precision, which when regarding floods generally vary between dayly precision and yearly precision.</p>
+<p>We carried out a third Wikidata query (<strong>?@fig-queries.c</strong>) for each country listed by the first query, to gather information about their coordinates, the languages used by their population (either official or used languages), and Human Development Index (HDI).</p>
 </section>
 <section id="comparison-to-the-dartmouth-flood-observatory-data" class="level3">
 <h3 class="anchored" data-anchor-id="comparison-to-the-dartmouth-flood-observatory-data">Comparison to the Dartmouth Flood Observatory data</h3>
@@ -231,6 +219,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <li>filter all DFO events to only keep those verifying condition 1 or condition 2</li>
 <li>if several DFO events verify those conditions, retain only the one corresponding to lowest difference in time to <code>flood</code>, and consider that this is the DFO event that matches <code>flood</code></li>
 </ul>
+<p>The rather high threshold of 400 days has been chosen to account both for the possibly low precision -sometimes, yearly precision- in dates, and the fact that flood events can be quite long, leading to heterogeneities in the way the date of occurrence is defined and recorded. The also rather high threshold of 400 kms has been chosen to account for the fact that Wikidata events are not always precisely located. The flood event might indeed be located through a location corresponding to the region centroid, or even country centroid. Using as an alternative to the distance the country of occurrence recorded in both datasets aimed at alleviating this problem of events located with very low spatial precision.</p>
 </section>
 <section id="text-analysis-of-wikipedia-pages" class="level2">
 <h2 class="anchored" data-anchor-id="text-analysis-of-wikipedia-pages">Text analysis of Wikipedia pages</h2>
@@ -249,7 +238,17 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </section>
 <section id="datasets" class="level2">
 <h2 class="anchored" data-anchor-id="datasets">Datasets</h2>
-<p>We have gathered and curated tables of data organized as follows:</p>
+<p><em>Je ne suis pas sûre qu’il faille inclure cette partie dans l’article, mais en même temps je trouve qu’il faudrait réussir à correctement valoriser les données elles-mêmes car ce n’était pas une mince affaire de les rassembler…</em></p>
+<p>We have gathered and curated tables of data from both Wikidata and Wikipedia :</p>
+<ul>
+<li>wd_event: one row = one flood event</li>
+<li>wp_pages: one row = one Wikipedia page</li>
+<li>wp_revisions : one row = one revision of a Wikipedia page</li>
+<li>wp_views: one row = one day of views of a Wikipedia page</li>
+<li>wp_segments: one row = one segment of a Wikipedia page</li>
+<li>countries: one row = one country * one language</li>
+</ul>
+<p>For each of these tables, we show below the descriptors names, display which among these correspond to a key useable for joining to other tables, the type of data (numeric, character, logical, etc.) and the contents of one row randomly selected.</p>
 <section id="wd_events" class="level3">
 <h3 class="anchored" data-anchor-id="wd_events">wd_events</h3>
 <div class="cell">
@@ -270,42 +269,49 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <td style="text-align: left;">*</td>
 <td style="text-align: left;">character</td>
 <td style="text-align: right;">792</td>
-<td style="text-align: left;">wd:Q18991372</td>
+<td style="text-align: left;">wd:Q15833333</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">flood_label</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">character</td>
 <td style="text-align: right;">698</td>
-<td style="text-align: left;">1966 Kaetsu flood</td>
+<td style="text-align: left;">The Magdalen flood of 1480</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">date</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">Date</td>
 <td style="text-align: right;">615</td>
-<td style="text-align: left;">1966-07-17</td>
+<td style="text-align: left;">1480-06-22</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">country</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">character</td>
 <td style="text-align: right;">154</td>
-<td style="text-align: left;">wd:Q17</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">country_label</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">character</td>
 <td style="text-align: right;">154</td>
-<td style="text-align: left;">Japan</td>
+<td style="text-align: left;">NA</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">deathtoll</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">numeric</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">year</td>
 <td style="text-align: left;"></td>
 <td style="text-align: left;">numeric</td>
 <td style="text-align: right;">236</td>
-<td style="text-align: left;">1966</td>
+<td style="text-align: left;">1480</td>
 </tr>
 </tbody>
 </table>
@@ -492,6 +498,68 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </div>
 </div>
 </section>
+<section id="wp_views" class="level3">
+<h3 class="anchored" data-anchor-id="wp_views">wp_views</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 1%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">var</th>
+<th style="text-align: left;">key</th>
+<th style="text-align: left;">class</th>
+<th style="text-align: right;">n_distinct</th>
+<th style="text-align: left;">example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">article</td>
+<td style="text-align: left;">*</td>
+<td style="text-align: left;">character</td>
+<td style="text-align: right;">2630</td>
+<td style="text-align: left;">https://th.wikipedia.org/wiki/%E0%B8%AD%E0%B8%B8%E0%B8%97%E0%B8%81%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B9%83%E0%B8%99%E0%B8%A3%E0%B8%B1%E0%B8%90%E0%B9%80%E0%B8%81%E0%B8%A3%E0%B8%A5%E0%B8%B0_%E0%B8%9E.%E0%B8%A8._2561</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">title</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">character</td>
+<td style="text-align: right;">2544</td>
+<td style="text-align: left;">อุทกภัยในรัฐเกรละ พ.ศ. 2561</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lang</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">character</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: left;">th</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">timestamp</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">character</td>
+<td style="text-align: right;">3138</td>
+<td style="text-align: left;">2022070100</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">views</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">integer</td>
+<td style="text-align: right;">3939</td>
+<td style="text-align: left;">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
 <section id="wp_segments" class="level3">
 <h3 class="anchored" data-anchor-id="wp_segments">wp_segments</h3>
 <div class="cell">
@@ -633,7 +701,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </section>
 <section id="wikidata-on-floods" class="level2">
 <h2 class="anchored" data-anchor-id="wikidata-on-floods">Wikidata on floods</h2>
-<p>The initial query provided <strong>1018 Wikidata flood events</strong>. In terms of spatial precision, most coordinates are inferred from either variable country or variable location (the major part of provided locations being countries too). The date of most events is documented either directly or through the label of the event. Most events’ dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.</p>
+<p>The initial query provided <strong>1048 Wikidata flood events</strong>. In terms of spatial precision, most coordinates are inferred from either variable country or variable location (the major part of provided locations being countries too). The date of most events is documented either directly or through the label of the event. Most events’ dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
@@ -725,32 +793,23 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </section>
 <section id="compare-to-dfo-data" class="level2">
 <h2 class="anchored" data-anchor-id="compare-to-dfo-data">Compare to DFO data</h2>
+<p>We could expect the WD dataset to include less events than the DFO dataset which records flood events primarily based on physical criteria, while one can argue that events are only recorded in WD when they reach some level of social or historical significance. We also expected the WD dataset to be somewhat biased towards events in countries with a higher HDI, as the WD dataset is based on user-generated content. We hence compared the number of events in both datasets according to the HDI class of the country where the event took place.</p>
 <p>We compare the number of events in both datasets (WD and DFO) according to Human Development Index of the country where the event took place.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-freq_events_in_datasets" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-freq_events_in_datasets-1.png" class="img-fluid figure-img" width="576"></p>
-<figcaption class="figure-caption">Figure&nbsp;1: Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile).</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;2: a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div class="cell">
-<div class="cell-output-display">
-<div id="fig-HDI_deathtoll_data" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-HDI_deathtoll_data-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;2: Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class.</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<p><a href="#fig-HDI_deathtoll_data">Figure&nbsp;2</a> shows that events in Wikidata are generally associated with higher deathtoll compared to those documented in DFO only or DFO and WD both. For DFO-documented events, the lower the HDI class, the higher the deathtoll, while for WD-documented events, the few events which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries. <em>(and I don’t quite know how to explain that… maybe a tendency to overestimation or to consider “far-reaching” consequences?)</em></p>
+<p><strong>?@fig-HDI_deathtoll_data</strong> shows that events in Wikidata are generally associated with higher deathtoll compared to those documented in DFO only or DFO and WD both. For DFO-documented events, the lower the HDI class, the higher the deathtoll, while for WD-documented events, the few events which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries. <em>(and I don’t quite know how to explain that… maybe a tendency to overestimation or to consider “far-reaching” consequences?)</em></p>
 </section>
 <section id="wikipedia-articles-description" class="level2">
 <h2 class="anchored" data-anchor-id="wikipedia-articles-description">Wikipedia articles’ description</h2>
-<p>There are <strong>2630 Wikipedia pages</strong> associated to these events (i.e.&nbsp;on average 2.58 Wikipedia pages per event). 727 flood events are associated to at least one Wikipedia page.</p>
+<p>There are <strong>2630 Wikipedia pages</strong> associated to these events (i.e.&nbsp;on average 2.51 Wikipedia pages per event). 727 flood events are associated to at least one Wikipedia page.</p>
 <p>455 Wikipedia pages are in English. Out of the 2175 remaining pages, we could translate most pages to English, except 175 pages which were in languages that Google Translate did not support. We based all subsequent textometric analyses on the texts in English, either natively so or translated.</p>
 <p>The average length of articles (in English or translated to English) is 4348 characters. The 10% shortest articles represent less than 448 characters and the 10% longest ones are more than 9362 characters long.</p>
 <p>There are <strong>216245 revisions</strong> that produced the Wikipedia pages as they appear to this date, which represents an average 82 revisions per page. 175107 (80.98%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings “bot” or “Bot”). There are <strong>44109 distinct editors</strong>, 40101 (90.91%) of which appear to be humans. On average, each human editor in our corpus is responsible for 4.37 edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:</p>
@@ -807,12 +866,12 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-delays" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-delays-1.png" class="img-fluid figure-img" width="1344"></p>
-<figcaption class="figure-caption">Figure&nbsp;3: Time delay (in years) between events and A) revisions to the Wikipedia articles documenting them B) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;3: Time delay (in years) between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><a href="#fig-delays">Figure&nbsp;3</a> shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. Views, on the other hand, are distributed more evenly through time. For instance, most views about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact.</p>
+<p><strong>?@fig-delays.a</strong> shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. <strong>?@fig-delays.b</strong> shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, although most views occur about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact.</p>
 <!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
 </section>
 <section id="wikipedia-articles-topics" class="level2">
@@ -859,7 +918,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </div>
 </div>
 </div>
-<p><a href="#fig-curation_topics">Figure&nbsp;7</a> shows that articles with high levels of curation tend to deal with topics such as relief (diff=0.0454944, p-value=0.00007), and governance (diff=0.0281336, p-value=0.00133), while weather ((diff=-0.0227273, p-value=0.02902)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g.&nbsp;reports on weather.</p>
+<p><a href="#fig-curation_topics">Figure&nbsp;7</a> shows that articles with high levels of curation tend to deal with topics such as relief (diff=0.045, p-value=0.00007), and governance (diff=0.028, p-value=0.00133), while weather ((diff=-0.023, p-value=0.02902)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g.&nbsp;reports on weather.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-curation_causes" class="quarto-figure quarto-figure-center anchored">

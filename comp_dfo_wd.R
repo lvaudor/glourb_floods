@@ -20,11 +20,6 @@ dfo_comp=left_join(dfo_comp ,
   select(-start,-end,-date,-deathtoll,-country_label) 
 
 wd_events=readRDS("data/wd_events.RDS") %>% 
-  left_join(readRDS("data/wd_raw.RDS") %>% 
-              select(flood,deathtoll) %>% 
-              unique(),
-            by="flood",
-            relationship = "many-to-many") %>% 
   left_join(countries %>% select(country,HDI),"country",relationship = "many-to-many") %>% 
   mutate(HDI_wd=HDI) %>% 
   select(-HDI) %>% 
@@ -69,9 +64,14 @@ wm_dfo_comparison=wd_events %>%
          include.lowest=TRUE) %>% 
   mutate(in_data=case_when(is.na(flood) & !is.na(flood_dfo)~"dfo",
                            !is.na(flood) & is.na(flood_dfo)~"wd",
-                           !is.na(flood) & !is.na(flood_dfo)~"in_both")) %>% 
-  mutate(deathtoll=case_when(!is.na(deathtoll_dfo)~deathtoll_dfo,
-                             is.na(deathtoll_dfo)~deathtoll))
-
+                           !is.na(flood) & !is.na(flood_dfo)~"in_both"))
+complement_wd_events=spq_init() %>%
+  spq_prefix(prefixes=c(prov="http://www.w3.org/ns/prov#")) %>% 
+  spq_add("?flood wdt:P31/wdt:P279* wd:Q8068") %>% 
+  spq_add("?flood p:P1120 ?statement") %>%
+  spq_add("?statement prov:wasDerivedFrom ?deathtoll_source") %>% 
+  spq_perform(replace_prefixes=TRUE)
+wm_dfo_comparison=wm_dfo_comparison %>% 
+  left_join(complement_wd_events,by="flood")
 saveRDS(wm_dfo_comparison,"data/wm_dfo_comparison.RDS")
 }

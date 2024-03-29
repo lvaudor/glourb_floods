@@ -363,37 +363,49 @@ if(!file.exists("data/wp_pages_complete.RDS")){
       unnest(c(data1,data2,data3)) %>% 
       mutate(n_views_mean=n_views_tot/n_months)
     
-    wm_full=readRDS("data/wm_full.RDS") %>% select(flood,deathtoll) %>% unique()
+    wm_full=readRDS("data/wm_full.RDS") %>%
+      select(flood,deathtoll,date,date_precision,date_from) %>%
+      unique()
     wp_pages_complete=readRDS("data/wp_pages_curation.RDS") %>% 
       left_join(wp_views_tot,by=c("article")) %>% 
-      left_join(wm_full,by="flood")
+      left_join(wm_full,by="flood") %>% 
+      mutate(mean_views_longterm=(n_views_tot-n_views_f3months)/(n_months-3))
     saveRDS(wp_pages_complete,"data/wp_pages_complete.RDS")
 }
 wp_pages_complete=readRDS("data/wp_pages_complete.RDS")
 ```
-```{r}
-# ggplot(wp_pages_complete, aes(x=local,n_views_mean, fill=local))+
-#   geom_boxplot()+
-#   scale_y_log10()
 
+
+```{r}
+ggplot(wp_pages_complete,aes(x=n_views_f3months,y=curation, col=local))+
+  geom_point()+
+  scale_x_log10()+scale_y_log10()+
+  geom_smooth()
+```
+
+```{r views_to_deathtoll,fig.width=10,fig.height=4}
+p1=ggplot(wp_pages_complete, aes(x=local,n_views_mean, fill=local))+
+  geom_boxplot()+
+  scale_y_log10()
+p2=ggplot(wp_pages_complete,aes(x=deathtoll,y=n_views_f3months, col=local))+
+  geom_point()+
+  scale_x_log10()+scale_y_log10()+
+  geom_smooth(method="lm")
+
+
+p3=ggplot(wp_pages_complete,aes(x=length,y=mean_views_longterm, col=local))+
+  geom_point()+
+  scale_x_log10()+scale_y_log10()+
+  geom_smooth(method="lm")
+figure <- ggpubr::ggarrange(p1,p2,p3,
+                    labels = c("A", "B","C"),
+                    ncol = 3, nrow = 1)
+figure
 ```
 
 ```{r}
-# ggplot(wp_pages_complete,aes(x=n_edits,y=n_views_tot, col=local))+
-#   geom_point()+
-#   scale_x_log10()+scale_y_log10()+
-#   geom_smooth()
+ggplot(wp_pages_complete,aes(x=n_months,y=curation, col=local))+
+  geom_point()+scale_y_log10()+
+  geom_smooth(method="lm")
 ```
 
-```{r}
-# ggplot(wp_pages,aes(x=deathtoll,y=n_views_f3months, col=local))+
-#   geom_point()+
-#   scale_x_log10()+scale_y_log10()+
-#   geom_smooth(method="lm")
-# 
-# 
-# ggplot(wp_pages,aes(x=deathtoll,y=n_views_tot, col=local))+
-#   geom_point()+
-#   scale_x_log10()+scale_y_log10()+
-#   geom_smooth(method="lm")
-```
