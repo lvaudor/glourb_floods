@@ -1,18 +1,8 @@
-author:
-    - name: Lise Vaudor
-    - name: Liolia Bajemon
-    - name: Maïlys Genouël
-    - name: Hervé Piégay
-
-project:
-  type: website
-  output-dir: docs
-
 website:
   title: "glourb_floods"
 
   navbar:
-    left:      
+    left:
       - href: index.qmd
         text: Article
       - href: about.qmd
@@ -44,3 +34,7 @@ execute:
   message: false
 
 
+# project:
+#   title: "qsdf"
+# 
+# format: "odt"

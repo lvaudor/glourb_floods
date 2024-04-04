@@ -8,6 +8,86 @@ library(tidytext)
 library(leaflet)
 library(rainette)
 options(scipen = 9999)
+col_WD="#e82a8e"
+col_WD_medium="#f17fbb"
+col_WD_soft="#fad4e8"
+col_DFO="#607d73"
+col_DFO_WD="#670525"
+signif_stars=function(signif){
+  result=case_when(signif<0.001~"***",
+                   signif<0.01~"**",
+                   signif<0.05~"*",
+                   signif<0.1 ~".",
+                   TRUE~"")
+  return(result)
+}
+compare_medians=function(tib,general=FALSE){
+  if(general==FALSE){
+      result=tib %>%
+      dplyr::group_by(varx) %>%
+      dplyr::summarise(mediany=median(vary,na.rm=TRUE)) %>%
+      dplyr::select(mediany) %>%
+      dplyr::pull() %>%
+      diff()
+  }
+  if(general==TRUE){
+      median_other=tib %>% filter(varx==FALSE) %>% pull(vary) %>% median(na.rm=TRUE)
+      median_cat=tib %>% filter(varx==TRUE) %>% pull(vary) %>% median(na.rm=TRUE)
+      result=median_cat-median_other
+  }
+  return(result)
+}
+
+calc_tib_summary=function(tib,group,y,x,round=3,diffgroupname="dg",diffxname="dx"){
+  group=enquo(group)
+  x=enquo(x)
+  y=enquo(y)
+  tibt=tib %>%
+    select(!!group,!!x,!!y) %>% 
+    mutate(varx:=!!x,
+           vary:=!!y,
+           group:=!!group) %>% 
+    na.omit()
+  f=function(x){return(tibt)}
+  replace_varx=function(tib,xval){
+    tib=tib %>% 
+      mutate(varx=case_when(group==xval~TRUE,
+                            TRUE~FALSE))
+    return(tib)
+  }
+  tib1=tibt   %>%
+    group_by(group) %>%
+    tidyr::nest() %>% 
+    mutate(data=purrr::map(group,~f(.x))) %>% 
+    mutate(data=purrr::map2(data,group,~replace_varx(.x,.y))) %>% 
+    mutate(median_general=purrr::map_dbl(data,~median(.x$vary,na.rm=TRUE)),
+           signif_group=purrr::map_dbl(data,~wilcox.test(vary~varx, data=.x)$p.value),
+           diff_group=purrr::map_dbl(data,~compare_medians(.x,general=TRUE))) %>% 
+    mutate(signif_group_c=signif_stars(signif_group)) %>%
+    mutate(label_group=paste0(diffgroupname,"=",round(diff_group,round),signif_group_c)) %>% 
+    select(-data)
+
+  tib2=tibt %>%
+    group_by(group) %>% 
+    tidyr::nest() %>% 
+    mutate(
+      median_group=purrr::map_dbl(data,~median(.x$vary,na.rm=TRUE)),
+      signif_x=purrr::map_dbl(data,~wilcox.test(vary~varx, data=.x)$p.value),
+      diff_x=purrr::map_dbl(data,~compare_medians(.x))) %>%
+    mutate(signif_x_c=signif_stars(signif_x)) %>%
+    mutate(label_x=paste0(diffxname,"=",round(diff_x,round),signif_x_c)) %>% 
+    select(-data)
+  tib=full_join(tib1,tib2,by=c("group"))
+  tib3=tibt %>% 
+    group_by(group,varx) %>% 
+    tally()
+  tib=full_join(tib,tib3,by=c("group"))
+  return(tib)
+  }
+```
+
+```{r load_data, message=FALSE,warning=FALSE}
+
 wd_events=readRDS("data/wd_events.RDS")
 wm_full=readRDS("data/wm_full.RDS")
 wp_20_words_per_event=readRDS("data/wp_20_words_per_event.RDS")
@@ -54,7 +134,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 
 ### Primary census of flood events
 
-We collected Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) [@vaudor_glitter_2023]. Wikidata is a free and collaborative knowledge base, structured as a graph of interconnected items representing physical entities, events, concepts or topics, associated to a unique identifier. These items are linked through properties forming statements describing the relationships between items and/or attributes. Each query we run on Wikidata can hence be viewed as a graph query, where we retrieve items and attributes and the relationships between them.  
+We collected Wikidata about floods, using the glitter R package (an API-client to the Wikidata SPARQL endpoint API) [@vaudor_glitter_2023]. Wikidata is a free and collaborative knowledge base, structured as a graph of interconnected items representing physical entities, events, concepts or topics, associated to a unique identifier. These items are linked through properties forming statements describing the relationships between items and/or attributes. Each query we run on Wikidata can hence be viewed as a graph query, where we retrieve items and attributes and the relationships between them.
 
 ![Wikidata queries represented as graphs. When properties were part of the Wikidata (wd) namespace, labels explaining their nature were displayed, instead of their codified property identifiers (e.g. "instance of" instead of "wd:P31")](figure/fig-graph_query_complete.png){#fig-queries}
 
@@ -103,12 +183,12 @@ The app provides maps and plots regarding all events (i.e. at the global scale) 
 
 We have gathered and curated tables of data from both Wikidata and Wikipedia :
 
-- wd_event: one row = one flood event 
-- wp_pages: one row = one Wikipedia page
-- wp_revisions : one row = one revision of a Wikipedia page
-- wp_views: one row = one day of views of a Wikipedia page
-- wp_segments: one row = one segment of a Wikipedia page
-- countries: one row = one country * one language
+-   wd_event: one row = one flood event
+-   wp_pages: one row = one Wikipedia page
+-   wp_revisions : one row = one revision of a Wikipedia page
+-   wp_views: one row = one day of views of a Wikipedia page. This data is provided by one of Wikipedia's API only dating from the first of July 2015.
+-   wp_segments: one row = one segment of a Wikipedia page
+-   countries: one row = one country \* one language
 
 For each of these tables, we show below the descriptors names, display which among these correspond to a key useable for joining to other tables, the type of data (numeric, character, logical, etc.) and the contents of one row randomly selected.
 
@@ -137,7 +217,6 @@ knitr::kable(show_table(wp_pages,provide_key=c("article")))
 wp_revisions=readRDS("data/wp_revisions.RDS")
 knitr::kable(show_table(wp_revisions,provide_key="article"))
 ```
-
 
 ### wp_views
 
@@ -184,22 +263,25 @@ wm_dfo_comparison=readRDS("data/wm_dfo_comparison.RDS") %>%
   mutate(total_length=ceiling(total_length/1000))
 ```
 
-We compare the number of events in both datasets (WD and DFO) according to Human Development Index of the country where the event took place.
+We compare the number of events in both datasets (WD and DFO) according to the Human Development Index of the country where the event took place.
 
 ```{r plot_fig-comp_WD_DFO,fig.width=6,fig.height=6}
 #| label: fig-comp_WD_DFO
-#| fig-cap: "a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class."
+#| fig-cap: "---" 
 p1=ggplot(wm_dfo_comparison,
        aes(x=HDI_class,fill=in_data))+
   geom_bar(position=position_dodge())+
-  scale_fill_manual(values=c("dfo"="#607d73",
-                             "in_both"="#9ecfbd",
-                             "wd"="#e7cee4"))+
+  scale_fill_manual(values=c("dfo"=col_DFO,
+                             "in_both"=col_DFO_WD,
+                             "wd"=col_WD))+
   scale_y_continuous(breaks=c(0,500,1000,1500),
                      labels=c("0","   500","   1000","   1500"))+
   ylab("number of events")
 
-wm_dfo_comparison_summary=wm_dfo_comparison %>% 
+wm_dfo_comparison=wm_dfo_comparison %>% 
+    mutate(deathtoll=case_when(is.na(deathtoll)~deathtoll_dfo,
+                   !is.na(deathtoll)~deathtoll))
+wm_dfo_comparison_summary=wm_dfo_comparison  %>% 
   group_by(HDI_class,in_data) %>% 
   tally()
 p2=ggplot(wm_dfo_comparison, 
@@ -212,56 +294,78 @@ p2=ggplot(wm_dfo_comparison,
   scale_y_continuous(trans="log1p",
                      limits=c(0,1000000),
                      breaks=c(0,10,100,1000,10000,100000))+
-  scale_fill_manual(values=c("dfo"="#607d73",
-                             "in_both"="#9ecfbd",
-                             "wd"="#e7cee4"))
+  scale_fill_manual(values=c("dfo"=col_DFO,
+                             "in_both"=col_DFO_WD,
+                             "wd"=col_WD))
+
 ggpubr::ggarrange(p1,p2,nrow=2,ncol=1,common.legend=TRUE)
 ```
 
+*@fig-comp_WD_DFO a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class.*
 
-@fig-comp_WD_DFO .a confirms that compared to DFO, the proportion of events in Wikidata corresponding to countries with higher HDI is important. On the other hand, the distribution of events in the DFO dataset through HDI categories is also quite heterogeneous, with countries in the first and especially second quartile for HDI representing most events. An unbiased distribution of events (when defined through purely physical criteria) should reflect the total area of countries in the four quartiles for HDI, if there were no distinction between them in terms of distribution of more-or-less flood-prone bioms, which we know is not the case). Moreover, even if events are primarily detected based on physical criteria, the DFO dataset still incorporates societal elements (regarding damage and deathtoll for instance) to account for the actual importance or significance of the event. This highlights the systematic difficulty of defining, detecting and reporting flood events in an unbiased, homogeneous way across projects.
+@fig-comp_WD_DFO .a confirms that compared to DFO, the proportion of events in Wikidata corresponding to countries with higher HDI is important. On the other hand, the distribution of events in the DFO dataset through HDI categories is also quite heterogeneous, with countries in the first and especially second quartile for HDI representing most events. An unbiased distribution of events (when defined through purely physical criteria) should reflect the total area of countries in the four quartiles for HDI, if there were no distinction between them in terms of distribution of more-or-less flood-prone biomes, which we know is not the case). Moreover, even if events are primarily detected based on physical criteria, the DFO dataset still incorporates societal elements (regarding damage and deathtoll for instance) to account for the actual importance or significance of the event. This highlights the systematic difficulty of defining, detecting and reporting flood events in an unbiased, homogeneous way across projects.
 
-@fig-comp_WD_DFO .b shows that compared to DFO-documented events, events included in the WD dataset are generally associated with higher deathtoll. For DFO-documented events, the lower the HDI class, the higher the deathtoll, which could be explained by impoverished countries having less resources and infrastructure to mitigate and respond to such disasters effectively, as well as more inadequate housing and settlement in vulnerable areas exacerbating the impact of floods on communities. As for WD-documented events, the few ones which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries and even more so the ones for which we do not have a value for HDI. In this last case, the events documented in Wikidata only are often historical ones like the 1931 China floods (wd:Q1150973). These floods occurred in the Republic of China (1912-1949), for which we failed to obtain an HDI value, and  which were associated with very high and somewhat discussed deathtolls. This highlights the fact that the WD dataset is biased towards events with high societal impact, which is not surprising given the nature of the project.
+@fig-comp_WD_DFO .b shows that compared to DFO-documented events, events included in the WD dataset are generally associated with higher deathtoll. For DFO-documented events, the lower the HDI class, the higher the deathtoll, which could be explained by impoverished countries having less resources and infrastructure to mitigate and respond to such disasters effectively, as well as more inadequate housing and settlement in vulnerable areas exacerbating the impact of floods on communities. As for WD-documented events, the few ones which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries and even more so the ones for which we do not have a value for HDI. In this last case, the events documented in Wikidata only are often historical ones like the 1931 China floods (wd:Q1150973). These floods occurred in the Republic of China (1912-1949), for which we failed to obtain an HDI value, and which were associated with very high and somewhat discussed deathtolls. This highlights the fact that the WD dataset is biased towards events with high societal impact, which is not surprising given the nature of the project.
 
-As for the events for which we were able to find a possible match between the WD dataset and the DFO dataset, we can compare the deathtoll values. We can see that the deathtoll values are generally higher in the WD dataset than in the DFO dataset, which is consistent with the fact that the WD dataset is biased towards events with high societal impact. However, the correlation between the deathtoll values in the two datasets is quite high, which suggests that the WD dataset is not completely biased towards events with high deathtoll values, and that there is some overlap between the two datasets.
+For some events we were able to find a match between the WD dataset and the DFO dataset, so that we could compare the deathtoll paired observations.
 
-```{r plot_deathtoll_comparison,fig.width=4,fig.height=5}
+
+```{r plot_deathtoll_comparison,fig.width=6,fig.height=5}
 #| label: fig-deathtoll_WD_DFO
-#| fig-cap: "a) Distribution of deathtolls estimates in Wikidata and DFO according to the estimates being paired or not (deathtoll estimates are paired when the events in Wikidata have been paired to an event in DFO). b) Comparison of deathtoll paired estimates in Wikidata and DFO for the same events. The symbol varies according to the deathtoll estimate in Wikidata being sourced, indicating a higher reliability of the estimate. "
-deathtoll_compar=wm_dfo_comparison %>% 
-  mutate(paired_observations=(!is.na(deathtoll) & !is.na(deathtoll_dfo))) %>% 
+#| fig-cap: "---" 
+
+deathtoll_compar=wm_dfo_comparison %>%
+  # define source of deathtoll 
+  mutate(deathtoll_wd=deathtoll)%>%
+ 
+  # define for which floods we have paired observations
+  mutate(paired_observations=in_data=="in_both") %>%
   mutate(paired_observations=case_when(paired_observations~"paired",
-                                       TRUE~"unpaired")) %>% 
-  mutate(deathtoll_wd=deathtoll) %>% 
+                                      TRUE~"unpaired")) %>%
   tidyr::pivot_longer(c(deathtoll_wd,deathtoll_dfo),
                      names_to="dataset",
                      names_prefix="deathtoll_")
 deathtoll_compar_summary=deathtoll_compar %>% 
-  group_by(dataset,paired_observations) %>%
-  summarise(value=mean(value,na.rm=TRUE))
+  group_by(paired_observations) %>%
+  summarise(value=median(value,na.rm=TRUE))
+tib_effect=calc_tib_summary(deathtoll_compar,
+                            group=paired_observations,
+                            x=dataset, 
+                            y=value,
+                            round=10)
 p1=ggplot(deathtoll_compar,
-  aes(x=dataset, y=value,fill=dataset))+
-  geom_boxplot()+
-  facet_grid(cols=vars(paired_observations))+
-  geom_point(data=deathtoll_compar_summary,
-             aes(x=dataset,y=value),
-             position=position_dodge(width=0.8),
-             size=3,shape=1)+
+  aes(x=paired_observations, y=value))+
+  geom_hline(data=tib_effect %>% select(median_general) %>% unique(),
+             aes(yintercept=median_general),
+             linewidth=2,alpha=0.5,col=col_DFO_WD)+
+  geom_point(data=tib_effect %>% select(group,median_group) %>% unique(),
+             aes(x=group,y=median_group),
+             col=col_DFO_WD, shape=3,size=2)+
+  geom_text(data=tib_effect %>% select(group,label_x) %>% unique(),
+            aes(x=group,y=1000,label=label_x),
+            position=position_dodge(width=0.8),
+            size=3)+
+  geom_text(data=tib_effect %>% select(group,label_group) %>% unique(),
+          aes(x=group,y=100,label=label_group),
+          position=position_dodge(width=0.8),
+          size=3,col=col_DFO_WD)+
+  geom_text(data=tib_effect %>% select(group,varx,n) %>% unique(),
+        aes(x=group,group=varx,y=-0.5,label=n),
+        position=position_dodge(width=0.8),
+        size=2)+
+  geom_boxplot(aes(fill=dataset))+
   scale_y_continuous(trans="log1p",
                      breaks=c(0,10,100,1000,10000,100000))+
-  scale_fill_manual(values=c("dfo"="#607d73",
-                             "wd"="#e7cee4"))+
-  scale_color_manual(values=c("paired"="#9ecfbd",
-                              "unpaired"="black"))+
-  theme(legend.position="none")
- 
+  scale_fill_manual(values=c("dfo"=col_DFO,
+                             "wd"=col_WD))+
+  scale_color_manual(values=c("paired"=col_DFO_WD,
+                              "unpaired"="black"))
 p2=ggplot(wm_dfo_comparison %>%
          mutate(deathtoll_wd=deathtoll) %>% 
          mutate(sourced=!is.na(deathtoll_source)),
        aes(x=deathtoll_wd,
            y =deathtoll_dfo))+
-  geom_point(aes(shape=sourced),
-             col="#9ecfbd",size=3, alpha=0.75)+
+  geom_point(col=col_DFO_WD,size=2, alpha=0.25)+
   scale_x_continuous(trans="log1p",
                      breaks=c(0,10,100,1000,10000,100000))+
   scale_y_continuous(trans="log1p",
@@ -269,10 +373,30 @@ p2=ggplot(wm_dfo_comparison %>%
   geom_abline(intercept=0,slope=1, linetype=2,col="black")+
   geom_rug(col="grey")
 
+
+cor=cor(log(wm_dfo_comparison$deathtoll+1),log(wm_dfo_comparison$deathtoll_dfo+1),use="complete.obs")
+deathtolls_estimates=wm_dfo_comparison %>%
+  mutate(ldeathtoll=round(log(deathtoll+1)),ldeathtoll_dfo=round(log(deathtoll_dfo+1))) %>%
+  mutate(diff_om=ldeathtoll-ldeathtoll_dfo,diff=deathtoll-deathtoll_dfo)
+tib=deathtolls_estimates %>%
+  mutate(same_deathtoll=diff==0,
+         same_deathtoll_om=diff_om==0)
+tib_same=tib %>%
+  group_by(same_deathtoll,in_data) %>% 
+  tally()
+tib_same_om=tib %>% 
+  group_by(same_deathtoll_om,in_data) %>% 
+  tally()
+n_same=tib_same %>% filter(same_deathtoll==TRUE,in_data=="in_both") %>% pull(n)
+n_same_om=tib_same_om %>% filter(same_deathtoll_om==TRUE,in_data=="in_both") %>% pull(n)
+n_tot=tib %>% filter(in_data=="in_both") %>% tally() %>% pull(n)
+
 ggpubr::ggarrange(p1,p2,nrow=2,ncol=1, labels=c("a","b"))
 ```
 
+*@fig-deathtoll_WD_DFO a) Distribution of deathtolls estimates in Wikidata and DFO according to the estimates being paired or not (deathtoll estimates are paired when the events in Wikidata have been paired to an event in DFO). b) Comparison of deathtoll paired estimates in Wikidata and DFO for the same events. The symbol varies according to the deathtoll estimate in Wikidata being sourced, indicating a higher reliability of the estimate. *
 
+@fig-deathtoll_WD_DFO shows that the deathtoll values are generally higher in the WD dataset than in the DFO dataset, which is consistent with the fact that the WD dataset is biased towards events with high societal impact. However, the correlation between the deathtoll values in the two datasets is quite high. In particular, there is a portion of the matched events for which the recorded deathtoll is exactly the same (`r n_same` events i.e. `r round(n_same/n_tot*100,2)`% of the paired events) or of the same order of magnitude (`r n_same_om` events i.e. `r round(n_same_om/n_tot*100,2)`% of the paired events) which suggests not only that the pairing of events is, to a certain extent and despite the difficulty of joining completely independently designed datasets) but also that the WD dataset is not only about the events with highest deathtoll values.
 
 ## Wikipedia articles' description
 
@@ -339,28 +463,31 @@ wm_full=readRDS("data/wm_full.RDS")
 
 ```{r wd_years, fig.width=8,fig.height=4, fig.show='hide'}
 #| label: fig-wd_year
-#| fig-cap: "Distribution of flood events through time A) all events dated with a year-accuracy B) events dated with a year-accuracy starting in 2000"
+#| fig-cap: "---" 
+
 wd_events_freq=wd_events %>% 
   mutate(cat_year=cut(year,breaks=c(1000,1200,1400,1600,1800,1950,
                                     2000,2023),dig.lab=10)) %>% 
   group_by(cat_year) %>% tally()
 p1=ggplot(wd_events_freq, aes(x=cat_year,y=n))+
-  geom_col()
+  geom_col(fill=col_WD,col="darkgrey")
 p2=ggplot(wd_events %>% filter(year>=2000), aes(x=year))+
-  geom_histogram(breaks=2000:2023)
+  geom_histogram(breaks=2000:2023,fill=col_WD,col="darkgrey")
 figure <- ggarrange(p1,p2,
                     labels = c("A", "B"),
                     ncol = 1, nrow = 2)
 figure
 ```
 
+*Distribution of flood events through time A) all events dated with a year-accuracy B) events dated with a year-accuracy starting in 2000*
+
 ## Wikipedia articles' history
 
 ```{r delays,fig.width=14,fig.height=8, warning=FALSE, message=FALSE}
 #| label: fig-delays
-#| fig-cap: "Time delay (in years) between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year)."
+#| fig-cap: "---" 
 
-timebreaks=c(-Inf,2000,2015,2020,2024)
+timebreaks=c(-Inf,2000,2014,2020,2024)
 labels=c("0","1.5 months","3 months",
          "6 months","1 year","2 years","4 years",
          "10 years","15 years","25 years")
@@ -386,26 +513,25 @@ truc=wp_views_daily %>%
   summarise(n=sum(views,na.rm=TRUE),.groups="drop") %>% 
   mutate(prop=n/ntot)%>% 
   na.omit()
-imposs=cross_join(truc %>% group_by(year) %>% tally() %>% select(-n),
+imposs_views=cross_join(truc %>% group_by(year) %>% tally() %>% select(-n),
                   truc %>% group_by(delay) %>% tally() %>% select(-n)) %>% 
-  mutate(impossible=case_when(year=="(-Inf,2000]" & delay<5~1,
-                              year=="(2000,2015]" & delay>=11~1,
-                              year=="(2015,2020]" & delay>=9~1,
+  mutate(impossible=case_when(year=="(-Inf,2000]" & delay<10~1,
+                              year=="(2000,2014]" & delay>=11~1,
+                              year=="(2000,2014]" & delay<6~1,
+                              year=="(2014,2020]" & delay>=9~1,
                               year=="(2020,2024]" & delay>=8~1,
                               TRUE~0))
-  # mutate(impossible=case_when(year=="(-Inf,2000]" & delay<5~1,
-  #                             year=="(2000,2015]" & delay>=11~1,
-  #                             year=="(2015,2020]" & delay>=9~1,
-  #                             year=="(2020,2024]" & delay>=8~1,
-  #                             TRUE~0))
-p1=ggplot(data=imposs,aes(x=delay,y=+Inf))+
-  geom_col(aes(alpha=impossible))+
+p1=ggplot(data=imposs_views,aes(x=delay,y=+Inf))+
+  geom_col(aes(alpha=impossible),fill="grey")+
   facet_grid(rows=vars(year))+
   geom_col(data=truc,aes(x=delay,y=prop,fill=date_precision))+
   scale_x_continuous(breaks=(1:10)+0.5,
                      labels=labels) +
   ylab("proportion of views")+
-  guides(alpha = FALSE)
+  guides(alpha = FALSE)+
+  scale_fill_manual(values=c(day=col_WD,
+                             month=col_WD_medium,
+                             year=col_WD_soft))
 
 
 flood_date_precision=readRDS("data/wm_full.RDS") %>% select(flood,date_precision) %>% unique()
@@ -431,12 +557,23 @@ truc=wp_revisions %>%
   summarise(n=n(),.groups="drop") %>% 
   mutate(prop=n/ntot) %>% 
   na.omit()
-p2=ggplot(truc ,aes(x=delay,y=prop,fill=date_precision))+
-  geom_col()+
+imposs_edits=cross_join(truc %>% group_by(year) %>% tally() %>% select(-n),
+                  truc %>% group_by(delay) %>% tally() %>% select(-n)) %>% 
+  mutate(impossible=case_when(year=="(-Inf,2000]" & delay<6~1,
+                              year=="(2000,2014]" & delay>=11~1,
+                              year=="(2014,2020]" & delay>=9~1,
+                              year=="(2020,2024]" & delay>=8~1,
+                              TRUE~0))
+p2=ggplot(data=imposs_edits ,aes(x=delay,y=+Inf))+
+  geom_col(aes(alpha=impossible),fill="grey")+
   facet_grid(rows=vars(year))+
+  geom_col(data=truc, aes(x=delay,y=prop,fill=date_precision))+
   scale_x_continuous(breaks=(1:10)+0.5,
                      labels=labels)+
-  ylab("proportion of edits")
+  ylab("proportion of edits")+
+    scale_fill_manual(values=c(day=col_WD,
+                             month=col_WD_medium,
+                             year=col_WD_soft))
 figure <- ggarrange(p2,p1,
                     labels = c("a", "b"),
                     ncol = 2, nrow = 1,
@@ -444,7 +581,9 @@ figure <- ggarrange(p2,p1,
 figure
 ```
 
-@fig-delays .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. @fig-delays .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, although most views occur about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact. 
+*Time delay between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).The grey rectangles indicate impossible-to-observe delays (first Wikipedia edits were in 2001 and first recorded views in 2015).*
+
+@fig-delays .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. @fig-delays .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, although most views occur about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact.
 
 <!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
 
@@ -452,7 +591,7 @@ figure
 
 ```{r plot_class_rainette, fig.width=10, fig.height=8}
 #| label: fig-topics
-#| fig-cap: "Topics identified by the Reinert classification method. Based on the over-represented terms in each cluster we propose the following labelling of the classes: 'governance' for cluster1, 'relief' for cluster2, 'damage' for cluster3, 'hydrology' for cluster4, 'anticipation' for cluster5, and 'weather' for cluster6."
+#| fig-cap: "---" 
 res=readRDS("data/res_rainette_wp.RDS")
 corpus=readRDS("data/corpus.RDS")
 dtm=readRDS("data/dtm.RDS")
@@ -468,10 +607,14 @@ rainette_plot(
 )
 ```
 
+*Topics identified by the Reinert classification method. Based on the over-represented terms in each cluster we propose the following labelling of the classes: 'governance' for cluster1, 'relief' for cluster2, 'damage' for cluster3, 'hydrology' for cluster4, 'anticipation' for cluster5, and 'weather' for cluster6.*
+
 ```{r plot_topic_per_length}
 #| label: fig-topic_per_length
-#| fig-cap: "Link between total article's length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1<k<=4 segments while the 25% longest represent 26<k<860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The red dots correspond to the median proportions of topics throughout all articles irrespective of articles' length."
-tib_classes=wp_segments %>% select(class,class_name,color) %>% unique()
+#| fig-cap: "---" 
+tib_classes=wp_segments %>%
+  select(class,class_name,color) %>%
+  unique()
 tib_count_class=wp_segments %>% 
   group_by(article,class_name) %>% 
   tally()
@@ -494,15 +637,22 @@ ggplot(tib,aes(x=class_name,y=prop))+
   facet_grid(rows=vars(ntotcat),scales="free")+
   scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
   coord_flip()+
-  geom_point(data=tib_summary,aes(x=class_name,y=medianprop),col="red")+
+  geom_point(data=tib_summary,
+             aes(x=class_name,y=medianprop),
+             shape=3,col=col_WD)+
   theme(legend.position="none")
 ```
 
+
+*Link between total article's length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1<k<=4 segments while the 25% longest represent 26<k<860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The fushia plus signs correspond to the median proportions of topics throughout all articles irrespective of articles' length.*
+
 @fig-topic_per_length shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather), and justifying reporting that event based on its consequences (damage), while longer articles might convey more extensive reports on the physical causes (hydrology) and management of the crisis (anticipation, governance, relief).
+
+## Curation
 
 ```{r plot_curation,fig.width=9,fig.height=4, warning=FALSE, message=FALSE}
 #| label: fig-curation
-#| fig-cap: "a) Mean length of edits as a function of number of edits. A relative length of edit for each article is calculated based on this relationship. b) Relative length of edit as a function of total length. A measure of article curation (independent of total length) is calculated based on this relationship. The articles in language 'simple' (for 'simple English') being destined to be particularly synthetic, we did not take include them in the model." 
+#| fig-cap: "---"  
 wp_pages=readRDS("data/wp_pages.RDS")
 tib=wp_revisions %>% 
   mutate(date_page=lubridate::ymd(as.POSIXct(timestamp))) %>% 
@@ -524,53 +674,131 @@ tibfitted=tibfitted %>%
   mutate(fitted=exp(fitted))
 tib=tib %>% 
   left_join(tibfitted %>% select(article,fitted),by="article") %>% 
-  mutate(rel_edit_length=log(mean_edit_length)-log(fitted))
+  mutate(rel_edit_length=log(mean_edit_length)-log(fitted)) %>% 
+  mutate(curation=-rel_edit_length) %>% 
+  mutate(curation=case_when(curation>0~curation/max(curation,na.rm=TRUE),
+                             curation<=0~curation/max(-curation,na.rm=TRUE),
+                              TRUE~curation))
 
-wp_pages=left_join(wp_pages,tib %>% select(article,date_page,n_edits,rel_edit_length),
+wp_pages=left_join(wp_pages,tib %>% select(article,date_page,n_edits,mean_edit_length,curation),
                    by="article",
                    relationship="many-to-many")
-saveRDS(wp_pages,"data/wp_pages_synthesis.RDS")
-p1=ggplot(tib,
-       aes(x=n_edits,y=mean_edit_length,col=rel_edit_length))+
-  geom_point()+
+saveRDS(wp_pages,"data/wp_pages_curation.RDS")
+
+p=ggplot(wp_pages,
+       aes(x=n_edits,y=mean_edit_length,fill=curation))+
+  geom_point(shape=21,size=3)+
   scale_x_log10()+
   scale_y_log10()+
   geom_smooth(data=tib %>% filter(n_edits>=10),
               method="lm",
-              col="dark grey")+
-  scale_color_gradient2(low="green",mid="white",high="purple")
-
-wp_pages2=wp_pages %>% 
-  filter(!is.na(rel_edit_length),!is.na(length),lang!="simple")
-wp_pages2=wp_pages2 %>% 
-  mutate(fitted_rel_edit_length=predict(lm(rel_edit_length~log(length),data=wp_pages2),data=wp_pages2)) %>% 
-  mutate(curation=rel_edit_length-fitted_rel_edit_length) %>% 
-  mutate(curation=case_when(curation>0~curation/max(curation,na.rm=TRUE),
-                             curation<=0~curation/max(-curation,na.rm=TRUE),
-                              TRUE~curation))
-wp_pages=wp_pages %>%
-  left_join(wp_pages2 %>% select(article,curation),by=c("article"))
-saveRDS(wp_pages,"data/wp_pages_curation.RDS")
-library(ggnewscale)
-p2=ggplot(wp_pages,
-       aes(x=length,y=rel_edit_length,col=curation))+
-  geom_point()+
-  scale_x_log10()+
-  geom_smooth(method="lm",
-              col="dark grey")+
-  scale_color_gradient2(low="blue",mid="yellow",high="red")+
-  new_scale_color()+
-  geom_rug(aes(y=rel_edit_length,col=rel_edit_length), sides="l")+
-    
-  scale_color_gradient2(low="green",mid="white",high="purple")
-cowplot::plot_grid(p1, p2, labels = c('a', 'b'))
+              col="black")+
+  scale_fill_gradient2(low=col_DFO,mid=col_DFO_WD,high=col_WD)
+p
 ```
 
-@fig-curation .a shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page 'matures', with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). By construction and as shown by @fig-curation .b, the relative edit length is highly correlated to total article length, though we would like to dispose of a length-independent curation measure for further analyses purposes. Hence we calculate the curation score based on the residuals of the linear relationship of the relative edit length to total length (both log-transformed). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles). We argue that this could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.
+*Mean length of edits as a function of number of edits. The residuals of these relationship correspond to a relative mean edit length, and curation is calculated as minus the residuals. The articles in language 'simple' (for 'simple English') being destined to be particularly synthetic, we did not take include them in the model.*
+
+We want to quantify curation of the articles as reflecting the back-and-forth nature of the Wikipedia pages writing process. An index for curation could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.
+
+@fig-curation shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page 'matures', with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). We calculate the curation score corresponds to minus the relative edit length (i.e. high level of curation corresponds to smaller-sized edits). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles).
+
+```{r, fig.width=8,fig.height=8}
+#| label: fig-curation_causes
+#| fig-cap: "---"
+
+tib=wp_pages %>% 
+  left_join(wm_full %>%
+              select(flood,country,deathtoll,year) %>% 
+              unique()) %>%
+  left_join(countries %>% select(country,HDI) %>% unique()) %>% 
+  mutate(catyear=cut(year,c(0,2000,2015,2020,2024),dig.lab=10)) %>%
+  filter(!is.na(curation),!is.na(year)) %>% 
+  mutate(mean_curation_global=mean(curation))
+tib_mod1=tib %>% 
+  group_by(catyear,local) %>% 
+  summarise(mean_curation_local=mean(curation),
+            n=n(),
+            .groups="drop")
+  
+tib_mod=tib %>% 
+  group_by(catyear,local) %>% 
+  mutate(mean_curation_local=mean(curation)) %>% 
+  ungroup() %>% 
+  group_by(catyear) %>% 
+  mutate(mean_curation=mean(curation)) %>% 
+  tidyr::nest(data=c(-mean_curation,-catyear)) %>% 
+  mutate(result=purrr::map(data,~summary(lm(curation~local,data=.x)))) %>% 
+  mutate(diff=purrr::map_dbl(result,~.x$coeff[2,1]),
+         signif=purrr::map_dbl(result,~.x$coeff[2,4])) %>% 
+  ungroup() %>% 
+  mutate(signifc=signif_stars(signif))
+tib_mod2=lm(curation~catyear+0,data=tib) %>%
+  summary() %>% .$coeff %>% as.data.frame() %>%
+  rownames_to_column("catyear") %>%
+  mutate(catyear=str_replace(catyear,"catyear","")) %>%
+  mutate(catyear=as.factor(catyear)) %>% 
+  mutate(signifc=signif_stars(`Pr(>|t|)`))
+
+p1=ggplot(tib, aes(x=catyear, curation))+
+  geom_hline(aes(yintercept=unique(mean_curation_global)),
+             col=col_DFO_WD,alpha=0.5,linewidth=2)+
+  geom_boxplot(aes(fill=local))+
+  geom_text(data=tib_mod,
+            aes(y=-1,label=paste0("α=",round(diff,3),signifc)))+
+  geom_point(data=tib_mod1,
+             aes(x=catyear,y=mean_curation_local,fill=local),
+             shape=3,size=3,stroke=2,
+             position=position_dodge(width=0.8))+
+  geom_point(data=tib_mod,
+             aes(y=mean_curation),
+             col=col_DFO_WD,shape=3,size=3,stroke=2)+
+  
+  geom_text(data=tib_mod1,
+            aes(y=-0.8,fill=local,
+                label=n),
+            position=position_dodge(width=0.8))+
+  geom_text(data=tib_mod2,col=col_DFO_WD,
+            aes(y=1,label=paste0("δ=",round(Estimate,4),signifc)))+
+  scale_fill_manual(values=c(col_DFO,col_WD))
+
+
+tib_lm=tib %>%
+  filter(!is.na(deathtoll),!is.na(curation)) %>% 
+  group_by(catyear) %>% 
+  tidyr::nest() %>% 
+  mutate(result=purrr::map(data,~summary(lm(curation~deathtoll,data=.x))$coeff)) %>% 
+  mutate(slope=purrr::map_dbl(result,~.x[2,1]),
+         signif=purrr::map_dbl(result,~.x[2,4])) %>% 
+  select(-result,-data) %>% 
+  ungroup() %>% 
+  mutate(signifc=signif_stars(signif))
+
+
+p2=ggplot(tib %>% filter(!is.na(deathtoll),!is.na(curation)),
+          aes(x=deathtoll, y=curation))+
+  geom_point(alpha=0.25)+
+  geom_smooth(method="lm",col=col_DFO_WD)+
+  geom_text(data=tib_lm,
+            aes(x=1000,y=0.7,label=paste0("α=",round(slope,8),signifc)))+  
+  facet_grid(cols=vars(catyear))+
+  scale_x_continuous(trans="log1p",
+                     breaks=c(0,10,100,1000,10000,100000,1000000),
+                     labels=c("0","10","100","","10,000","","1,000,000"))
+
+options(scipen = 0)
+ggarrange(p1,p2,nrow=2,common.legend=TRUE)
+options(scipen = 9999)
+```
+
+*@fig-curation_causes: a) Effect on curation of the article being in a local language and period in which the event occurred. The estimates α correspond to the difference in mean between local and non-local articles (for one period). The estimates δ correspond to the difference in mean for one period compared to the mean value of curation throughout all articles. These differences are all tested through Student tests and the corresponding p-values are displayed. b) Effect on curation of period in which the event occurred and deathtoll. The slope for each linear regression (on log-log scale) is displayed with the corresponding p-value. For a) and b) the symbols for p-values are `.`:p<0.1, `*`:p<0.05, `**`:p<0.01, `***`:p<0.001.*
+
+
+
+@fig-curation_causes .a shows that the more recent the events, the less curated the articles. Besides, for events which occurred before 2015, the articles' being written in a local language (considering the event location) tends to be associated with a lower level of article curation. This could be due to local articles about older events comprising more anecdotal facts. As for the events which occurred after 2015, there is no significant difference in curation levels between local and non-local articles. @fig-curation_causes .b shows that according to the period in which the event occurred, higher deathtoll tend to be correlated to higher (between 2000 and 2015) or lower (after 2015) curation. This could hint at Wikipedia being used more and more as information or managing crises tools (and all the more so than the crisis is important) instead of as an educational or encyclopedic carefully curated source of knowledge.
 
 ```{r curation_topics,fig.width=7,fig.height=5}
 #| label: fig-curation_topics
-#| fig-cap: "Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test." 
 
 tib_classes=wp_segments %>% select(class,class_name,color) %>% unique()
 tib_count_class=wp_segments %>% 
@@ -601,50 +829,190 @@ tib_summary=tib %>%
                                  select(x) %>%
                                  pull() %>% 
                                  diff()})) %>% 
-  mutate(signifc=case_when(signif<0.001~"***",
-                          signif<0.01~"**",
-                          signif<0.05~"*",
-                          signif<0.1 ~".",
-                          TRUE~"")) %>% 
+  mutate(signifc=signif_stars(signif)) %>% 
   mutate(label=paste0("diff=",round(diff,3),signifc))
 ggplot(tib,aes(x=class_name,fill=class_name,y=prop))+
   geom_boxplot(aes(fill=class_name,color=highcuration))+
   scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
-  scale_color_manual(values=c("grey40","black"))+
+  scale_color_manual(values=c(col_DFO,col_WD))+
   coord_flip()+
   geom_text(data=tib_summary,
             aes(x=class_name, y=-0.25,label=label),
              hjust=0)+
-  guides(fill = FALSE)
+  guides(fill = FALSE)+
+  xlab("")
 
 ```
 
-@fig-curation_topics shows that articles with high levels of curation tend to deal with topics such as relief (diff=`r tib_summary %>% filter(class_name=="relief") %>% pull(diff) %>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="relief") %>% pull(signif) %>% round(5)`), and governance (diff=`r tib_summary %>% filter(class_name=="governance") %>% pull(diff)%>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="governance") %>% pull(signif) %>% round(5)`), while weather ((diff=`r tib_summary %>% filter(class_name=="weather") %>% pull(diff) %>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="weather") %>% pull(signif) %>% round(5)`)) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g. reports on weather.
+*@fig-curation_topics: Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test. The symbols correspond to p-values with `.`:p<0.1, `*`:p<0.05, `**`:p<0.01, `***`:p<0.001).*
 
-```{r curation_causes, fig.width=8, fig.height=3}
-#| label: fig-curation_causes
-#| fig-cap: "a) Effect of the article being in a local language on curation. b) Effect of deathtoll and of the article being in a local language on curation." 
-tt=wp_pages2 %>% 
-  left_join(wm_full %>%
-              select(flood,country,deathtoll,year) %>% 
-              unique()) %>%
-  left_join(countries %>% select(country,HDI) %>% unique()) %>% 
-  mutate(year=cut(year,c(0,1950,1980,2000,2010,2020)))
-lm1=lm(curation~local,data=tt)%>% summary()
-lm2=lm(curation~local*log(deathtoll+1),data=tt) %>% summary()
-p1=ggplot(tt,aes(x=local, y=curation,fill=local))+
-  geom_boxplot()+theme(legend.position="none")+
-  geom_text(data=tt %>% group_by(local) %>% tally(),
-            aes(x=local, y = -1.2, label=paste0("n=",n)))
-p2=ggplot(tt %>% filter(n_edits>10),
-       aes(x=deathtoll,y=curation, col=local))+
-  geom_point(alpha=0.2)+
-  scale_x_continuous(trans="log1p", breaks=c(0,1,10,100,1000,10000,100000,10^6))+
-  geom_smooth(method="lm")
-cowplot::plot_grid(p1, p2, labels = c('a', 'b'), rel_widths=c(1,2))
+
+@fig-curation_topics shows that articles with high levels of curation tend to deal with topics such as relief (diff=`r tib_summary %>% filter(class_name=="relief") %>% pull(diff) %>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="relief") %>% pull(signif) %>% round(5)`), and governance (diff=`r tib_summary %>% filter(class_name=="governance") %>% pull(diff)%>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="governance") %>% pull(signif) %>% round(5)`), while weather (diff=`r tib_summary %>% filter(class_name=="weather") %>% pull(diff) %>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="weather") %>% pull(signif) %>% round(5)`) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g. reports on weather.
+
+## Number of views
+
+We now consider only events which occurred after July 2015 (the date from which we have access to the number of views of Wikipedia pages), in order to be able to quantify the number of views of various articles at the same stage in time (i.e. from the moment the event occurred). For each Wikipedia article, we summarise the number of views during the first three months following the creation of the page (which, for the events that have occurred after July 2015, generally corresponds to the first three months following the occurrence of the event).
+
+We expect the number of views of an article to be particularly important right after the event occurred, and to decrease as time goes by. We expect that the number of views will be correlated to the level of curation of the article, as articles with a higher level of curation are more likely to be of higher quality, and hence more likely to be consulted.
+
+```{r wp_pages_complete}
+countries=readRDS("data/countries.RDS")
+wp_pages_complete=readRDS("data/wp_pages_complete.RDS") %>% 
+  left_join(wd_events %>% select(flood,date,country_label)) %>%
+  left_join(countries %>% select(country_label,HDI)) %>% 
+  mutate(year=lubridate::year(date)) %>% 
+  filter(year>2015) %>%   
+  mutate(HDI_class=cut(HDI,
+                      quantile(countries$HDI,seq(0,1,by=0.25),
+                               na.rm=TRUE,include.lowest=TRUE)),
+         include.lowest=TRUE) %>% 
+  filter(!is.na(HDI_class)) %>% 
+  mutate(mean_views_f3months=n_views_f3months/3)
 ```
 
-@fig-curation_causes .a shows that the articles' being written in a local language (considering the event location) tends to be associated with a lower level of article curation (effect estimate= `r round(lm1$coef[2,1],3)`, t value=`r round(lm1$coef[2,3])`, Pr(\>\|t\|)=`r round(lm1$coef[2,4])`). This could be due to local articles being used more as information or managing crises tools than educational or encyclopedic carefully curated sources of knowledge. This hypothesis is reinforced by @fig-curation_causes .b which shows that the higher the deathtoll of an event, the less curated the local articles (slope for local articles `r round(lm2$coef[4,1],2)`, t value= `r round(lm2$coef[4,3],2)`, Pr(\>\|t\|)=`r round(lm2$coef[4,4],5)`).
+```{r,fig.width=6,fig.height=8}
+#| label: fig-views_articles
+#| fig-cap: "---"
+
+views=wp_pages_complete %>% 
+  tidyr::pivot_longer(c(mean_views_longterm,mean_views_f3months),
+                      names_prefix="mean_views_",values_to="mean_views")
+views_name_local=views %>% 
+  group_by(name,local) %>% 
+  summarise(n=n())
+
+tib_effect=calc_tib_summary(views,
+                            group=name,
+                            x=local, 
+                            y=mean_views,
+                            round=0)
+
+p1=ggplot(views,aes(x=name,y=mean_views))+
+  geom_hline(data=tib_effect,
+             aes(yintercept=median_general),
+             col=col_DFO_WD,linewidth=2,alpha=0.5)+
+  geom_point(data=tib_effect,
+             aes(x=group,y=median_group),
+             col=col_DFO_WD, shape=3,size=2)+
+  geom_text(data=tib_effect,
+            aes(x=group,y=10000,label=label_x),
+            position=position_dodge(width=0.8),
+            size=3)+
+  geom_text(data=tib_effect,
+          aes(x=group,y=100000,label=label_group),
+          position=position_dodge(width=0.8),
+          size=3,col=col_DFO_WD)+
+  geom_text(data=views_name_local,
+            aes(x=name,group=local,y=5,label=n),
+            position=position_dodge(width=0.75))+
+  
+  geom_boxplot(aes(fill=local))+ 
+  scale_y_continuous(trans="log1p",
+                     breaks=c(10,100,1000,10000,100000,1000000))+
+  scale_fill_manual(values=c(col_DFO,col_WD))
+p2=ggplot(truc,aes(x=curation,y=mean_views,col=local))+
+  geom_point(alpha=0.5)+
+  facet_grid(cols=vars(name))+
+  scale_y_continuous(trans="log1p",
+                     breaks=c(10,100,1000,10000,100000,1000000))+
+  geom_smooth(method="lm")+
+  scale_color_manual(values=c(col_DFO,col_WD))
+p3=ggplot(views,aes(x=length,y=curation,col=local))+
+  geom_point(alpha=0.5)+
+  facet_grid(cols=vars(name))+
+  scale_y_continuous(trans="log1p",
+                     breaks=c(10,100,1000,10000,100000,1000000))+  scale_x_continuous(trans="log1p",
+                     breaks=c(10,100,1000,10000,100000,1000000))+
+  geom_smooth(method="lm")+
+  scale_color_manual(values=c(col_DFO,col_WD))
+
+
+ggpubr::ggarrange(p1,p2,
+                  labels=c("a","b"),
+                  nrow=3,ncol=1,
+                  common.legend=TRUE)
+```
+
+*@fig-views_articles: Mean number of views during the first 3 months of the page's existence and long-term (after the 3 first months) according to the page's locality (a), and according to curation (b).*
+
+
+@fig-views_articles .a shows that the number of views of an article during the first three months of its existence is indeed significantly higher than in the long run. In both cases, the number of views is higher for local articles. @fig-views_articles .b shows that contrary to our expectation the number of views of an article, either during the first three months of its existence or long-term, is lower for articles with a higher level of curation. This is particularly the case for local articles, and during the first three months of the page's existence. This could be interpreted as a sign that viewers seek content over quality of content, especially during a local crisis.
+
+We also expect the number of views to reflect some characteristics of the events. In particular we expect the number of views to be positively correlated to the event's deathtoll, and to the HDI of the countries in which they occurred (in particular for the local pages) due to the higher use of Internet and Wikipedia in richer countries.
+
+```{r plot_views, fig.width=8,fig.height=6}
+#| label: fig-views_events
+#| fig-cap: "---"
+
+sum_HDI_class_local=wp_pages_complete %>% 
+  group_by(HDI_class,local) %>% 
+  summarise(n=n(),
+            mean_views_longterm=median(mean_views_longterm,na.rm=TRUE))
+sum_local=wp_pages_complete %>% 
+  group_by(local) %>% 
+  summarise(mean_views_longterm=median(mean_views_longterm,na.rm=TRUE))
+sum_HDI_class=wp_pages_complete %>% 
+  group_by(HDI_class) %>% 
+  summarise(mean_views_longterm=median(mean_views_longterm,na.rm=TRUE))
+views_HDI=wp_pages_complete %>% 
+  group_by(HDI_class) %>% 
+  tidyr::nest() %>% 
+  mutate(signif=purrr::map_dbl(data,~wilcox.test(mean_views_longterm~local, data=.x)$p.value),
+         diff=purrr::map_dbl(data,
+                             function(dat){dat %>%
+                                 group_by(local) %>% 
+                                 summarise(x=median(mean_views_longterm,na.rm=TRUE)) %>%
+                                 select(x) %>%
+                                 pull() %>% 
+                                 diff()})) %>% 
+  mutate(signifc=signif_stars(signif)) %>% 
+  mutate(label=paste0("diff=",round(diff,3),signifc))
+p1=ggplot(wp_pages_complete,
+          aes(y=mean_views_longterm))+
+  # add horizontal lines corresponding to local or non-local mean_views
+  geom_hline(data=sum_local,
+             aes(yintercept=mean_views_longterm,col=local),
+             alpha=0.5,linewidth=2)+
+  # add boxplots
+  geom_boxplot(aes(x=HDI_class, fill=local))+
+  # add means according to HDI_class and locality
+  geom_text(data=sum_HDI_class_local,
+             aes(x=HDI_class,y=10,label=n,group=local),
+             size=3,
+             position=position_dodge(width=0.75))+
+  # add means according to HDI_class
+  geom_point(data=sum_HDI_class,
+             aes(x=HDI_class),
+             shape=3,size=3,
+             col=col_DFO_WD)+
+  geom_text(data=views_HDI,
+            aes(x=HDI_class,y=5,label=label),
+            col=col_DFO_WD)+
+  scale_y_continuous(trans="log1p",
+                     breaks=c(100,1000,10000,100000,1000000))+
+  scale_fill_manual(values=c(col_DFO,col_WD))+
+  scale_color_manual(values=c(col_DFO,col_WD))
+
+
+p2=ggplot(wp_pages_complete ,
+       aes(x=deathtoll,y=mean_views_longterm, col=local))+
+  geom_point(alpha=0.25)+
+  facet_grid(cols=vars(HDI_class))+
+  scale_x_continuous(trans="log1p",
+                     breaks=c(0,10,100,1000,10000,100000))+
+  scale_y_continuous(trans="log1p",
+                     breaks=c(10,100,1000,10000,100000,1000000))+
+  geom_smooth(method="lm")+
+  scale_color_manual(values=c(col_DFO,col_WD))
+
+ggpubr::ggarrange(p1,p2,
+                  labels=c("a","b"),
+                  nrow=2,ncol=1,common.legend=TRUE)
+```
+
+*@fig-views_events: Mean number of views during the first 3 months of the page's existence according to the page's locality and HDI of the country in which the event occurred (a), and according to deathtoll (b).*
+
+@fig-views_events shows that the number of views of an article during the first three months of its existence is higher for local articles. The number of views is more and more important for events occurring in countries from lowest HDI to 3rd quartile HDI, but it is a bit less important for the richest countries. This could be due to the richest countries' lower populations compensating their inhabitant's increased use of Wikipedia. and for events which occurred in countries with higher HDI. This is particularly the case for events which occurred in countries with a very high HDI. @fig-views_events .b shows that the number of views of an article during the first three months of its existence is higher for events with higher deathtolls. This is particularly the case for events with deathtolls between 100 and 1000.
 
 # Conclusion
 
