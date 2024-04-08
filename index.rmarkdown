@@ -1,5 +1,6 @@
 # Online reports and narrations of flood events
 
+
 ```{r setup, message=FALSE,warning=FALSE}
 library(glitter)
 library(tidyverse)
@@ -52,6 +53,7 @@ wm_comp=readRDS("data/wm_comp.RDS")
 wm_dfo=readRDS("data/wm_dfo.RDS")
 wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS")
 ```
+
 
 # Aim of the article
 
@@ -152,47 +154,60 @@ We have gathered and curated tables of data from both Wikidata and Wikipedia :
 
 For each of these tables, we show below the descriptors names, display which among these correspond to a key useable for joining to other tables, the type of data (numeric, character, logical, etc.) and the contents of one row randomly selected.
 
+
 ```{r def_show_table, echo=FALSE}
 source("scripts/show_table.R")
 set.seed(123)
 ```
 
+
 ### wd_events
+
 
 ```{r wd_events}
 wd_events=readRDS("data/wd_events.RDS")
 knitr::kable(show_table(wd_events,provide_key="flood"))
 ```
 
+
 ### wp_pages
+
 
 ```{r show_wp_pages}
 wp_pages=readRDS("data/wp_pages.RDS")
 knitr::kable(show_table(wp_pages,provide_key=c("article")))
 ```
 
+
 ### wp_revisions
+
 
 ```{r}
 wp_revisions=readRDS("data/wp_revisions.RDS")
 knitr::kable(show_table(wp_revisions,provide_key="article"))
 ```
 
+
 ### wp_views
+
 
 ```{r show_wp_views}
 wp_views=readRDS("data/wp_views.RDS")
 knitr::kable(show_table(wp_views,provide_key="article"))
 ```
 
+
 ### wp_segments
+
 
 ```{r show wp_segments}
 wp_segments=readRDS("data/wp_segments.RDS")
 knitr::kable(show_table(wp_segments,provide_key="article"))
 ```
 
+
 ### countries
+
 
 ```{r show_countries}
 countries=readRDS("data/countries.RDS")
@@ -200,9 +215,11 @@ knitr::kable(show_table(countries, provide_key=c("country","country_label")))
 
 ```
 
+
 ## Wikidata on floods
 
 The initial query provided **`r nrow(wd_events)` Wikidata flood events**. In terms of spatial precision, most coordinates are inferred from either variable country or variable location (the major part of provided locations being countries too). The date of most events is documented either directly or through the label of the event. Most events' dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.
+
 
 ```{r show_precision_coords}
 readRDS("data/precision_coords.RDS") %>% 
@@ -213,9 +230,11 @@ readRDS("data/dates_precision.RDS") %>%
   knitr::kable()
 ```
 
+
 ## Compare to DFO data
 
 We could expect the WD dataset to include less events than the DFO dataset which records flood events primarily based on physical criteria, while one can argue that events are only recorded in WD when they reach some level of social or historical significance. We also expected the WD dataset to be somewhat biased towards events in countries with a higher HDI, as crowdsourced web datasets are known to be. We hence compared the number of events in both datasets according to the HDI class of the country where the event took place.
+
 
 ```{r build_data_compare}
 source("scripts/comp_dfo_wd.R")
@@ -223,7 +242,9 @@ wm_dfo_comparison=readRDS("data/wm_dfo_comparison.RDS") %>%
   mutate(total_length=ceiling(total_length/1000))
 ```
 
+
 We compare the number of events in both datasets (WD and DFO) according to the Human Development Index of the country where the event took place.
+
 
 ```{r plot_fig-comp_WD_DFO,fig.width=6,fig.height=8}
 #| label: fig-comp_WD_DFO
@@ -291,6 +312,7 @@ p2=ggplot(wm_dfo_comparison,
 ggpubr::ggarrange(p1,p2,nrow=2,ncol=1,common.legend=TRUE)
 ```
 
+
 *@fig-comp_WD_DFO a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by an unknown HDI class.*
 
 @fig-comp_WD_DFO .a confirms that compared to DFO, the proportion of events in Wikidata corresponding to countries with higher HDI is important. On the other hand, the distribution of events in the DFO dataset through HDI categories is also quite heterogeneous, with countries in the first and especially second quartile for HDI representing most events. An unbiased distribution of events (when defined through purely physical criteria) should reflect the total area of countries in the four quartiles for HDI, if there were no distinction between them in terms of distribution of more-or-less flood-prone biomes, which we know is not the case). Moreover, even if events are primarily detected based on physical criteria, the DFO dataset still incorporates societal elements (regarding damage and deathtoll for instance) to account for the actual importance or significance of the event. This highlights the systematic difficulty of defining, detecting and reporting flood events in an unbiased, homogeneous way across projects.
@@ -298,6 +320,7 @@ ggpubr::ggarrange(p1,p2,nrow=2,ncol=1,common.legend=TRUE)
 @fig-comp_WD_DFO .b shows that compared to DFO-documented events, events included in the WD dataset are generally associated with higher deathtoll. For DFO-documented events, the lower the HDI class, the higher the deathtoll, which could be explained by impoverished countries having less resources and infrastructure to mitigate and respond to such disasters effectively, as well as more inadequate housing and settlement in vulnerable areas exacerbating the impact of floods on communities. As for WD-documented events, the few ones which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries and even more so the ones for which we do not have a value for HDI. In this last case, the events documented in Wikidata only are often historical ones like the 1931 China floods (wd:Q1150973). These floods occurred in the Republic of China (1912-1949), for which we failed to obtain an HDI value, and which were associated with very high and somewhat discussed deathtolls. This highlights the fact that the WD dataset is biased towards events with high societal impact, which is not surprising given the nature of the project.
 
 For some events we were able to find a match between the WD dataset and the DFO dataset, so that we could compare the deathtoll paired observations.
+
 
 
 ```{r plot_deathtoll_comparison,fig.width=6,fig.height=5}
@@ -388,11 +411,13 @@ n_tot=tib %>% filter(in_data=="in_both") %>% tally() %>% pull(n)
 ggpubr::ggarrange(p1,p2,nrow=2,ncol=1, labels=c("a","b"))
 ```
 
+
 *@fig-deathtoll_WD_DFO a) Distribution of deathtolls estimates in Wikidata and DFO according to the estimates being paired or not (deathtoll estimates are paired when the events in Wikidata have been paired to an event in DFO). b) Comparison of deathtoll paired estimates in Wikidata and DFO for the same events. The symbol varies according to the deathtoll estimate in Wikidata being sourced, indicating a higher reliability of the estimate. *
 
 @fig-deathtoll_WD_DFO shows that the deathtoll values are generally higher in the WD dataset than in the DFO dataset, which is consistent with the fact that the WD dataset is biased towards events with high societal impact. However, the correlation between the deathtoll values in the two datasets is quite high. In particular, there is a portion of the matched events for which the recorded deathtoll is exactly the same (`r n_same` events i.e. `r round(n_same/n_tot*100,2)`% of the paired events) or of the same order of magnitude (`r n_same_om` events i.e. `r round(n_same_om/n_tot*100,2)`% of the paired events) which suggests not only that the pairing of events is, to a certain extent and despite the difficulty of joining completely independently designed datasets) but also that the WD dataset is not only about the events with highest deathtoll values.
 
 ## Wikipedia articles' description
+
 
 ```{r wpp_describe}
 Nwde_with_wpp=wp_pages %>% 
@@ -428,6 +453,7 @@ Nwpuh=wp_revisions %>%
   nrow()
 ```
 
+
 There are **`r nrow(wp_pages)` Wikipedia pages** associated to these events (i.e. on average `r round(nrow(wp_pages)/nrow(wd_events),2)` Wikipedia pages per event). `r wp_pages %>% group_by(flood) %>% tally() %>% nrow()` flood events are associated to at least one Wikipedia page.
 
 `r wp_pages %>% filter(lang=="en") %>% nrow()` Wikipedia pages are in English. Out of the `r n_pages_not_in_english` remaining pages, we could translate most pages to English, except `r n_pages_untranslatable` pages which were in languages that Google Translate did not support. We based all subsequent textometric analyses on the texts in English, either natively so or translated.
@@ -435,6 +461,7 @@ There are **`r nrow(wp_pages)` Wikipedia pages** associated to these events (i.e
 The average length of articles (in English or translated to English) is `r round(wpp_length_average)` characters. The 10% shortest articles represent less than `r round(wpp_length_quant10)` characters and the 10% longest ones are more than `r round(wpp_length_quant90)` characters long.
 
 There are **`r Nwpr` revisions** that produced the Wikipedia pages as they appear to this date, which represents an average `r round(Nwpr/nrow(wp_pages))` revisions per page. `r Nwpr_humans` (`r round(Nwpr_humans/Nwpr*100,2)`%) of these revisions appear to have been done by human editors and not bots (Wikipedia usernames do not contain the strings "bot" or "Bot"). There are **`r Nwpu` distinct editors**, `r Nwpuh` (`r round(Nwpuh/Nwpu*100,2)`%) of which appear to be humans. On average, each human editor in our corpus is responsible for `r round(Nwpr_humans/Nwpuh,2)` edits. The number of articles (in the corpus) edited by each human editor is distributed as follows:
+
 
 ```{r wp_revisions}
 wp_revisions %>% 
@@ -473,9 +500,11 @@ figure <- ggarrange(p1,p2,
 figure
 ```
 
+
 *@fig-wd_year: Distribution of flood events through time A) all events dated with a year-accuracy B) events dated with a year-accuracy starting in 2000*
 
 ## Wikipedia articles' history
+
 
 ```{r delays,fig.width=14,fig.height=8, warning=FALSE, message=FALSE}
 #| label: fig-delays
@@ -575,6 +604,7 @@ figure <- ggarrange(p2,p1,
 figure
 ```
 
+
 *@fig-delays Time delay between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).The grey rectangles indicate impossible-to-observe delays (first Wikipedia edits were in 2001 and first recorded views in 2015).*
 
 @fig-delays .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. @fig-delays .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, there is a peak in the number of views in the 1.5 months after the fact, but the data about the events between 2015 and 2020 shows that the total number of views is far more important in the long run (at least 6 months after the fact) than this initial number of views.
@@ -582,6 +612,7 @@ figure
 <!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
 
 ## Wikipedia articles' topics
+
 
 ```{r plot_class_rainette, fig.width=10, fig.height=8}
 #| label: fig-topics
@@ -601,7 +632,9 @@ rainette_plot(
 )
 ```
 
+
 *Topics identified by the Reinert classification method. Based on the over-represented terms in each cluster we propose the following labelling of the classes: 'governance' for cluster1, 'relief' for cluster2, 'damage' for cluster3, 'hydrology' for cluster4, 'anticipation' for cluster5, and 'weather' for cluster6.*
+
 
 ```{r plot_topic_per_length}
 #| label: fig-topic_per_length
@@ -654,11 +687,13 @@ ggplot(tib,aes(x=class_name,y=prop))+
 
 
 
+
 *@fig-topic_per_length Link between total article's length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1<k<=4 segments while the 25% longest represent 26<k<860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The plus signs correspond to the median proportions of topics throughout all articles irrespective of articles' length. The underlying model is proportion~topic+length_category. For each topic the difference in median due to length_category is represented by the gap between the + sign and the mid-line of each boxplot: this difference is tested through a Wilcoxon rank test and the result is displayed in the plot.*
 
 @fig-topic_per_length shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather), and justifying reporting that event based on its consequences (damage), while longer articles might convey more extensive reports on the physical causes (hydrology) and management of the crisis (anticipation, governance, relief).
 
 ## Curation
+
 
 ```{r plot_curation,fig.width=9,fig.height=4, warning=FALSE, message=FALSE}
 #| label: fig-curation
@@ -707,11 +742,13 @@ p=ggplot(wp_pages,
 p
 ```
 
+
 *@fig-curation Mean length of edits as a function of number of edits. The residuals of these relationship correspond to a relative mean edit length, and curation is calculated as minus the residuals. The articles in language 'simple' (for 'simple English') being destined to be particularly synthetic, we did not take include them in the model.*
 
 We want to quantify curation of the articles as reflecting the back-and-forth nature of the Wikipedia pages writing process. An index for curation could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.
 
 @fig-curation shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page 'matures', with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). We calculate the curation score corresponds to minus the relative edit length (i.e. high level of curation corresponds to smaller-sized edits). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles).
+
 
 ```{r, fig.width=8,fig.height=8}
 #| label: fig-curation_causes
@@ -816,6 +853,7 @@ ggarrange(p1,p2,nrow=2,common.legend=TRUE)
 options(scipen = 9999)
 ```
 
+
 *@fig-curation_causes: a) Effect on curation of the article being in a local language and period in which the event occurred. The estimates α correspond to the difference in mean between local and non-local articles (for one period). The estimates δ correspond to the difference in mean for one period compared to the mean value of curation throughout all articles. These differences are all tested through Student tests and the corresponding p-values are displayed. b) Effect on curation of period in which the event occurred and deathtoll. The slope for each linear regression (on log-log scale) is displayed with the corresponding p-value. For a) and b) the symbols for p-values are `.`:p<0.1, `*`:p<0.05, `**`:p<0.01, `***`:p<0.001.*
 
 
@@ -823,6 +861,7 @@ options(scipen = 9999)
 @fig-curation_causes .a shows that the more recent the events, the less curated the articles. Besides, for events which occurred before 2015, the articles' being written in a local language (considering the event location) tends to be associated with a lower level of article curation. This could be due to local articles about older events comprising more anecdotal facts. As for the events which occurred after 2015, there is no significant difference in curation levels between local and non-local articles. @fig-curation_causes .b shows that according to the period in which the event occurred, higher deathtoll tend to be correlated to higher (between 2000 and 2015) or lower (after 2015) curation. This could hint at Wikipedia being used more and more as information or managing crises tools (and all the more so than the crisis is important) instead of as an educational or encyclopedic carefully curated source of knowledge.
 
 We expect that the level of curation of an article will be correlated to the topics addressed in the article. We hypothesize that higher-quality articles will correspond to a higher level of curation and address topics which necessitate a deeper level of analysis (such as anticipation, governance, and hydrology) in higher proportions.
+
 
 ```{r curation_topics,fig.width=7,fig.height=5}
 #| label: fig-curation_topics
@@ -864,6 +903,7 @@ ggplot(tib,aes(x=class_name,y=prop))+
   guides(fill = FALSE)+
   xlab("")
 ```
+
 *@fig-curation_topics: Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test. The symbols correspond to p-values with `.`:p<0.1, `*`:p<0.05, `**`:p<0.01, `***`:p<0.001).*
 
 
@@ -875,6 +915,7 @@ ggplot(tib,aes(x=class_name,y=prop))+
 We now consider only events which occurred after July 2015 (the date from which we have access to the number of views of Wikipedia pages), in order to be able to quantify the number of views of various articles at the same stage in time (i.e. from the moment the event occurred). For each Wikipedia article, we summarise the number of views during the first three months following the creation of the page (which, for the events that have occurred after July 2015, generally corresponds to the first three months following the occurrence of the event).
 
 We expect the number of views of an article to be particularly important right after the event occurred, and to decrease as time goes by. We expect that the number of views will be correlated to the level of curation of the article, as articles with a higher level of curation are more likely to be of higher quality, and hence more likely to be consulted.
+
 
 ```{r wp_pages_complete}
 countries=readRDS("data/countries.RDS")
@@ -891,7 +932,9 @@ wp_pages_complete=readRDS("data/wp_pages_complete.RDS") %>%
   mutate(mean_views_f3months=n_views_f3months/3)
 ```
 
+
 We expect the number of views of pages to be higher in the local language, in particular shortly after the event, due to Wikipedia being used as an information source regarding the crisis unfolding and management. We also expect the number of views to be higher for articles with a higher level of curation, as these articles are more likely to be of higher quality and hence more likely to be consulted. 
+
 
 ```{r,fig.width=6,fig.height=8}
 #| label: fig-views_articles
@@ -951,12 +994,14 @@ ggpubr::ggarrange(p1,p2,
                   common.legend=TRUE)
 ```
 
+
 *@fig-views_articles: Mean number of views per month during the first 3 months of the page's existence and long-term (after the 3 first months) according to the page's locality (a), and according to curation (b).*
 
 
 @fig-views_articles .a shows that the number of views of an article during the first three months of its existence is indeed significantly higher than in the long run. In both cases, the number of views is higher for local articles. @fig-views_articles .b shows that contrary to our expectation the number of views of an article, either during the first three months of its existence or long-term, is lower for articles with a higher level of curation. This is particularly the case for local articles, and during the first three months of the page's existence. This could be interpreted as a sign that viewers seek content over quality of content, especially during a local crisis.
 
 We also expect the number of views to reflect some characteristics of the events. In particular we expect the number of views to be positively correlated to the event's deathtoll, and to the HDI of the countries in which they occurred (in particular for the local pages) due to the higher use of Internet and Wikipedia in richer countries.
+
 
 ```{r plot_views, fig.width=8,fig.height=6}
 #| label: fig-views_events
@@ -1028,6 +1073,7 @@ ggpubr::ggarrange(p1,p2,
                   nrow=2,ncol=1,common.legend=TRUE)
 ```
 
+
 *@fig-views_events: Mean number of views during the first 3 months of the page's existence according to the page's locality and HDI of the country in which the event occurred (a), and according to deathtoll (b).*
 
 @fig-views_events shows that the number of views of an article during the first three months of its existence is higher for local articles. The number of views is more and more important for events occurring in countries from lowest HDI to 3rd quartile HDI, but it is a bit less important for the richest countries. This could be due to the richest countries' lower populations compensating their inhabitant's increased use of Wikipedia. and for events which occurred in countries with higher HDI. This is particularly the case for events which occurred in countries with a very high HDI. @fig-views_events .b shows that the number of views of an article during the first three months of its existence is higher for events with higher deathtolls. This is particularly the case for events with deathtolls between 100 and 1000.
@@ -1037,3 +1083,4 @@ ggpubr::ggarrange(p1,p2,
 This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity [@lorini_uneven_2020; @ruprechter_poor_2023] due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.
 
 Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Nevertheless, the interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.
+
