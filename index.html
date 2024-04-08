@@ -147,6 +147,10 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 </ul>
 <p>The rather high threshold of 400 days has been chosen to account both for the possibly low precision -sometimes, yearly precision- in dates, and the fact that flood events can be quite long, leading to heterogeneities in the way the date of occurrence is defined and recorded. The also rather high threshold of 400 kms has been chosen to account for the fact that Wikidata events are not always precisely located. The flood event might indeed be located through a location corresponding to the region centroid, or even country centroid. Using as an alternative to the distance the country of occurrence recorded in both datasets aimed at alleviating this problem of events located with very low spatial precision.</p>
 </section>
+<section id="statistical-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analysis">Statistical analysis</h3>
+<p>We ran all statistical analyses and produced graphics with the R software <span class="citation" data-cites="R_base">(<a href="#ref-R_base" role="doc-biblioref">R Core Team 2023</a>)</span>. When comparing distributions through categories (associating this comparison with boxplots) we tested the difference of each category’s median with the other categories’ median using the Wilcoxon test, a non-parametric test based on ranks, in order not to rely on a normal distribution hypothesis or on asymptotic conditions. When we had more than two categories to compare we compared one category to all other categories, pooling them. We generally considered models with two levels, the response depending on two categorical variables X_1 and X_2. We tested the significance of the difference in median of each level of X_1 against all other levels of X_1, and for each level of X_1, the difference in median of each level of X_2 against all other levels of X_2. We displayed on the graphics the difference in median for each group associated with a code for the p-value: <code>.</code>:p&lt;0.1, <code>*</code>:p&lt;0.05, <code>**</code>:p&lt;0.01, <code>***</code>:p&lt;0.001.</p>
+</section>
 <section id="text-analysis-of-wikipedia-pages" class="level2">
 <h2 class="anchored" data-anchor-id="text-analysis-of-wikipedia-pages">Text analysis of Wikipedia pages</h2>
 <p>We scraped the text (all the textual content in headers from level one (h1) to level 6 (h6) as well as paragraphs) from all listed Wikipedia pages, using the <code>rvest</code> R package <span class="citation" data-cites="wickham_rvest_2024">(<a href="#ref-wickham_rvest_2024" role="doc-biblioref">Wickham 2024</a>)</span>. We then translated them to English (if necessary) through Google Translate using the polyglotr R package <span class="citation" data-cites="iwan_polyglotr_2024">(<a href="#ref-iwan_polyglotr_2024" role="doc-biblioref">Iwan 2024</a>)</span>.</p>
@@ -726,26 +730,27 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-comp_WD_DFO" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-comp_WD_DFO-1.png" class="img-fluid figure-img" width="576"></p>
-<figcaption class="figure-caption">Figure&nbsp;2: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;2: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em>a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class.</em></p>
+<p><em><a href="#fig-comp_WD_DFO">Figure&nbsp;2</a> a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by an unknown HDI class.</em></p>
 <p><a href="#fig-comp_WD_DFO">Figure&nbsp;2</a> .a confirms that compared to DFO, the proportion of events in Wikidata corresponding to countries with higher HDI is important. On the other hand, the distribution of events in the DFO dataset through HDI categories is also quite heterogeneous, with countries in the first and especially second quartile for HDI representing most events. An unbiased distribution of events (when defined through purely physical criteria) should reflect the total area of countries in the four quartiles for HDI, if there were no distinction between them in terms of distribution of more-or-less flood-prone biomes, which we know is not the case). Moreover, even if events are primarily detected based on physical criteria, the DFO dataset still incorporates societal elements (regarding damage and deathtoll for instance) to account for the actual importance or significance of the event. This highlights the systematic difficulty of defining, detecting and reporting flood events in an unbiased, homogeneous way across projects.</p>
 <p><a href="#fig-comp_WD_DFO">Figure&nbsp;2</a> .b shows that compared to DFO-documented events, events included in the WD dataset are generally associated with higher deathtoll. For DFO-documented events, the lower the HDI class, the higher the deathtoll, which could be explained by impoverished countries having less resources and infrastructure to mitigate and respond to such disasters effectively, as well as more inadequate housing and settlement in vulnerable areas exacerbating the impact of floods on communities. As for WD-documented events, the few ones which occurred in lowest HDI countries also correspond to (very) high deathtolls indeed, but so do the ones which have occurred in the richest countries and even more so the ones for which we do not have a value for HDI. In this last case, the events documented in Wikidata only are often historical ones like the 1931 China floods (wd:Q1150973). These floods occurred in the Republic of China (1912-1949), for which we failed to obtain an HDI value, and which were associated with very high and somewhat discussed deathtolls. This highlights the fact that the WD dataset is biased towards events with high societal impact, which is not surprising given the nature of the project.</p>
+<p>For some events we were able to find a match between the WD dataset and the DFO dataset, so that we could compare the deathtoll paired observations.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-deathtoll_WD_DFO" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-deathtoll_WD_DFO-1.png" class="img-fluid figure-img" width="576"></p>
-<figcaption class="figure-caption">Figure&nbsp;3: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;3: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em>a) Distribution of deathtolls estimates in Wikidata and DFO according to the estimates being paired or not (deathtoll estimates are paired when the events in Wikidata have been paired to an event in DFO). b) Comparison of deathtoll paired estimates in Wikidata and DFO for the same events. The symbol varies according to the deathtoll estimate in Wikidata being sourced, indicating a higher reliability of the estimate. </em></p>
-<p>As for the events for which we were able to find a possible match between the WD dataset and the DFO dataset, we can compare the deathtoll values. <a href="#fig-deathtoll_WD_DFO">Figure&nbsp;3</a> shows that the deathtoll values are generally higher in the WD dataset than in the DFO dataset, which is consistent with the fact that the WD dataset is biased towards events with high societal impact. However, the correlation between the deathtoll values in the two datasets is quite high. In particular, there is a portion of the matched events for which the recorded deathtoll is exactly the same (276 events i.e.&nbsp;52.67% of the paired events) or of the same order of magnitude (361 events i.e.&nbsp;68.89% of the paired events) which suggests not only that the pairing of events is, to a certain extent and despite the difficulty of joining completely independently designed datasets) but also that the WD dataset is not only about the events with highest deathtoll values.</p>
+<p><em><a href="#fig-deathtoll_WD_DFO">Figure&nbsp;3</a> a) Distribution of deathtolls estimates in Wikidata and DFO according to the estimates being paired or not (deathtoll estimates are paired when the events in Wikidata have been paired to an event in DFO). b) Comparison of deathtoll paired estimates in Wikidata and DFO for the same events. The symbol varies according to the deathtoll estimate in Wikidata being sourced, indicating a higher reliability of the estimate. </em></p>
+<p><a href="#fig-deathtoll_WD_DFO">Figure&nbsp;3</a> shows that the deathtoll values are generally higher in the WD dataset than in the DFO dataset, which is consistent with the fact that the WD dataset is biased towards events with high societal impact. However, the correlation between the deathtoll values in the two datasets is quite high. In particular, there is a portion of the matched events for which the recorded deathtoll is exactly the same (276 events i.e.&nbsp;52.67% of the paired events) or of the same order of magnitude (361 events i.e.&nbsp;68.89% of the paired events) which suggests not only that the pairing of events is, to a certain extent and despite the difficulty of joining completely independently designed datasets) but also that the WD dataset is not only about the events with highest deathtoll values.</p>
 </section>
 <section id="wikipedia-articles-description" class="level2">
 <h2 class="anchored" data-anchor-id="wikipedia-articles-description">Wikipedia articles’ description</h2>
@@ -807,13 +812,13 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-delays" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-delays-1.png" class="img-fluid figure-img" width="1344"></p>
-<figcaption class="figure-caption">Figure&nbsp;4: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;4: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em>Time delay between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).The grey rectangles indicate impossible-to-observe delays (first Wikipedia edits were in 2001 and first recorded views in 2015).</em></p>
-<p><a href="#fig-delays">Figure&nbsp;4</a> .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. <a href="#fig-delays">Figure&nbsp;4</a> .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, although most views occur about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact.</p>
+<p><em><a href="#fig-delays">Figure&nbsp;4</a> Time delay between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).The grey rectangles indicate impossible-to-observe delays (first Wikipedia edits were in 2001 and first recorded views in 2015).</em></p>
+<p><a href="#fig-delays">Figure&nbsp;4</a> .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. <a href="#fig-delays">Figure&nbsp;4</a> .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, there is a peak in the number of views in the 1.5 months after the fact, but the data about the events between 2015 and 2020 shows that the total number of views is far more important in the long run (at least 6 months after the fact) than this initial number of views.</p>
 <!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
 </section>
 <section id="wikipedia-articles-topics" class="level2">
@@ -823,7 +828,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-topics" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-topics-1.png" class="img-fluid figure-img" width="960"></p>
-<figcaption class="figure-caption">Figure&nbsp;5: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;5: —</figcaption>
 </figure>
 </div>
 </div>
@@ -834,12 +839,12 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-topic_per_length" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-topic_per_length-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;6: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;6: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em>Link between total article’s length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1&lt;k&lt;=4 segments while the 25% longest represent 26&lt;k&lt;860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The fushia plus signs correspond to the median proportions of topics throughout all articles irrespective of articles’ length.</em></p>
+<p><em><a href="#fig-topic_per_length">Figure&nbsp;6</a> Link between total article’s length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1&lt;k&lt;=4 segments while the 25% longest represent 26&lt;k&lt;860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The plus signs correspond to the median proportions of topics throughout all articles irrespective of articles’ length. The underlying model is proportion~topic+length_category. For each topic the difference in median due to length_category is represented by the gap between the + sign and the mid-line of each boxplot: this difference is tested through a Wilcoxon rank test and the result is displayed in the plot.</em></p>
 <p><a href="#fig-topic_per_length">Figure&nbsp;6</a> shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather), and justifying reporting that event based on its consequences (damage), while longer articles might convey more extensive reports on the physical causes (hydrology) and management of the crisis (anticipation, governance, relief).</p>
 </section>
 <section id="curation" class="level2">
@@ -849,12 +854,12 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-curation" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-curation-1.png" class="img-fluid figure-img" width="864"></p>
-<figcaption class="figure-caption">Figure&nbsp;7: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;7: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em>Mean length of edits as a function of number of edits. The residuals of these relationship correspond to a relative mean edit length, and curation is calculated as minus the residuals. The articles in language ‘simple’ (for ‘simple English’) being destined to be particularly synthetic, we did not take include them in the model.</em></p>
+<p><em><a href="#fig-curation">Figure&nbsp;7</a> Mean length of edits as a function of number of edits. The residuals of these relationship correspond to a relative mean edit length, and curation is calculated as minus the residuals. The articles in language ‘simple’ (for ‘simple English’) being destined to be particularly synthetic, we did not take include them in the model.</em></p>
 <p>We want to quantify curation of the articles as reflecting the back-and-forth nature of the Wikipedia pages writing process. An index for curation could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.</p>
 <p><a href="#fig-curation">Figure&nbsp;7</a> shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page ‘matures’, with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). We calculate the curation score corresponds to minus the relative edit length (i.e.&nbsp;high level of curation corresponds to smaller-sized edits). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles).</p>
 <div class="cell">
@@ -862,41 +867,43 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-curation_causes" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-curation_causes-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;8: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;8: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p><em><a href="#fig-curation_causes">Figure&nbsp;8</a>: a) Effect on curation of the article being in a local language and period in which the event occurred. The estimates α correspond to the difference in mean between local and non-local articles (for one period). The estimates δ correspond to the difference in mean for one period compared to the mean value of curation throughout all articles. These differences are all tested through Student tests and the corresponding p-values are displayed. b) Effect on curation of period in which the event occurred and deathtoll. The slope for each linear regression (on log-log scale) is displayed with the corresponding p-value. For a) and b) the symbols for p-values are <code>.</code>:p&lt;0.1, <code>*</code>:p&lt;0.05, <code>**</code>:p&lt;0.01, <code>***</code>:p&lt;0.001.</em></p>
 <p><a href="#fig-curation_causes">Figure&nbsp;8</a> .a shows that the more recent the events, the less curated the articles. Besides, for events which occurred before 2015, the articles’ being written in a local language (considering the event location) tends to be associated with a lower level of article curation. This could be due to local articles about older events comprising more anecdotal facts. As for the events which occurred after 2015, there is no significant difference in curation levels between local and non-local articles. <a href="#fig-curation_causes">Figure&nbsp;8</a> .b shows that according to the period in which the event occurred, higher deathtoll tend to be correlated to higher (between 2000 and 2015) or lower (after 2015) curation. This could hint at Wikipedia being used more and more as information or managing crises tools (and all the more so than the crisis is important) instead of as an educational or encyclopedic carefully curated source of knowledge.</p>
+<p>We expect that the level of curation of an article will be correlated to the topics addressed in the article. We hypothesize that higher-quality articles will correspond to a higher level of curation and address topics which necessitate a deeper level of analysis (such as anticipation, governance, and hydrology) in higher proportions.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-curation_topics" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-curation_topics-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;9: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;9: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p><em><a href="#fig-curation_topics">Figure&nbsp;9</a>: Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test. The symbols correspond to p-values with <code>.</code>:p&lt;0.1, <code>*</code>:p&lt;0.05, <code>**</code>:p&lt;0.01, <code>***</code>:p&lt;0.001).</em></p>
-<p><a href="#fig-curation_topics">Figure&nbsp;9</a> shows that articles with high levels of curation tend to deal with topics such as relief (diff=-0.143, p-value=0), and governance (diff=-0.082, p-value=0), while weather (diff=0.095, p-value=0) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g.&nbsp;reports on weather.</p>
+<p><a href="#fig-curation_topics">Figure&nbsp;9</a> shows that, contrary to our hypothesis, articles with high levels of curation tend to address topics such as relief, hydrology and governance in lower proportions. This hints at Wikipedia’s curation process actually tending to lower the proportion in which these topics appear (for instance through the suppression of unchecked or debatable statements).</p>
 </section>
 <section id="number-of-views" class="level2">
 <h2 class="anchored" data-anchor-id="number-of-views">Number of views</h2>
 <p>We now consider only events which occurred after July 2015 (the date from which we have access to the number of views of Wikipedia pages), in order to be able to quantify the number of views of various articles at the same stage in time (i.e.&nbsp;from the moment the event occurred). For each Wikipedia article, we summarise the number of views during the first three months following the creation of the page (which, for the events that have occurred after July 2015, generally corresponds to the first three months following the occurrence of the event).</p>
 <p>We expect the number of views of an article to be particularly important right after the event occurred, and to decrease as time goes by. We expect that the number of views will be correlated to the level of curation of the article, as articles with a higher level of curation are more likely to be of higher quality, and hence more likely to be consulted.</p>
+<p>We expect the number of views of pages to be higher in the local language, in particular shortly after the event, due to Wikipedia being used as an information source regarding the crisis unfolding and management. We also expect the number of views to be higher for articles with a higher level of curation, as these articles are more likely to be of higher quality and hence more likely to be consulted.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-views_articles" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-views_articles-1.png" class="img-fluid figure-img" width="576"></p>
-<figcaption class="figure-caption">Figure&nbsp;10: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;10: —</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p><em><a href="#fig-views_articles">Figure&nbsp;10</a>: Mean number of views during the first 3 months of the page’s existence and long-term (after the 3 first months) according to the page’s locality (a), and according to curation (b).</em></p>
+<p><em><a href="#fig-views_articles">Figure&nbsp;10</a>: Mean number of views per month during the first 3 months of the page’s existence and long-term (after the 3 first months) according to the page’s locality (a), and according to curation (b).</em></p>
 <p><a href="#fig-views_articles">Figure&nbsp;10</a> .a shows that the number of views of an article during the first three months of its existence is indeed significantly higher than in the long run. In both cases, the number of views is higher for local articles. <a href="#fig-views_articles">Figure&nbsp;10</a> .b shows that contrary to our expectation the number of views of an article, either during the first three months of its existence or long-term, is lower for articles with a higher level of curation. This is particularly the case for local articles, and during the first three months of the page’s existence. This could be interpreted as a sign that viewers seek content over quality of content, especially during a local crisis.</p>
 <p>We also expect the number of views to reflect some characteristics of the events. In particular we expect the number of views to be positively correlated to the event’s deathtoll, and to the HDI of the countries in which they occurred (in particular for the local pages) due to the higher use of Internet and Wikipedia in richer countries.</p>
 <div class="cell">
@@ -904,7 +911,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <div id="fig-views_events" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="index_files/figure-html/fig-views_events-1.png" class="img-fluid figure-img" width="768"></p>
-<figcaption class="figure-caption">Figure&nbsp;11: <strong>?(caption)</strong></figcaption>
+<figcaption class="figure-caption">Figure&nbsp;11: —</figcaption>
 </figure>
 </div>
 </div>
@@ -916,7 +923,7 @@ Identifying the data distribution is capital for interpretation and analysis, gi
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
 <p>This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity <span class="citation" data-cites="lorini_uneven_2020 ruprechter_poor_2023">(<a href="#ref-lorini_uneven_2020" role="doc-biblioref">Lorini et al. 2020</a>; <a href="#ref-ruprechter_poor_2023" role="doc-biblioref">Ruprechter, Burghardt, and Helic 2023</a>)</span> due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.</p>
-<p>Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Neverthelss, the interconnected nature of Wikidata’s model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.</p>
+<p>Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Nevertheless, the interconnected nature of Wikidata’s model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.</p>
 
 </section>
 
@@ -1022,6 +1029,9 @@ O’Reilly, Tim. 2020. <span>“4. <span>What</span> <span>Is</span> <span>Web</
 </div>
 <div id="ref-oeberst_knowledge_2014" class="csl-entry" role="listitem">
 Oeberst, Aileen, Iassen Halatchliyski, Joachim Kimmerle, and Ulrike Cress. 2014. <span>“Knowledge <span>Construction</span> in <span>Wikipedia</span>: <span>A</span> <span>Systemic</span>-<span>Constructivist</span> <span>Analysis</span>.”</span> <em>Journal of the Learning Sciences</em> 23 (2): 149–76. <a href="https://doi.org/10.1080/10508406.2014.888352">https://doi.org/10.1080/10508406.2014.888352</a>.
+</div>
+<div id="ref-R_base" class="csl-entry" role="listitem">
+R Core Team. 2023. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.
 </div>
 <div id="ref-ratinaud_iramuteq_2009" class="csl-entry" role="listitem">
 Ratinaud, Pierre. 2009. <span>“Iramuteq: <span>Interface</span> de <span>R</span> Pour Les <span>Analyses</span> <span>Multidimensionnelles</span> de <span>Textes</span> Et de <span>Questionnaires</span>.”</span> <a href="http://www.iramuteq.org">http://www.iramuteq.org</a>.

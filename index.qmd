@@ -24,66 +24,20 @@ signif_stars=function(signif){
 compare_medians=function(tib,general=FALSE){
   if(general==FALSE){
       result=tib %>%
-      dplyr::group_by(varx) %>%
+      dplyr::group_by(x) %>%
       dplyr::summarise(mediany=median(vary,na.rm=TRUE)) %>%
       dplyr::select(mediany) %>%
       dplyr::pull() %>%
       diff()
   }
   if(general==TRUE){
-      median_other=tib %>% filter(varx==FALSE) %>% pull(vary) %>% median(na.rm=TRUE)
-      median_cat=tib %>% filter(varx==TRUE) %>% pull(vary) %>% median(na.rm=TRUE)
+      median_other=tib %>% filter(x==FALSE) %>% pull(vary) %>% median(na.rm=TRUE)
+      median_cat=tib %>% filter(x==TRUE) %>% pull(vary) %>% median(na.rm=TRUE)
       result=median_cat-median_other
   }
   return(result)
 }
-
-calc_tib_summary=function(tib,group,y,x,round=3,diffgroupname="dg",diffxname="dx"){
-  group=enquo(group)
-  x=enquo(x)
-  y=enquo(y)
-  tibt=tib %>%
-    select(!!group,!!x,!!y) %>% 
-    mutate(varx:=!!x,
-           vary:=!!y,
-           group:=!!group) %>% 
-    na.omit()
-  f=function(x){return(tibt)}
-  replace_varx=function(tib,xval){
-    tib=tib %>% 
-      mutate(varx=case_when(group==xval~TRUE,
-                            TRUE~FALSE))
-    return(tib)
-  }
-  tib1=tibt   %>%
-    group_by(group) %>%
-    tidyr::nest() %>% 
-    mutate(data=purrr::map(group,~f(.x))) %>% 
-    mutate(data=purrr::map2(data,group,~replace_varx(.x,.y))) %>% 
-    mutate(median_general=purrr::map_dbl(data,~median(.x$vary,na.rm=TRUE)),
-           signif_group=purrr::map_dbl(data,~wilcox.test(vary~varx, data=.x)$p.value),
-           diff_group=purrr::map_dbl(data,~compare_medians(.x,general=TRUE))) %>% 
-    mutate(signif_group_c=signif_stars(signif_group)) %>%
-    mutate(label_group=paste0(diffgroupname,"=",round(diff_group,round),signif_group_c)) %>% 
-    select(-data)
-
-  tib2=tibt %>%
-    group_by(group) %>% 
-    tidyr::nest() %>% 
-    mutate(
-      median_group=purrr::map_dbl(data,~median(.x$vary,na.rm=TRUE)),
-      signif_x=purrr::map_dbl(data,~wilcox.test(vary~varx, data=.x)$p.value),
-      diff_x=purrr::map_dbl(data,~compare_medians(.x))) %>%
-    mutate(signif_x_c=signif_stars(signif_x)) %>%
-    mutate(label_x=paste0(diffxname,"=",round(diff_x,round),signif_x_c)) %>% 
-    select(-data)
-  tib=full_join(tib1,tib2,by=c("group"))
-  tib3=tibt %>% 
-    group_by(group,varx) %>% 
-    tally()
-  tib=full_join(tib,tib3,by=c("group"))
-  return(tib)
-  }
+source("scripts/calc_tib_summary.R")
 ```
 
 ```{r load_data, message=FALSE,warning=FALSE}
@@ -159,6 +113,10 @@ For each WD event `flood`:
 
 The rather high threshold of 400 days has been chosen to account both for the possibly low precision -sometimes, yearly precision- in dates, and the fact that flood events can be quite long, leading to heterogeneities in the way the date of occurrence is defined and recorded. The also rather high threshold of 400 kms has been chosen to account for the fact that Wikidata events are not always precisely located. The flood event might indeed be located through a location corresponding to the region centroid, or even country centroid. Using as an alternative to the distance the country of occurrence recorded in both datasets aimed at alleviating this problem of events located with very low spatial precision.
 
+### Statistical analysis
+
+We ran all statistical analyses and produced graphics with the R software [@R_base]. When comparing distributions through categories (associating this comparison with boxplots) we tested the difference of each category's median with the other categories' median using the Wilcoxon test, a non-parametric test based on ranks, in order not to rely on a normal distribution hypothesis or on asymptotic conditions. When we had more than two categories to compare we compared one category to all other categories, pooling them. We generally considered models with two levels, the response depending on two categorical variables X_1 and X_2. We tested the significance of the difference in median of each level of X_1 against all other levels of X_1, and for each level of X_1, the difference in median of each level of X_2 against all other levels of X_2. We displayed on the graphics the difference in median for each group associated with a code for the p-value: `.`:p<0.1, `*`:p<0.05, `**`:p<0.01, `***`:p<0.001.
+
 ## Text analysis of Wikipedia pages
 
 We scraped the text (all the textual content in headers from level one (h1) to level 6 (h6) as well as paragraphs) from all listed Wikipedia pages, using the `rvest` R package [@wickham_rvest_2024]. We then translated them to English (if necessary) through Google Translate using the polyglotr R package [@iwan_polyglotr_2024].
@@ -166,6 +124,8 @@ We scraped the text (all the textual content in headers from level one (h1) to l
 We tokenized the texts with the tidytext R package [@silge_tidytext_2016], lemmatized words and filtered out stop words based on the Iramuteq English dictionnary [@ratinaud_iramuteq_2009]. We could then identify textual specificities based on various partitions of the corpus [@lafon_pierre_sur_1980; @loiseau_textometry_2022].
 
 We used Reinert's method [@reinert_alceste_1990] to classify segments of our corpus (consisting in successive parts of the Wikipedia articles, segmented in such a way that each contains 10 lemmatized, content words). To implement that method, we used the rainette package [@barnier_rainette_2023] and used its exploration tools to choose a meaningful and tractable number of classes. Each class is characterized as a collection of over-represented words, and we used them to label each class in a one-worded, synthetic way. We then used these labelled classes to examine the relationship between the flood characteristics and the topic contents of articles.
+
+
 
 # Results
 
@@ -265,7 +225,7 @@ wm_dfo_comparison=readRDS("data/wm_dfo_comparison.RDS") %>%
 
 We compare the number of events in both datasets (WD and DFO) according to the Human Development Index of the country where the event took place.
 
-```{r plot_fig-comp_WD_DFO,fig.width=6,fig.height=6}
+```{r plot_fig-comp_WD_DFO,fig.width=6,fig.height=8}
 #| label: fig-comp_WD_DFO
 #| fig-cap: "---" 
 p1=ggplot(wm_dfo_comparison,
@@ -280,17 +240,47 @@ p1=ggplot(wm_dfo_comparison,
 
 wm_dfo_comparison=wm_dfo_comparison %>% 
     mutate(deathtoll=case_when(is.na(deathtoll)~deathtoll_dfo,
-                   !is.na(deathtoll)~deathtoll))
+                   !is.na(deathtoll)~deathtoll)) %>% 
+    mutate(HDI_class=case_when(is.na(HDI_class)~"unknown",
+                               TRUE~HDI_class))
 wm_dfo_comparison_summary=wm_dfo_comparison  %>% 
   group_by(HDI_class,in_data) %>% 
   tally()
+tib_effect=calc_tib_summary(tib=wm_dfo_comparison,
+                            group1=HDI_class,
+                            group2=in_data, 
+                            y=deathtoll,
+                            round=10,
+                            d1name=NULL,
+                            d2name=NULL)
 p2=ggplot(wm_dfo_comparison, 
-       aes(x=HDI_class,y=deathtoll,fill=in_data))+
-  geom_boxplot()+
-  geom_text(data=wm_dfo_comparison_summary,
-            aes(x=HDI_class,y=-0.5,label=n),
+       aes(x=HDI_class,y=deathtoll))+
+  geom_hline(data=tib_effect %>% select(no_group1) %>% unique,
+             aes(yintercept=no_group1),
+             alpha=0.5,col=col_DFO_WD, linewidth=2)+
+  geom_boxplot(aes(fill=in_data))+
+  geom_text(data=tib_effect %>% select(group1,n) %>% unique(),
+            aes(x=group1,y=-0.5,label=n),
             position=position_dodge(width=0.8),
             size=3)+
+  geom_text(data=tib_effect %>%
+              select(contains("group1")) %>% unique(),
+            aes(x=group1,y=30000,label=label_group1),
+            size=4,col=col_DFO_WD)+
+  geom_text(data=tib_effect %>%
+              select(group1,contains("group2")) %>% unique(),
+            aes(x=group1,group=group2,
+                y=rep(exp(c(12.2,12.7,13.2)-1),5),
+                label=label_group2),
+            size=3,
+            position=position_dodge(width=0.8))+
+  geom_text(data=tib_effect %>%
+            select(group1,group2,n) %>% unique(),
+          aes(x=group1,group=group2,
+              y=0.5,
+              label=n),
+          size=3,
+          position=position_dodge(width=0.8))+
   scale_y_continuous(trans="log1p",
                      limits=c(0,1000000),
                      breaks=c(0,10,100,1000,10000,100000))+
@@ -301,7 +291,7 @@ p2=ggplot(wm_dfo_comparison,
 ggpubr::ggarrange(p1,p2,nrow=2,ncol=1,common.legend=TRUE)
 ```
 
-*@fig-comp_WD_DFO a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by a NA (not available) HDI class.*
+*@fig-comp_WD_DFO a) Number of flood events documented in Wikidata (wd), DFO (dfo) or both datasets according to our matching algorithm. The number of events is displayed according to the Human Development Index (HDI) class of the country where the event took place (countries are pooled in the first, second, third or fourth quartile). b) Deathtoll per event according to HDI class and occurrence in one or both datasets. The estimate considered for deathtoll comes either from the DFO dataset, or by default from the Wikidata dataset (some events are not associated to any deathtoll estimate, in which case they are excluded from this figure). Some events happened in places where the country name changed through time making it difficult to link them to a HDI value: these are the ones represented by an unknown HDI class.*
 
 @fig-comp_WD_DFO .a confirms that compared to DFO, the proportion of events in Wikidata corresponding to countries with higher HDI is important. On the other hand, the distribution of events in the DFO dataset through HDI categories is also quite heterogeneous, with countries in the first and especially second quartile for HDI representing most events. An unbiased distribution of events (when defined through purely physical criteria) should reflect the total area of countries in the four quartiles for HDI, if there were no distinction between them in terms of distribution of more-or-less flood-prone biomes, which we know is not the case). Moreover, even if events are primarily detected based on physical criteria, the DFO dataset still incorporates societal elements (regarding damage and deathtoll for instance) to account for the actual importance or significance of the event. This highlights the systematic difficulty of defining, detecting and reporting flood events in an unbiased, homogeneous way across projects.
 
@@ -321,7 +311,7 @@ deathtoll_compar=wm_dfo_comparison %>%
   # define for which floods we have paired observations
   mutate(paired_observations=in_data=="in_both") %>%
   mutate(paired_observations=case_when(paired_observations~"paired",
-                                      TRUE~"unpaired")) %>%
+                                       TRUE~"unpaired")) %>%
   tidyr::pivot_longer(c(deathtoll_wd,deathtoll_dfo),
                      names_to="dataset",
                      names_prefix="deathtoll_")
@@ -329,31 +319,35 @@ deathtoll_compar_summary=deathtoll_compar %>%
   group_by(paired_observations) %>%
   summarise(value=median(value,na.rm=TRUE))
 tib_effect=calc_tib_summary(deathtoll_compar,
-                            group=paired_observations,
-                            x=dataset, 
+                            group1=paired_observations,
+                            group2=dataset, 
                             y=value,
-                            round=10)
+                            round=10,
+                            d1name=NULL,d2name=NULL)
 p1=ggplot(deathtoll_compar,
   aes(x=paired_observations, y=value))+
-  geom_hline(data=tib_effect %>% select(median_general) %>% unique(),
-             aes(yintercept=median_general),
-             linewidth=2,alpha=0.5,col=col_DFO_WD)+
-  geom_point(data=tib_effect %>% select(group,median_group) %>% unique(),
-             aes(x=group,y=median_group),
-             col=col_DFO_WD, shape=3,size=2)+
-  geom_text(data=tib_effect %>% select(group,label_x) %>% unique(),
-            aes(x=group,y=1000,label=label_x),
-            position=position_dodge(width=0.8),
-            size=3)+
-  geom_text(data=tib_effect %>% select(group,label_group) %>% unique(),
-          aes(x=group,y=100,label=label_group),
-          position=position_dodge(width=0.8),
-          size=3,col=col_DFO_WD)+
-  geom_text(data=tib_effect %>% select(group,varx,n) %>% unique(),
-        aes(x=group,group=varx,y=-0.5,label=n),
-        position=position_dodge(width=0.8),
-        size=2)+
+  geom_hline(data=tib_effect %>% select(no_group1) %>% unique,
+             aes(yintercept=no_group1),
+             alpha=0.5,col=col_DFO_WD, linewidth=2)+
   geom_boxplot(aes(fill=dataset))+
+  geom_text(data=tib_effect %>%
+              select(contains("group1")) %>% unique(),
+            aes(x=group1,y=1000000,label=label_group1),
+            size=4,col=col_DFO_WD)+
+  geom_text(data=tib_effect %>%
+              select(group1,contains("group2")) %>% unique(),
+            aes(x=group1,group=group2,
+                y=400000,
+                label=label_group2),
+            size=3,
+            position=position_dodge(width=0.8))+
+  geom_text(data=tib_effect %>%
+            select(group1,group2,n) %>% unique(),
+          aes(x=group1,group=group2,
+              y=-0.5,
+              label=n),
+          size=3,
+          position=position_dodge(width=0.8))+
   scale_y_continuous(trans="log1p",
                      breaks=c(0,10,100,1000,10000,100000))+
   scale_fill_manual(values=c("dfo"=col_DFO,
@@ -581,9 +575,9 @@ figure <- ggarrange(p2,p1,
 figure
 ```
 
-*Time delay between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).The grey rectangles indicate impossible-to-observe delays (first Wikipedia edits were in 2001 and first recorded views in 2015).*
+*@fig-delays Time delay between events and a) revisions to the Wikipedia articles documenting them b) views of the Wikipedia articles. The delay might be negative (the edits or views about an event began before the recorded, average date for the event, hinting to an event with long duration or event with a low-precision recorded date). The color indicates the precision of the recorded event date (it can be accurate to the day, month or year).The grey rectangles indicate impossible-to-observe delays (first Wikipedia edits were in 2001 and first recorded views in 2015).*
 
-@fig-delays .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. @fig-delays .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, although most views occur about events which occurred between 2010 and 2020 occur 5 to 10 years after the fact.
+@fig-delays .a shows that most of the writing of Wikipedia articles related to flood events take place during the month of their occurrence (except of course when Wikipedia did not exist (before 2001) or when it was still moderately used to document current events. This highlights the fact that Wikipedia articles about recent flood events are written as news rather than encyclopedic reports on past events. @fig-delays .b shows that views (consultations) of the pages, on the other hand, are distributed more evenly through time. We cannot access the data relative to views before July 2015 so that early views of articles dated before 2015 cannot be known. For articles dated after 2015, there is a peak in the number of views in the 1.5 months after the fact, but the data about the events between 2015 and 2020 shows that the total number of views is far more important in the long run (at least 6 months after the fact) than this initial number of views.
 
 <!-- Conversely, one can argue that articles exhibiting a large proportion of revisions implemented a long time after the occurrence of the event could be indicative of an ongoing debate or controversy, or be the ongoing focus of some social or human interest.  -->
 
@@ -632,19 +626,35 @@ tib=crossing(wp_pages %>% select(article) %>% unique(),
 tib_summary=tib %>% 
   group_by(class_name) %>% 
   summarise(medianprop=median(prop))
+
+tib_effect=calc_tib_summary(tib,
+                            group1=class_name,
+                            group2=ntotcat,
+                            y=prop,
+                            d1name=NULL,
+                            d2name=NULL,
+                            round=2) %>% 
+  mutate(ntotcat=group2)
+
 ggplot(tib,aes(x=class_name,y=prop))+
   geom_boxplot(aes(fill=class_name))+
   facet_grid(rows=vars(ntotcat),scales="free")+
+  geom_text(data=tib_effect,
+            aes(x=group1,y=-0.05,label=label_group2),
+            size=2)+
   scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
   coord_flip()+
   geom_point(data=tib_summary,
              aes(x=class_name,y=medianprop),
-             shape=3,col=col_WD)+
+             shape=3,stroke=1)+
   theme(legend.position="none")
 ```
 
 
-*Link between total article's length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1<k<=4 segments while the 25% longest represent 26<k<860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The fushia plus signs correspond to the median proportions of topics throughout all articles irrespective of articles' length.*
+
+
+
+*@fig-topic_per_length Link between total article's length and topics identified by the Reinert classification method. The articles are classified into 4 categories according to their lengths k (number of segments used for the Reinert classification and identification of topics). The 25% shortest articles represent 1<k<=4 segments while the 25% longest represent 26<k<860 segments. The proportion of segments falling into each category is calculated and the distribution of these proportions is displayed through boxplots for each article length category. The plus signs correspond to the median proportions of topics throughout all articles irrespective of articles' length. The underlying model is proportion~topic+length_category. For each topic the difference in median due to length_category is represented by the gap between the + sign and the mid-line of each boxplot: this difference is tested through a Wilcoxon rank test and the result is displayed in the plot.*
 
 @fig-topic_per_length shows that the length of the article is probably a very important factor in the topics addressed (or conversely, the topics addressed determine the length of the article), with shorter articles corresponding to factual statements regarding physical features of the event (weather), and justifying reporting that event based on its consequences (damage), while longer articles might convey more extensive reports on the physical causes (hydrology) and management of the crisis (anticipation, governance, relief).
 
@@ -697,7 +707,7 @@ p=ggplot(wp_pages,
 p
 ```
 
-*Mean length of edits as a function of number of edits. The residuals of these relationship correspond to a relative mean edit length, and curation is calculated as minus the residuals. The articles in language 'simple' (for 'simple English') being destined to be particularly synthetic, we did not take include them in the model.*
+*@fig-curation Mean length of edits as a function of number of edits. The residuals of these relationship correspond to a relative mean edit length, and curation is calculated as minus the residuals. The articles in language 'simple' (for 'simple English') being destined to be particularly synthetic, we did not take include them in the model.*
 
 We want to quantify curation of the articles as reflecting the back-and-forth nature of the Wikipedia pages writing process. An index for curation could be used as a measure of a particular effort having been devoted to the establishment of the current text and could thus be interpreted as a sign of possible controversy or debate in its writing process.
 
@@ -740,26 +750,41 @@ tib_mod2=lm(curation~catyear+0,data=tib) %>%
   mutate(catyear=as.factor(catyear)) %>% 
   mutate(signifc=signif_stars(`Pr(>|t|)`))
 
+tib_effect=calc_tib_summary(tib,
+                            group1=catyear,
+                            group2=local,
+                            y=curation,
+                            d1name=NULL,
+                            d2name=NULL)
+
 p1=ggplot(tib, aes(x=catyear, curation))+
-  geom_hline(aes(yintercept=unique(mean_curation_global)),
-             col=col_DFO_WD,alpha=0.5,linewidth=2)+
-  geom_boxplot(aes(fill=local))+
-  geom_text(data=tib_mod,
-            aes(y=-1,label=paste0("α=",round(diff,3),signifc)))+
-  geom_point(data=tib_mod1,
-             aes(x=catyear,y=mean_curation_local,fill=local),
-             shape=3,size=3,stroke=2,
-             position=position_dodge(width=0.8))+
-  geom_point(data=tib_mod,
-             aes(y=mean_curation),
-             col=col_DFO_WD,shape=3,size=3,stroke=2)+
-  
-  geom_text(data=tib_mod1,
-            aes(y=-0.8,fill=local,
-                label=n),
+  geom_hline(data=tib_effect %>% select(no_group1) %>% unique,
+             aes(yintercept=no_group1),
+             alpha=0.5,col=col_DFO_WD, linewidth=2)+
+  geom_text(data=tib_effect %>%
+              select(contains("group1")) %>% unique(),
+            aes(x=group1,y=0.8,label=label_group1),
+            size=4,col=col_DFO_WD)+
+  geom_text(data=tib_effect %>%
+              select(group1,contains("group2")) %>% unique(),
+            aes(x=group1,group=group2,
+                y=1,
+                label=label_group2),
+            size=3,
             position=position_dodge(width=0.8))+
-  geom_text(data=tib_mod2,col=col_DFO_WD,
-            aes(y=1,label=paste0("δ=",round(Estimate,4),signifc)))+
+  geom_text(data=tib_effect %>%
+            select(group1,group2,n) %>% unique(),
+          aes(x=group1,group=group2,
+              y=-0.95,
+              label=n),
+          size=3,
+          position=position_dodge(width=0.8))+
+  geom_point(data=tib_effect %>% 
+               select(group1,no_group2) %>%
+               unique(),
+             aes(x=group1,y=no_group2),
+             col=col_DFO_WD,shape=3,stroke=1.5)+
+  geom_boxplot(aes(fill=local))+
   scale_fill_manual(values=c(col_DFO,col_WD))
 
 
@@ -797,8 +822,11 @@ options(scipen = 9999)
 
 @fig-curation_causes .a shows that the more recent the events, the less curated the articles. Besides, for events which occurred before 2015, the articles' being written in a local language (considering the event location) tends to be associated with a lower level of article curation. This could be due to local articles about older events comprising more anecdotal facts. As for the events which occurred after 2015, there is no significant difference in curation levels between local and non-local articles. @fig-curation_causes .b shows that according to the period in which the event occurred, higher deathtoll tend to be correlated to higher (between 2000 and 2015) or lower (after 2015) curation. This could hint at Wikipedia being used more and more as information or managing crises tools (and all the more so than the crisis is important) instead of as an educational or encyclopedic carefully curated source of knowledge.
 
+We expect that the level of curation of an article will be correlated to the topics addressed in the article. We hypothesize that higher-quality articles will correspond to a higher level of curation and address topics which necessitate a deeper level of analysis (such as anticipation, governance, and hydrology) in higher proportions.
+
 ```{r curation_topics,fig.width=7,fig.height=5}
 #| label: fig-curation_topics
+#| fig-cap: "---"
 
 tib_classes=wp_segments %>% select(class,class_name,color) %>% unique()
 tib_count_class=wp_segments %>% 
@@ -818,36 +846,29 @@ tib=crossing(wp_pages %>% select(article,curation) %>%
          prop=n/ntot) %>%
   ungroup() %>% 
   na.omit()
-tib_summary=tib %>% 
-  group_by(class_name) %>%
-  tidyr::nest() %>% 
-  mutate(signif=purrr::map_dbl(data,~wilcox.test(prop~highcuration, data=.x)$p.value),
-         diff=purrr::map_dbl(data,
-                             function(dat){dat %>%
-                                 group_by(highcuration) %>% 
-                                 summarise(x=median(prop)) %>%
-                                 select(x) %>%
-                                 pull() %>% 
-                                 diff()})) %>% 
-  mutate(signifc=signif_stars(signif)) %>% 
-  mutate(label=paste0("diff=",round(diff,3),signifc))
-ggplot(tib,aes(x=class_name,fill=class_name,y=prop))+
+tib_summary=calc_tib_summary(tib,
+                             group1=class_name,
+                             group2=highcuration,
+                             y=prop,
+                             d1name=NULL,
+                             d2name=NULL)
+ggplot(tib,aes(x=class_name,y=prop))+
   geom_boxplot(aes(fill=class_name,color=highcuration))+
   scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
   scale_color_manual(values=c(col_DFO,col_WD))+
   coord_flip()+
-  geom_text(data=tib_summary,
-            aes(x=class_name, y=-0.25,label=label),
-             hjust=0)+
+  geom_text(data=tib_summary %>% select(group1,group2,label_group2) %>% unique(),
+            aes(x=group1,group=group2, y=-0.25,label=label_group2),
+             hjust=0,
+            position=position_dodge(width=0.8))+
   guides(fill = FALSE)+
   xlab("")
-
 ```
-
 *@fig-curation_topics: Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test. The symbols correspond to p-values with `.`:p<0.1, `*`:p<0.05, `**`:p<0.01, `***`:p<0.001).*
 
 
-@fig-curation_topics shows that articles with high levels of curation tend to deal with topics such as relief (diff=`r tib_summary %>% filter(class_name=="relief") %>% pull(diff) %>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="relief") %>% pull(signif) %>% round(5)`), and governance (diff=`r tib_summary %>% filter(class_name=="governance") %>% pull(diff)%>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="governance") %>% pull(signif) %>% round(5)`), while weather (diff=`r tib_summary %>% filter(class_name=="weather") %>% pull(diff) %>% round(3)`, p-value=`r tib_summary %>% filter(class_name=="weather") %>% pull(signif) %>% round(5)`) is a bit less addressed. This hints at relief and governance being sensitive topics, which probably require and elicit more careful editing, discussion and fact-checking than e.g. reports on weather.
+@fig-curation_topics shows that, contrary to our hypothesis, articles with high levels of curation tend to address topics such as relief, hydrology and governance in lower proportions. This hints at Wikipedia's curation process actually tending to lower the proportion in which these topics appear (for instance through the suppression of unchecked or debatable statements).
+
 
 ## Number of views
 
@@ -870,6 +891,8 @@ wp_pages_complete=readRDS("data/wp_pages_complete.RDS") %>%
   mutate(mean_views_f3months=n_views_f3months/3)
 ```
 
+We expect the number of views of pages to be higher in the local language, in particular shortly after the event, due to Wikipedia being used as an information source regarding the crisis unfolding and management. We also expect the number of views to be higher for articles with a higher level of curation, as these articles are more likely to be of higher quality and hence more likely to be consulted. 
+
 ```{r,fig.width=6,fig.height=8}
 #| label: fig-views_articles
 #| fig-cap: "---"
@@ -882,58 +905,53 @@ views_name_local=views %>%
   summarise(n=n())
 
 tib_effect=calc_tib_summary(views,
-                            group=name,
-                            x=local, 
+                            group1=name,
+                            group2=local, 
                             y=mean_views,
-                            round=0)
+                            round=0,
+                            d1name=NULL,
+                            d2name=NULL)
 
 p1=ggplot(views,aes(x=name,y=mean_views))+
-  geom_hline(data=tib_effect,
-             aes(yintercept=median_general),
-             col=col_DFO_WD,linewidth=2,alpha=0.5)+
-  geom_point(data=tib_effect,
-             aes(x=group,y=median_group),
-             col=col_DFO_WD, shape=3,size=2)+
-  geom_text(data=tib_effect,
-            aes(x=group,y=10000,label=label_x),
-            position=position_dodge(width=0.8),
-            size=3)+
-  geom_text(data=tib_effect,
-          aes(x=group,y=100000,label=label_group),
-          position=position_dodge(width=0.8),
-          size=3,col=col_DFO_WD)+
-  geom_text(data=views_name_local,
-            aes(x=name,group=local,y=5,label=n),
-            position=position_dodge(width=0.75))+
-  
+  geom_hline(data=tib_effect %>% select(no_group1) %>% unique,
+             aes(yintercept=no_group1),
+             alpha=0.5,col=col_DFO_WD, linewidth=2)+
+  geom_text(data=tib_effect %>%
+              select(contains("group1")) %>% unique(),
+            aes(x=group1,y=200000,label=label_group1),
+            size=4,col=col_DFO_WD)+
+  geom_text(data=tib_effect %>%
+              select(group1,contains("group2")) %>% unique(),
+            aes(x=group1,group=group2,
+                y=90000,
+                label=label_group2),
+            size=3,
+            position=position_dodge(width=0.8))+
+  geom_text(data=tib_effect %>%
+            select(group1,group2,n) %>% unique(),
+          aes(x=group1,group=group2,
+              y=0.5,
+              label=n),
+          size=3,
+          position=position_dodge(width=0.8))+
   geom_boxplot(aes(fill=local))+ 
   scale_y_continuous(trans="log1p",
                      breaks=c(10,100,1000,10000,100000,1000000))+
   scale_fill_manual(values=c(col_DFO,col_WD))
-p2=ggplot(truc,aes(x=curation,y=mean_views,col=local))+
+p2=ggplot(views,aes(x=curation,y=mean_views,col=local))+
   geom_point(alpha=0.5)+
   facet_grid(cols=vars(name))+
   scale_y_continuous(trans="log1p",
                      breaks=c(10,100,1000,10000,100000,1000000))+
   geom_smooth(method="lm")+
   scale_color_manual(values=c(col_DFO,col_WD))
-p3=ggplot(views,aes(x=length,y=curation,col=local))+
-  geom_point(alpha=0.5)+
-  facet_grid(cols=vars(name))+
-  scale_y_continuous(trans="log1p",
-                     breaks=c(10,100,1000,10000,100000,1000000))+  scale_x_continuous(trans="log1p",
-                     breaks=c(10,100,1000,10000,100000,1000000))+
-  geom_smooth(method="lm")+
-  scale_color_manual(values=c(col_DFO,col_WD))
-
-
 ggpubr::ggarrange(p1,p2,
                   labels=c("a","b"),
-                  nrow=3,ncol=1,
+                  nrow=2,ncol=1,
                   common.legend=TRUE)
 ```
 
-*@fig-views_articles: Mean number of views during the first 3 months of the page's existence and long-term (after the 3 first months) according to the page's locality (a), and according to curation (b).*
+*@fig-views_articles: Mean number of views per month during the first 3 months of the page's existence and long-term (after the 3 first months) according to the page's locality (a), and according to curation (b).*
 
 
 @fig-views_articles .a shows that the number of views of an article during the first three months of its existence is indeed significantly higher than in the long run. In both cases, the number of views is higher for local articles. @fig-views_articles .b shows that contrary to our expectation the number of views of an article, either during the first three months of its existence or long-term, is lower for articles with a higher level of curation. This is particularly the case for local articles, and during the first three months of the page's existence. This could be interpreted as a sign that viewers seek content over quality of content, especially during a local crisis.
@@ -1018,4 +1036,4 @@ ggpubr::ggarrange(p1,p2,
 
 This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, Wikimedia and Wikipedia projects. Although these data exhibit some heterogeneity [@lorini_uneven_2020; @ruprechter_poor_2023] due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.
 
-Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Neverthelss, the interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.
+Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Nevertheless, the interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to easily access additional information or related resources linked to a particular event. The present study hence demonstrates the strength of such a data source to provide context on a global scale (social, in particular) through the integration of Wikipedia discourse elements.
