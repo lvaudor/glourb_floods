@@ -249,7 +249,7 @@ if(!file.exists("data/countries.RDS")){
     na.omit() %>% 
     mutate(data=purrr::map(country,get_country_pop_and_area_info)) %>% select(-country) %>% 
     tidyr::unnest(data) %>% 
-    mutate(population=as.numeric(population),
+    mutate(population=as.numeric(population/1000000),
            area=as.numeric(area))
   countries=countries %>% 
     left_join(countries_area_and_pop,by="country")

@@ -6,6 +6,7 @@ library(tidyverse)
 library(ggpubr)
 library(tidytext)
 library(leaflet)
+source("scripts/plot_random_forest.R")
 # devtools::install_github("juba/rainette") 
 # install dev version to have custom colors and labels
 library(rainette)
@@ -57,6 +58,12 @@ wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS")
 wp_pages=readRDS("data/wp_pages.RDS")
 ```
 
+Frontiers in Big Data
+Journal of flood risk management
+Natural Hazards
+Progress in Human Geography
+GeoJournal
+
 # Abstract
 
 This study explores the use of Wikidata and Wikipedia as viable sources for flood data analysis. We evaluate the reliability and scope of these platforms despite inherent challenges such as geographical biases and inconsistencies in data. Our findings indicate that Wikidata and Wikipedia are particularly valuable for providing not only detailed textual descriptions and social context but also insights into the public’s interest and engagement with flood events. By juxtaposing this dataset with an established flood database, we investigate the conditions and extent to which flood-related pages are generated on these platforms. Our analysis reveals that the creation, content, and diffusion of Wikidata and Wikipedia entries are influenced by factors including geographical location, social context, and event's severity. This underscores the potential of these platforms as complementary tools in disaster management and research, offering a unique perspective.
@@ -104,19 +111,11 @@ Overall, leveraging participatory data in conjunction with conventional methods 
 
 This study’s objectives are to
 
--   
+- 1)  collect and assess the information provided by the Wikimedia initiative (in particular, Wikidata and Wikipedia) on flood events.
 
-    1)  collect and assess the information provided by the Wikimedia initiative (in particular, Wikidata and Wikipedia) on flood events.
+- 2)  compare this data, which is crowdsourced, to an institutionnally curated database on the same topic to estimate its validity and interest.
 
--   
-
-    2)  compare this data, which is crowdsourced, to an institutionnally curated database on the same topic to estimate its validity and interest.
-
--   
-
-    ```         
-    3)  use this data to characterize and understand (in terms of human impact especially) the flood events documented.
-    ```
+-  3)  use this data to characterize and understand (in terms of human impact especially) the flood events documented.
 
 # Material and methods
 
@@ -150,6 +149,10 @@ The rather high threshold of 400 days has been chosen to account both for the po
 ## Statistical analyses
 
 We ran all statistical analyses and produced graphics with the R software [@R_base]. When comparing distributions through categories (associating this comparison with boxplots) we tested the difference of each category's median with the other categories' median using the Wilcoxon test, a non-parametric test based on ranks, in order not to rely on a normal distribution hypothesis or on asymptotic conditions. When we had more than two categories to compare, we compared one category to all other categories, pooling them. We generally considered models with two levels, the response depending on two categorical variables X_1 and X_2. We tested the significance of the difference in median of each level of X_1 against all other levels of X_1, and for each level of X_1, the difference in median of each level of X_2 against all other levels of X_2. We displayed on the graphics the difference in median for each group associated with a code for the p-value: `.`:p\<0.1, `*`:p\<0.05, `**`:p\<0.01, `***`:p\<0.001.
+
+## Random Forests
+
+To better understand the non-linear relationship between quantitative variables and a set of non-independent descriptors, we ran random forest regressions using the R package randomForestSRC [@ishwaran_fast_2023]. Random forests work by constructing multiple decision trees from bootstrapped samples of the dataset and averaging their predictions to improve accuracy and control overfitting. Each tree is built using a random subset of predictors at each split, enhancing diversity among trees. Variable importance was calculated by assessing the increase in prediction error when the values of a predictor were permuted. Variables' partial effect correspond to the impact of a single predictor on the response variable, keeping other variables fixed, to show how changes in the predictor influence the outcome. We used partial dependence plots to understand the relationship between predictors and the response.
 
 ## Text analysis of Wikipedia pages
 
@@ -722,112 +725,33 @@ p
 
 @fig-curation shows that beyond a few edits (here, we consider the threshold is 10), the mean edit length for an article depends on the total number of edits for that same article, in an approximately linear relationship with both variables being log-transformed. The more edits a page has undergone, the lower the mean edit length: there is a tendency towards lower mean edit length as the page 'matures', with edits in a more advanced writing stage corresponding to suppressions, corrections, or slight modifications while edits at the beginning of the writing process tend to be more frequently text additions. We consider the difference between actual mean edit length edit and predicted mean edit length (based on number of edits) as a measure of relative edit length (it corresponds to a measure of mean edit length decorrelated from this previously described writing stage effect). We calculate the curation score as corresponding to minus the relative edit length (i.e. high level of curation corresponds to smaller-sized edits). These residuals are normalized to correspond to scores ranging from -1 (rather lowly curated articles) to 1 (very highly curated articles). These curation scores are only available for articles that have undergone at least 10 edits, so that article stubs created mainly from an automatic translation process from another Wikipedia page are not included in the analysis of curation effects.
 
-```{r, fig.width=8,fig.height=8}
-#| label: fig-curation_causes
-#| fig-cap: "---"
+
+```{r wp_pages_complete}
 countries=readRDS("data/countries.RDS")
-tib=wp_pages %>% 
-  left_join(wm_full %>%
-              select(flood,country,deathtoll,year) %>% 
-              unique()) %>%
-  left_join(countries %>% select(country,HDI) %>% unique()) %>% 
-  mutate(catyear=cut(year,c(0,2000,2015,2020,2024),dig.lab=10)) %>%
-  filter(!is.na(curation),!is.na(year)) %>% 
-  mutate(mean_curation_global=mean(curation))
-tib_mod1=tib %>% 
-  group_by(catyear,local) %>% 
-  summarise(mean_curation_local=mean(curation),
-            n=n(),
-            .groups="drop")
-  
-tib_mod=tib %>% 
-  group_by(catyear,local) %>% 
-  mutate(mean_curation_local=mean(curation)) %>% 
-  ungroup() %>% 
-  group_by(catyear) %>% 
-  mutate(mean_curation=mean(curation)) %>% 
-  tidyr::nest(data=c(-mean_curation,-catyear)) %>% 
-  mutate(result=purrr::map(data,~summary(lm(curation~local,data=.x)))) %>% 
-  mutate(diff=purrr::map_dbl(result,~.x$coeff[2,1]),
-         signif=purrr::map_dbl(result,~.x$coeff[2,4])) %>% 
-  ungroup() %>% 
-  mutate(signifc=signif_stars(signif))
-tib_mod2=lm(curation~catyear+0,data=tib) %>%
-  summary() %>% .$coeff %>% as.data.frame() %>%
-  rownames_to_column("catyear") %>%
-  mutate(catyear=str_replace(catyear,"catyear","")) %>%
-  mutate(catyear=as.factor(catyear)) %>% 
-  mutate(signifc=signif_stars(`Pr(>|t|)`))
-
-tib_effect=calc_tib_summary(tib,
-                            group1=catyear,
-                            group2=local,
-                            y=curation,
-                            d1name=NULL,
-                            d2name=NULL)
-
-p1=ggplot(tib, aes(x=catyear, curation))+
-  geom_hline(data=tib_effect %>% select(no_group1) %>% unique,
-             aes(yintercept=no_group1),
-             alpha=0.5,col=col_DFO_WD, linewidth=2)+
-  geom_text(data=tib_effect %>%
-              select(contains("group1")) %>% unique(),
-            aes(x=group1,y=0.8,label=label_group1),
-            size=4,col=col_DFO_WD)+
-  geom_text(data=tib_effect %>%
-              select(group1,contains("group2")) %>% unique(),
-            aes(x=group1,group=group2,
-                y=1,
-                label=label_group2),
-            size=3,
-            position=position_dodge(width=0.8))+
-  geom_text(data=tib_effect %>%
-            select(group1,group2,n) %>% unique(),
-          aes(x=group1,group=group2,
-              y=-0.95,
-              label=n),
-          size=3,
-          position=position_dodge(width=0.8))+
-  geom_point(data=tib_effect %>% 
-               select(group1,no_group2) %>%
-               unique(),
-             aes(x=group1,y=no_group2),
-             col=col_DFO_WD,shape=3,stroke=1.5)+
-  geom_boxplot(aes(fill=local))+
-  scale_fill_manual(values=c(col_DFO,col_WD))
-
-
-tib_lm=tib %>%
-  filter(!is.na(deathtoll),!is.na(curation)) %>% 
-  group_by(catyear) %>% 
-  tidyr::nest() %>% 
-  mutate(result=purrr::map(data,~summary(lm(curation~deathtoll,data=.x))$coeff)) %>% 
-  mutate(slope=purrr::map_dbl(result,~.x[2,1]),
-         signif=purrr::map_dbl(result,~.x[2,4])) %>% 
-  select(-result,-data) %>% 
-  ungroup() %>% 
-  mutate(signifc=signif_stars(signif))
-
-
-p2=ggplot(tib %>% filter(!is.na(deathtoll),!is.na(curation)),
-          aes(x=deathtoll, y=curation))+
-  geom_point(alpha=0.25)+
-  geom_smooth(method="lm",col=col_DFO_WD)+
-  geom_text(data=tib_lm,
-            aes(x=1000,y=0.7,label=paste0("α=",round(slope,8),signifc)))+  
-  facet_grid(cols=vars(catyear))+
-  scale_x_continuous(trans="log1p",
-                     breaks=c(0,10,100,1000,10000,100000,1000000),
-                     labels=c("0","10","100","","10,000","","1,000,000"))
-
-options(scipen = 0)
-ggarrange(p1,p2,nrow=2,common.legend=TRUE)
-options(scipen = 9999)
+wp_pages_complete=readRDS("data/wp_pages_complete.RDS") %>% 
+  left_join(wd_events %>% select(flood,date,country_label)) %>%
+  left_join(countries %>%
+              select(country_label,HDI,population=population,area)) %>% 
+  mutate(year=lubridate::year(date)) %>% 
+  mutate(HDI_class=cut(HDI,
+                      quantile(countries$HDI,seq(0,1,by=0.25),
+                               na.rm=TRUE,include.lowest=TRUE)),
+         include.lowest=TRUE) %>% 
+  filter(!is.na(HDI_class)) %>% 
+  mutate(mean_views_f3months=n_views_f3months/3) %>% 
+  mutate(density=population/area)
 ```
 
-@fig-curation_causes*:* *a) Effect on curation of the article being in a local language and period in which the event occurred. The estimates α correspond to the difference in mean between local and non-local articles (for one period). The estimates δ correspond to the difference in mean for one period compared to the mean value of curation throughout all articles. These differences are all tested through Student tests and the corresponding p-values are displayed. b) Effect on curation of period in which the event occurred and deathtoll. The slope for each linear regression (on log-log scale) is displayed with the corresponding p-value. For a) and b) the symbols for p-values are `.`:p\<0.1, `*`:p\<0.05, `**`:p\<0.01, `***`:p\<0.001.*
 
-@fig-curation_causes .a shows that the more recent the events, the less curated the articles. Besides, for events which occurred before 2015, the articles' being written in a local language (considering the event location) tends to be associated with a lower level of article curation. This could be due to local articles about older events comprising more anecdotal facts. As for the events which occurred after 2015, there is no significant difference in curation levels between local and non-local articles. @fig-curation_causes .b shows that according to the period in which the event occurred, higher deathtoll tend to be correlated to higher (between 2000 and 2015) or lower (after 2015) curation. This could hint at Wikipedia being used more and more as information or managing crises tools (and all the more so than the crisis is important) instead of as an educational or encyclopedic carefully curated source of knowledge.
+```{r, fig.width=8,fig.height=8, message=FALSE, warning=FALSE}
+#| label: fig-curation_causes
+#| fig-cap: "---"
+plot_random_forest("curation",remove="mean_views_f3months")
+```
+
+@fig-curation_causes * Links between curation of Wikipedia articles and a set of articles' descriptors (fushia), events' descriptors (green) and mixed descriptors (brown) assessed through a random forest regression. a) shows the relative importance of the descriptors in the prediction. The subsequent graphics show the partial effect of the descriptors on curation*
+
+@fig-curation_causes .a shows that the level of curation of an article is primarily linked to other characteristics of the page, (either as a cause or a consequence of them), in particular the number of views, the length of the article, and the article being written in an language local to the event. It is also linked to characteristics of the event, mainly deathtoll, and less importantly so to HDI, total population (in millions) of the country where the event occurred and density. Curation is negatively correlated to number of views. It is positively correlated to articles length for articles below a certain size and then negatively for longer ones, possibly indicating that curation effort is focused on longer articles. Curation tends to be lower in languages local to the event. This could be due to a larger proportion of edits being done by local people motivated by a different set of goals compared to frequent Wikipedia contributors (e.g., aiming to add vernacular content rather than improving pre-existing content). Articles are all the more curated that the event's deathtoll is important, which could reflect the fact that the level of scrutiny of Wikipedia editors on pages is correlated to the actual event's social impact. Older events exhibit less curation than recent ones, possibly due to increasing standards for the edition of pages and/or availability of other sources through time.
 
 We expect that the level of curation of an article will be correlated to the topics addressed in the article. We hypothesize that higher-quality articles will correspond to a higher level of curation and address topics which necessitate a deeper level of analysis (such as anticipation, governance, and hydrology) in higher proportions.
 
@@ -882,79 +806,11 @@ We now consider only events which occurred after July 2015 (the date from which 
 
 We expect the number of views of an article to be dependent of some of the articles' characteristics. In particular, we expect it to be more important right after the event occurred, and to decrease as time goes by. We expect that the number of views will be positively correlated to the level of curation of the article, as articles with a higher level of curation are more likely to be of higher quality, and hence more likely to be consulted. We expect the number of views of pages to be higher in the local language, in particular shortly after the event, due to Wikipedia being used as an information source regarding the crisis unfolding and management.
 
-```{r wp_pages_complete}
-countries=readRDS("data/countries.RDS")
-wp_pages_complete=readRDS("data/wp_pages_complete.RDS") %>% 
-  left_join(wd_events %>% select(flood,date,country_label)) %>%
-  left_join(countries %>%
-              select(country_label,HDI,population,area)) %>% 
-  mutate(year=lubridate::year(date)) %>% 
-  filter(year>2015) %>%   
-  mutate(HDI_class=cut(HDI,
-                      quantile(countries$HDI,seq(0,1,by=0.25),
-                               na.rm=TRUE,include.lowest=TRUE)),
-         include.lowest=TRUE) %>% 
-  filter(!is.na(HDI_class)) %>% 
-  mutate(mean_views_f3months=n_views_f3months/3) %>% 
-  mutate(density=population/area)
-```
 
 ```{r,fig.width=6,fig.height=8}
 #| label: fig-views_articles
 #| fig-cap: "---"
-
-views=wp_pages_complete %>% 
-  tidyr::pivot_longer(c(mean_views_longterm,mean_views_f3months),
-                      names_prefix="mean_views_",values_to="mean_views")
-views_name_local=views %>% 
-  group_by(name,local) %>% 
-  summarise(n=n())
-
-tib_effect=calc_tib_summary(views,
-                            group1=name,
-                            group2=local, 
-                            y=mean_views,
-                            round=0,
-                            d1name=NULL,
-                            d2name=NULL)
-
-p1=ggplot(views,aes(x=name,y=mean_views))+
-  geom_hline(data=tib_effect %>% select(no_group1) %>% unique,
-             aes(yintercept=no_group1),
-             alpha=0.5,col=col_DFO_WD, linewidth=2)+
-  geom_text(data=tib_effect %>%
-              select(contains("group1")) %>% unique(),
-            aes(x=group1,y=200000,label=label_group1),
-            size=4,col=col_DFO_WD)+
-  geom_text(data=tib_effect %>%
-              select(group1,contains("group2")) %>% unique(),
-            aes(x=group1,group=group2,
-                y=90000,
-                label=label_group2),
-            size=3,
-            position=position_dodge(width=0.8))+
-  geom_text(data=tib_effect %>%
-            select(group1,group2,n) %>% unique(),
-          aes(x=group1,group=group2,
-              y=0.5,
-              label=n),
-          size=3,
-          position=position_dodge(width=0.8))+
-  geom_boxplot(aes(fill=local))+ 
-  scale_y_continuous(trans="log1p",
-                     breaks=c(10,100,1000,10000,100000,1000000))+
-  scale_fill_manual(values=c(col_DFO,col_WD))
-p2=ggplot(views,aes(x=curation,y=mean_views,col=local))+
-  geom_point(alpha=0.5)+
-  facet_grid(cols=vars(name))+
-  scale_y_continuous(trans="log1p",
-                     breaks=c(10,100,1000,10000,100000,1000000))+
-  geom_smooth(method="lm")+
-  scale_color_manual(values=c(col_DFO,col_WD))
-ggpubr::ggarrange(p1,p2,
-                  labels=c("a","b"),
-                  nrow=2,ncol=1,
-                  common.legend=TRUE)
+plot_random_forest("mean_views_f3months")
 ```
 
 @fig-views_articles*:* *Mean number of views per month during the first 3 months of the page's existence and long-term (after the 3 first months) according to the page's locality (a), and according to curation (b).*
@@ -1049,84 +905,26 @@ ggpubr::ggarrange(p1,p2,p3,
 
 @fig-views_events shows that the number of views of an article during the first three months of its existence is higher for local articles. The number of views is more and more important for events occurring in countries from lowest HDI to 3rd quartile HDI, but it is a bit less important for the richest countries. This could be due to the richest countries' lower populations compensating their inhabitant's increased use of Wikipedia. and for events which occurred in countries with higher HDI. This is particularly the case for events which occurred in countries with a very high HDI. @fig-views_events .b shows that the number of views of an article during the first three months of its existence is higher for events with higher deathtolls. This is particularly the case for events with deathtolls between 100 and 1000.
 
-# Test Random Forest
+```{r, fig.width=10,fig.height=8}
 
-```{r}
-library(ggRandomForests)
-library(randomForestSRC)
-datarf=wp_pages_complete %>% select(
-                                    local,curation,
-                                    length,
-                                    deathtoll,
-                                    HDI,
-                                    population,
-                                    density,
-                                    mean_views_f3months
-                                   ) %>% 
-  na.omit() %>% as.data.frame()
-myrf=rfsrc(mean_views_f3months~., data=datarf,ntree=1000)
-gg_md=gg_minimal_depth(myrf)
-```
 
-```{r}
-myvimp=vimp(myrf)
-plot(myvimp)
-
-topvars=myvimp$importance %>% sort(decreasing=TRUE) %>% names()
-
-partial <- plot.variable(myrf,
-                         xvar = topvars,
-                         partial = TRUE, sorted = FALSE,
-                         show.plots = FALSE)
-gg_p <- gg_partial(partial)
-```
-
-```{r}
-
-# generate a list of gg_partial objects, one per xvar.
-plots=vector("list",length=7)
-for(i in 1:7){
-  if(names(gg_p)[i]=="local"){
-    dat=gg_p[[i]]
-    dat=tibble::tibble(y=gg_p[[i]][,1],
-                       x=gg_p[[i]][,2]) %>% 
-      mutate(x=case_when(x==0~FALSE,
-                         x==1~TRUE))
-    plots[[i]]=ggplot(dat, aes(x=x,y=y))+
-      geom_boxplot()
-  }else{
-    dat=gg_p[[i]] %>% as.data.frame()
-    colnames(dat)=c("y","x","se")
-    plots[[i]]=ggplot(dat, aes(x=x,y=y))+
-      geom_path(col=col_WD)+
-      geom_point(col=col_WD)+
-      geom_line(aes(x=x,y=y-se),col=col_DFO)+
-      geom_line(aes(x=x,y=y+se),col=col_DFO)
-  }
-  if(names(gg_p)[i] %in% c("population", "length", "density","deathtoll")){
-    plots[[i]]=plots[[i]]+
-      scale_x_log10()
-  }
-  plots[[i]]=plots[[i]]+
-    xlab(names(gg_p)[i])+
-    ylab("")
-  }
-ggpubr::ggarrange(plots[[1]],plots[[2]],plots[[3]],plots[[4]],plots[[5]],plots[[6]],
-                  labels=c("a","b","c","d","e","f"),
-                  nrow=3,ncol=3)
+rf_mean_views_f3months=plot_random_forest("mean_views_f3months")
 ```
 
 Mean views during the 3 first months of page's existence.
 
 # Discussion
 
-This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, and Wikipedia. Although these data exhibit some heterogeneity [@lorini_uneven_2020; @ruprechter_poor_2023] due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities.
+This study demonstrates the possibility to list and collect information on flood events on a large temporal and spatial scale through Wikidata, and Wikipedia. Although these data exhibit some heterogeneity [@lorini_uneven_2020; @ruprechter_poor_2023] due to economic and digital inequities, being able to rely on a preexistent, rich global dataset spanning a large time period is still a priceless asset in studying floods, and could be a first step to better-quality curated datasets. Besides, large-scale institutional data sources themselves are not immune to spatial heterogeneities due to scarcity of research activity in some areas, linguistic barriers, varying degrees of public investment in disaster management, or other sources of environmental, political and social inequities. The overcoming of all these difficulties require an ongoing specialist effort which might not always be guaranteed or easy to sustain. 
 
 Linked Open Data such as Wikidata hold great interest for the study of natural or social events due to their inherent ability to offer contextual information to documented items. Linking semantically events when they are documented in fundamentally different datasets (such as DFO and Wikidata) might remain very difficult. Nevertheless, the interconnected nature of Wikidata's model (as a knowledge graph) as well as their link to other data silos in the Linked Open Data framework allow users to access additional information or related resources linked to a particular event. In particular, the present study demonstrates the strength of such a data source to provide context on a global scale (social context, in particular) through the integration of Wikipedia discourse elements.
 
-The difficulty we faced with the spatial information available in Wikidata regarding floods demonstrates it is not, as such and on its own, a really convenient and rich data source for spatial analysis, as it is not primarily designed for this purpose. This limitation could be overcome by the use of other data sources, such as OpenStreetMap, which is more spatially oriented and linked to Wikidata. However, although OpenStreetMap would be a suitable source of spatial data for Wikidata items corresponding to physical objects, it does not deal with events. Whatever the database's structure though, providing spatial information regarding an event (such as a flood) is actually not a trivial task, as it requires the definition (through time) of the event's spatial extent, location(s), and/or impact area(s).
+In the present study we focused on the extrinsic reasons why entries about floods existed in Wikidata and Wikipedia, discussing it as indicators of the events' social significance. These platforms also provide guidance of their own as to which items are notable enough to warrant the existence of, primarily, Wikipedia pages [@wikipedia_notability_2024] and subsequently Wikidata pages (as the first condition to the existence of an item for Wikidata is that it should have a link to another Wikimedia-related project e.g. Wikipedia). The criteria for the existence of a page in Wikipedia might differ across language editions but share the same general principles: a subject typically needs to have received significant coverage from reliable, independent sources to be considered notable, information must be verifiable through reliable, independent, and trustworthy sources, and articles must be written from a neutral perspective, presenting all significant views fairly and without bias. The existence of a page in Wikipedia and Wikidata is thus a strong indicator of the event's notability, but it might be a bit restrictive compared to other lists of events that do not need to comply with as many criteria. Incidentally, Wikipedia itself does in fact offer pages that list items in certain categories, and in particular lists of floods [@wikipedia_listfloods_2024 e.g.], which might be a good source of information for events that are not as well documented.
 
 This study hints at Wikipedia articles being generally less opinionated than one might think. Wikipedia's content is indeed based on verifiable sources and strives to present information in a neutral and unbiased manner. While individual contributors may have their own perspectives, Wikipedia's community guidelines emphasize the importance of maintaining a neutral point of view in articles. Editors are encouraged to cite reliable sources and provide balanced coverage of topics to ensure accuracy and verified, factual content. Here, the possibly controversial topics in the narration of floods (governance, relief, hydrology) are finally less represented in the articles with high levels of curation. This means that a study with a particular interest in debates or controversies would need to rely either on sources of information outside Wikipedia or more specifically on the discussion pages of or revisions history of Wikipedia articles (rather than final article's content).
+
+The difficulty we faced with the spatial information available in Wikidata regarding floods demonstrates it is not, as such and on its own, a really convenient and rich data source for spatial analysis, which is not entirely surprising as it is not primarily designed for this purpose. This limitation could be overcome by the use of other data sources, such as OpenStreetMap, which is more spatially oriented as a community-driven mapping initiative, and akin in principles to Wikipedia. However, although OpenStreetMap would be a suitable source of spatial data for Wikidata items corresponding to physical objects, it does not deal directly documents events: OpenStreetMap
+disaster-related projects such as the ones of the Humanitarian OpenStreetMap Team rather focus on making sure that places and people are well mapped throughout the world to help provide relief or anticipate future crises [@specht_codification_2022]. Whatever the database's structure though, providing spatial information regarding an event (such as a flood) is actually not a trivial task, as it requires the definition (through time) of the event's spatial extent, location(s), and/or impact area(s). Actually, using Wikipedia pages as a source of information on floods could be a good way to overcome this limitation, as the articles often provide a detailed textual description of the event's impact area(s) and location(s). Nevertheless, extracting a map from each of the pages and inferring a standardized location from it would probably have arisen many methodological but also semantic questions similar to those surrounding narrative maps [@caquard_cartography_2013].
 
 # Conclusion
 
