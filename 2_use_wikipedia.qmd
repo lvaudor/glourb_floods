@@ -11,12 +11,15 @@ We translate all Wikipedia pages' titles and texts to English (when Google trans
 ```{r }
 if(!file.exists("data/wikisites_translated.RDS")){
   wikisites=readRDS("data/wikisites.RDS") %>% 
+     # extract language from article url
      mutate(lang=stringr::str_extract(article,"(?<=https://)([[:alpha:]]|-)*(?=\\.)"))%>%
      mutate(lang=case_when(lang=="simple"~"en",
                            TRUE~lang)) %>% 
+     # extract title from title url and decode
      mutate(title=stringr::str_extract(article,"(?<=\\/wiki\\/).*")) %>% 
      mutate(title=purrr::map_chr(title,URLdecode)) %>% 
      mutate(title=stringr::str_replace_all(title,"_"," ")) %>% 
+     # translate title
      mutate(translated_title=purrr::map2(title,lang,
                                          ~safely(polyglotr::google_translate)(.x,,source_language=.y,target_language="en"))) %>% 
     mutate(translated_title=purrr::map(translated_title,
@@ -37,10 +40,12 @@ translate <- function(i){
     if(wikisites_text$lang[i]=="en"){return(text)}
     tryCatch(
         #try to do this
-        {texts=unlist(stringr::str_split(text,"\n"))
+        {
+          texts=unlist(stringr::str_split(text,"\n"))
          result=purrr::map_chr(texts,
                                polyglotr::google_translate,
-                               source_language=wikisites_text$lang[i])
+                               source_language=wikisites_text$lang_google[i]
+                               )
          result=paste0(result, collapse="\n")
          return(result)
         },
@@ -127,30 +132,36 @@ if(!file.exists("data/wikisites_text.RDS")){
     mutate(text=purrr::map(html,safely(get_text))) %>% 
     mutate(text=purrr::map(text,"result")) %>% 
     select(-html) %>% 
-    mutate(text=purrr::map(text,~paste0(.x,collapse="\n"))) 
+    mutate(text=purrr::map(text,~paste0(.x,collapse="\n"))) %>% 
+    mutate(lang_google=case_when(lang=="zh"~"zh-CN",
+                                 lang=="zh-yue"~"zh-CN",
+                                 lang=="zh-classical"~"zh-CN",
+                                 lang=="zh-min-nan"~"zh-CN",
+                                 lang=="ar"~"hy",
+                                 lang=="bh"~"hi",
+                                 lang=="bjn"~"id",
+                                 TRUE~lang))
 
   
   # Translate them all to English with Google Translate (if possible)
   wikisites_textt=wikisites_text %>% 
-    mutate(textt=NA)
+    mutate(textt=NA) 
   tmp=Sys.time()
-  for(i in 1:nrow(wikisites_textt)){
+  ind=which(is.na(wikisites_textt$textt))
+  for(i in ind){
     print(i)
     result=translate(i)
     if(length(result)>0){
     wikisites_textt$textt[i]=result}
   }  
   print(Sys.time()-tmp) 
-saveRDS(wikisites_textt,"data/wp_pages_new.RDS")
+saveRDS(wikisites_textt,"data/wp_pages.RDS")
 
   wp_pages=wikisites_textt %>% 
     mutate(textt=purrr::map_chr(textt,clean_banners)) %>% 
     mutate(textt=stringr::str_replace(textt,"mw-parser-output.*$","")) %>% 
-    mutate(length=map_dbl(textt,str_length)) %>% 
-    select(-flood_label)
-  saveRDS(wp_pages,"data/wp_pages_new.RDS")
-  
-##FAIT JUSTE AVANT VACANCES => wp_pages_new.RDS
+    mutate(length=map_dbl(textt,str_length))
+  saveRDS(wp_pages,"data/wp_pages.RDS")
 }
 
 
@@ -172,7 +183,9 @@ if(!file.exists("data/wp_words.RDS")){
     summarise(n=n(),.groups="drop") %>%
     arrange(flood,desc(n)) 
 
-wp_words_spec <- mixr::tidy_specificities(wp_words %>% filter(n>3),lemma, flood) %>% 
+wp_words_spec <- mixr::tidy_specificities(wp_words %>%
+                                            filter(n>3),
+                                          lemma, flood) %>% 
   filter(spec>2) %>% 
   group_by(flood) %>% 
   summarise(specific_words=paste(lemma,collapse="; "),.groups="drop")
@@ -201,7 +214,7 @@ if(!file.exists("data/wp_segments.RDS")){
     tidytext::unnest_tokens(output="word",input="textt",token="words") %>%
     left_join(lexicon_en,by=c("word")) %>%
     mutate(keep=(type!="sw" & lemma!="flood")) %>% 
-    group_by(flood,flood_label,article) %>%
+    group_by(flood,article) %>%
     mutate(lemma=case_when(is.na(lemma)|(!keep)~"",
                            TRUE~lemma)) %>% 
     mutate(keep=as.numeric(keep)) %>% 
@@ -210,14 +223,16 @@ if(!file.exists("data/wp_segments.RDS")){
     mutate(num_lemma=cumsum(num_lemma)) %>% 
     mutate(num_segment=ceiling(num_lemma/10+0.000001)) %>% 
     ungroup() %>% 
-    group_by(flood,flood_label,article,num_segment) %>% 
+    group_by(flood,article,num_segment) %>% 
     summarise(text_all=paste0(word, collapse=" "),
               text_sig=paste0(lemma,collapse=" "),
               .groups="drop") %>% 
     mutate(num_segment=paste0(article,"_",num_segment)) %>% 
     mutate(text_sig_dontkeep=text_sig)
 
-  corpus=corpus(wp_segments,docid_field="num_segment",text_field="text_sig_dontkeep")
+  corpus=corpus(wp_segments,
+                docid_field="num_segment",
+                text_field="text_sig_dontkeep")
   tok <- tokens(corpus, remove_punct = TRUE, remove_numbers = TRUE)
   dtm <- dfm(tok)
   dtm <- dfm_trim(dtm, min_docfreq = 30)
@@ -249,17 +264,17 @@ if(!file.exists("data/wp_segments.RDS")){
   corpus$class=paste0("class_",cutree_rainette(res, k = 6))
   
   tib_classes=tibble::tribble(~class,~class_name,~color,
-                  "class_1","governance","#4E79A7",
-                  "class_2","relief","#F28E2B",
-                  "class_3","damage","#E15759",
-                  "class_4","hydrology", "#76B7B2", 
-                  "class_5","anticipation","#59A14F",
-                  "class_6","weather","#EDC948")
+                  "class_1","relief","#e14774",
+                  "class_2","governance","#ffc847",
+                  "class_3","weather","#5f2ad3",
+                  "class_4","anticipation","#16968d", 
+                  "class_5","hydrology","#6b7edd",
+                  "class_6","damage","#ff4646")
   wp_segments=docvars(corpus) %>% 
     left_join(tib_classes,by="class") %>% 
     mutate(class=as.factor(class),
            class_name=as.factor(class_name)) %>% 
-    select(-flood,-flood_label)
+    select(-flood)
   saveRDS(wp_segments,"data/wp_segments.RDS")
 }
 ```
@@ -295,7 +310,7 @@ wp_revisions=wp_pages %>%
   select(-text,-textt) %>% 
   mutate(revisions=purrr::map2(lang,title,get_revs)) %>% 
   tidyr::unnest(cols=c(revisions)) %>% 
-  select(-flood,-flood_label,-lang,-title,-translated_title)
+  select(-flood,-lang,-title,-translated_title)
 saveRDS(wp_revisions,"data/wp_revisions.RDS")
 }
 ```
@@ -374,4 +389,3 @@ if(!file.exists("data/wp_pages_complete.RDS")){
 }
 wp_pages_complete=readRDS("data/wp_pages_complete.RDS")
 ```
-

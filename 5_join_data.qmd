@@ -174,6 +174,15 @@ dfo_raw=readr::read_csv("data/FloodArchive.csv",
 colnames(dfo_raw)=c("index","GlideNumber","dfo_country","dfo_other_country",
            "dfo_centroid_x","dfo_centroid_y","area","dfo_began","dfo_ended",
            "validation","dfo_dead","displaced","maincause","severity")
+p=ggplot(data=dfo_raw,
+       aes(x=area,y=dfo_dead,color=as.factor(severity)))+
+  geom_point(aes(text=dfo_country))+
+  scale_y_sqrt()+
+  scale_x_sqrt()+
+  theme(legend.position="none")
+plotly::ggplotly(p)
+
+
 dfo_raw=dfo_raw %>%
   mutate(start=lubridate::dmy(dfo_began),
          end=lubridate::dmy(dfo_ended)) %>%
@@ -356,5 +365,56 @@ tib_dfo=dfo_comp %>%
 
 truc=left_join(tib_dfo,tib_wd_in_dfo,by="country_label") %>%
   mutate(prop=n_wd_in_dfo/n_dfo)
+
+```
+
+## Characteristic of floods extracted from Wikidata
+
+For each of these tables, we show below the descriptors names, display which among these correspond to a key useable for joining to other tables, the type of data (numeric, character, logical, etc.) and the contents of one row randomly selected.
+
+```{r def_show_table, echo=FALSE}
+source("scripts/show_table.R")
+set.seed(123)
+```
+
+### wd_events
+
+```{r wd_events}
+wd_events=readRDS("data/wd_events.RDS")
+knitr::kable(show_table(wd_events,provide_key="flood"))
+```
+
+### wp_pages
+
+```{r show_wp_pages}
+knitr::kable(show_table(wp_pages,provide_key=c("article")))
+```
+
+### wp_revisions
+
+```{r}
+wp_revisions=readRDS("data/wp_revisions.RDS")
+knitr::kable(show_table(wp_revisions,provide_key="article"))
+```
+
+### wp_views
+
+```{r show_wp_views}
+wp_views=readRDS("data/wp_views.RDS")
+knitr::kable(show_table(wp_views,provide_key="article"))
+```
+
+### wp_segments
+
+```{r show wp_segments}
+wp_segments=readRDS("data/wp_segments.RDS")
+knitr::kable(show_table(wp_segments,provide_key="article"))
+```
+
+### countries
+
+```{r show_countries}
+countries=readRDS("data/countries.RDS")
+knitr::kable(show_table(countries, provide_key=c("country","country_label")))
 
 ```

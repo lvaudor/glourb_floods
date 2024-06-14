@@ -143,6 +143,8 @@ For some events, location is not provided, only country. We still use this infor
 
 Here is a function that collects data for each country identifier about the coordinates of the location (coords_country)
 
+Change this to include new attributes,(population and area) if needed
+
 ```{r graph_query_country,fig.show=FALSE}
 query_country=spq_init() %>%
     spq_add("?country wdt:P625 ?coords_country") %>%
@@ -151,13 +153,36 @@ query_country=spq_init() %>%
     spq_add("?country wdt:P1081 ?HDI") %>%
     spq_add("?country wdt:P2936 ?language_used") %>% 
     spq_add("?language_used wdt:P424 ?language_used_code") %>% 
+    spq_add("?country wdt:P1082 ?population") %>%
+    spq_add("?country wdt:P2046 ?area") %>%
     spq_label(country,language_official,language_used)
 png("figure/fig-graph_query_country.png",width=7200,height=3600,res=600)
 plot_query(query_country, labelling=TRUE)
 dev.off()
 ```
 
-![](figure/fig-graph_query_country.png)
+The initial query, without estimates of population or area:
+
+
+<!-- ![](figure/fig-graph_query_country.png) -->
+
+
+<!-- ```{r graph_query_country,fig.show=FALSE} -->
+<!-- query_country=spq_init() %>% -->
+<!--     spq_add("?country wdt:P625 ?coords_country") %>% -->
+<!--     spq_add("?country wdt:P37 ?language_official") %>%  -->
+<!--     spq_add("?language_official wdt:P424 ?language_official_code") %>%  -->
+<!--     spq_add("?country wdt:P1081 ?HDI") %>% -->
+<!--     spq_add("?country wdt:P2936 ?language_used") %>%  -->
+<!--     spq_add("?language_used wdt:P424 ?language_used_code") %>%  -->
+<!--     spq_label(country,language_official,language_used) -->
+<!-- png("figure/fig-graph_query_country.png",width=7200,height=3600,res=600) -->
+<!-- plot_query(query_country, labelling=TRUE) -->
+<!-- dev.off() -->
+<!-- ``` -->
+
+<!-- ![](figure/fig-graph_query_country.png) -->
+
 
 ```{r def_get_country_info}
 library(glitter)
@@ -169,7 +194,7 @@ get_country_info=function(country_id){
     spq_add("?language_official wdt:P424 ?language_official_code") %>% 
     spq_add("?country wdt:P1081 ?HDI") %>%
     spq_add("?country wdt:P2936 ?language_used") %>% 
-    spq_add("?language_used wdt:P424 ?language_used_code") %>% 
+    spq_add("?language_used wdt:P424 ?language_used_code") %>%
     spq_label(country,language_official,language_used) %>% 
     spq_perform(replace_prefixes=TRUE) %>% 
     mutate(country_label=country_label,
@@ -177,6 +202,14 @@ get_country_info=function(country_id){
            language_used=language_used_label) %>% 
     select(-country,-language_official_label,-language_used_label)
   return(result)
+}
+get_country_pop_and_area_info=function(country_id){
+  result=query_country=spq_init() %>%
+    spq_set(country=country_id) %>% 
+    spq_add("?country wdt:P1082 ?population") %>% 
+    spq_add("?country wdt:P2046 ?area") %>% 
+    spq_perform(replace_prefixes=TRUE) %>% 
+   return(result)
 }
 ```
 
@@ -210,6 +243,16 @@ if(!file.exists("data/countries.RDS")){
     tidyr::unnest(cols=c(data)) %>% 
     ungroup() %>% 
     select(country,country_label,everything())
+  countries_area_and_pop=wd_raw %>%
+    select(country) %>% 
+    unique() %>% 
+    na.omit() %>% 
+    mutate(data=purrr::map(country,get_country_pop_and_area_info)) %>% select(-country) %>% 
+    tidyr::unnest(data) %>% 
+    mutate(population=as.numeric(population),
+           area=as.numeric(area))
+  countries=countries %>% 
+    left_join(countries_area_and_pop,by="country")
   saveRDS(countries, "data/countries.RDS")
 }
 countries=readRDS("data/countries.RDS")
@@ -223,25 +266,24 @@ Now we update the data about floods taking into account that supplementary data 
 floodlocs=wd_raw %>%
   left_join(locs,by="loc",
             relationship ="many-to-many") %>%
+  # country might be provided directly or might be inferred from location
   mutate(country_label=case_when(country_label==""~country_loc_label,
                                  is.na(country_label)~country_loc_label,
                                  country_label!=""~country_label)) %>% 
   mutate(country=case_when(is.na(country)~country_loc,
                            !is.na(country)~country)) %>% 
-  mutate(coords_from=case_when(!is.na(coords)~"flood",
-                               is.na(coords)~"location")) %>% 
   select(flood,flood_label,coords,coords_loc,country,country_label,loc_label,loc_type_label) %>% 
-  left_join(countries %>% select(country,coords_country),
+  left_join(countries %>% select(country,coords_country) %>% unique(),
             by="country",
             relationship ="many-to-many") %>%
   mutate(coords_from=case_when(is.na(coords) & is.na(coords_loc) & !is.na(coords_country) ~"3) country",
-                               !is.na(coords_loc)~"2) location",
+                               is.na(coords) & !is.na(coords_loc) ~"2) location",
                                !is.na(coords)~"1) direct",
                                TRUE~"4) no coordinates")) %>% 
-  mutate(coords=case_when(is.na(coords)~coords_loc,
-                          !is.na(coords)~coords)) %>%
-  mutate(coords=case_when(is.na(coords)~coords_country,
-                          !is.na(coords)~coords)) %>% 
+  mutate(coords=case_when(coords_from=="1) direct" ~ coords,
+                          coords_from=="2) location" ~ coords_loc,
+                          coords_from=="3) country" ~ coords_country,
+                          coords_from=="4) no coordinates" ~ NA_character_)) %>% 
   unique()
 ```
 
@@ -519,7 +561,6 @@ complement_wd_events=spq_init() %>%
   spq_add("?statement prov:wasDerivedFrom ?deathtoll_source") %>% 
   spq_perform(replace_prefixes=TRUE)
 ```
-
 
 ## Join everything
 
