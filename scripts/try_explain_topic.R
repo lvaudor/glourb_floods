@@ -1,63 +1,74 @@
-library(ggRandomForests)
-library(randomForestSRC)
+wp_segments=readRDS("data/wp_segments.RDS")
+tib_classes=wp_segments %>%
+  select(class,class_name,color) %>%
+  unique()
+tib_count_class=wp_segments %>% 
+  group_by(article,class_name) %>% 
+  tally()
+tib=crossing(wp_pages %>% select(article) %>% unique(),
+             tib_classes %>% select(class_name)) %>% 
+  left_join(tib_count_class,by=c("article","class_name")) %>% 
+  mutate(n=replace_na(n,0)) %>% 
+  group_by(article) %>% 
+  mutate(ntot=sum(n)) %>% 
+  ungroup() %>% 
+  mutate(ntotcat=cut(ntot,breaks=quantile(ntot,seq(0,1,by=0.25))),
+         prop=n/ntot) %>%
+  ungroup() %>% 
+  na.omit()
 
-plot_random_forest=function(response, remove=NULL){
-  
-  datarf=wp_pages_complete %>% 
-    select(local,
-           year,
-           curation,
-           length,
-           deathtoll,
-           HDI,
-           population,
-           density,
-           mean_views_f3months)
-  
+
+
+tiblarge=tib %>% 
+  mutate(prop=n/ntot) %>% 
+  select(article,class_name,prop) %>% 
+  na.omit() %>% 
+  pivot_wider(names_from=class_name,values_from=prop)
+tiblarge=left_join(tiblarge,
+                   wp_pages_complete %>%
+                     select(article, length,curation,deathtoll,
+                            HDI,year,local,population,density,mean_views_f3months))
+  datarf=tiblarge %>%
+    mutate(complex=anticipation + governance + hydrology) %>% 
+  select(local,
+         year,
+         curation,
+         length,
+         deathtoll,
+         HDI,
+         population,
+         density,
+         complex,
+         mean_views_f3months) 
+  response="complex"
   ind=which(colnames(datarf)==response)
   colnames(datarf)[ind]="response"
-  if(!is.null(remove)){
-    datarf=datarf[,which(!(colnames(datarf) %in% remove))]
-  }
   datarf= datarf %>% 
     na.omit() %>%
     as.data.frame()
   myrf=rfsrc(response~., 
-             data=datarf,importance=TRUE,nodesize=20)
+             data=datarf,
+             importance=TRUE,nodesize=20)
   var_importance <- var.select(myrf,method="md", verbose=FALSE)
-  
-  datimp=tibble::tibble(vars=var_importance$topvars,
-                        vals=var_importance$varselect$vimp) %>% 
-    arrange(desc(vals)) %>% 
-    mutate(basis=case_when(vars %in% c("length",
-                                       "curation",
-                                       "mean_views_f3months") ~"web",
-                           vars %in% c("local","year")~"real world and web",
-                           TRUE~"real world")) %>% 
-    mutate(colors=case_when(basis=="web"~col_WD,
-                            basis=="real world"~col_DFO,
-                            basis=="real world and web"~col_DFO_WD))
-  
+  var_import= var_importance$varselect %>%  rownames_to_column()%>% as_tibble() %>% arrange(depth)
   partial <- plot.variable(myrf,
-                           xvar = datimp$vars,
+                           xvar = var_import$rowname,
                            partial = TRUE, sorted = FALSE,
                            show.plots = FALSE)
   gg_p <- gg_partial(partial)
   
   # generate a list of gg_partial objects, one per xvar.
   plots=vector("list",length=9)
-  plots[[1]]=ggplot(datimp,
-                    aes(x=forcats::fct_reorder(vars,vals),
-                        y=vals,
-                        fill=basis))+
+  plots[[1]]=ggplot(var_import,
+                    aes(x=forcats::fct_reorder(rowname,depth),
+                        y=depth))+
     geom_bar(stat="identity")+
     scale_y_sqrt()+
     coord_flip()+
     ylab("importance")+
     xlab("")+
-    scale_fill_manual(values=c(col_DFO,col_DFO_WD,col_WD))+
     theme(legend.position="none")
-  for(i in 1:nrow(datimp)){
+  for(i in 1:nrow(var_import)){
     if(names(gg_p)[i]=="local"){
       dat=gg_p[[i]]
       dat=tibble::tibble(y=gg_p[[i]][,1],
@@ -65,13 +76,13 @@ plot_random_forest=function(response, remove=NULL){
         mutate(x=case_when(x==0~FALSE,
                            x==1~TRUE))
       plots[[i+1]]=ggplot(dat, aes(x=x,y=y))+
-        geom_boxplot(fill=datimp$colors[i])
+        geom_boxplot()
     }else{
       dat=gg_p[[i]] %>% as.data.frame()
       colnames(dat)=c("y","x","se")
       plots[[i+1]]=ggplot(dat, aes(x=x,y=y))+
-        geom_path(col=datimp$colors[i])+
-        geom_point(col=datimp$colors[i])+
+        geom_path()+
+        geom_point()+
         geom_line(aes(x=x,y=y-se),col="grey")+
         geom_line(aes(x=x,y=y+se),col="grey")
     }
