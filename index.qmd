@@ -823,7 +823,7 @@ For each Wikipedia article, we consider the total number of views during the fir
 
 We expect the short-term number of views of an article to be dependent of some of the articles' characteristics such as the article's being written in a language local to the event, article's length, and curation, although length and curation being measure on the latest state of development of articles rather than their state during their first three months of existence, they are probably to be interpreted more as consequences than causes. We expect that the number of views will be positively correlated to the level of curation of the article, as articles attracting more views are more likely to attract more scrutiny from editors. We expect the short-term number of views of pages to be higher in the local language, due to Wikipedia being used as an information source regarding the crisis unfolding and management. We also expect the number of views to reflect some characteristics of the events. For instance, we also expect the number of views to be higher for events with a higher deathtoll, and/or events occurring in areas where the density of population is particularly high, as these events are more likely to be of interest to a larger audience.
 
-```{r,fig.width=6,fig.height=8}
+```{r fig-views,message=FALSE, warning=FALSE, fig.width=10,fig.height=8}
 #| label: fig-views
 #| fig-cap: "---"
 
