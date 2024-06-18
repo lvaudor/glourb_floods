@@ -1,18 +1,13 @@
 library(ggRandomForests)
 library(randomForestSRC)
 
-plot_random_forest=function(response, remove=NULL){
+plot_random_forest=function(data, response, remove=NULL){
   
-  datarf=wp_pages_complete %>% 
-    select(local,
-           year,
-           curation,
-           length,
-           deathtoll,
-           HDI,
-           population,
-           density,
-           mean_views_f3months)
+  datarf=data %>% 
+    select(-article) %>% 
+    na.omit() %>% 
+    unique()
+
   
   ind=which(colnames(datarf)==response)
   colnames(datarf)[ind]="response"
@@ -24,11 +19,12 @@ plot_random_forest=function(response, remove=NULL){
     as.data.frame()
   myrf=rfsrc(response~., 
              data=datarf,importance=TRUE,nodesize=20)
-  var_importance <- var.select(myrf,method="md", verbose=FALSE)
-  
-  datimp=tibble::tibble(vars=var_importance$topvars,
-                        vals=var_importance$varselect$vimp) %>% 
-    arrange(desc(vals)) %>% 
+  smp.o <- subsample(myrf,verbose=FALSE)
+  oo <- extract.subsample(smp.o, alpha = 0.001)
+  datimp= oo$var.jk.sel.Z %>%
+    rownames_to_column("vars") %>%
+    mutate(signif_og=signif) %>% 
+    mutate(signif=signif_stars(pvalue)) %>% 
     mutate(basis=case_when(vars %in% c("length",
                                        "curation",
                                        "mean_views_f3months") ~"web",
@@ -36,8 +32,11 @@ plot_random_forest=function(response, remove=NULL){
                            TRUE~"real world")) %>% 
     mutate(colors=case_when(basis=="web"~col_WD,
                             basis=="real world"~col_DFO,
-                            basis=="real world and web"~col_DFO_WD))
+                            basis=="real world and web"~col_DFO_WD)) %>% 
+    arrange(desc(mean)) %>% 
+    mutate(vars_signif=paste0(vars, " (",signif,")"))
   
+
   partial <- plot.variable(myrf,
                            xvar = datimp$vars,
                            partial = TRUE, sorted = FALSE,
@@ -46,28 +45,26 @@ plot_random_forest=function(response, remove=NULL){
   
   # generate a list of gg_partial objects, one per xvar.
   plots=vector("list",length=9)
-  plots[[1]]=ggplot(datimp,
-                    aes(x=forcats::fct_reorder(vars,vals),
-                        y=vals,
-                        fill=basis))+
-    geom_bar(stat="identity")+
-    scale_y_sqrt()+
+  plots[[1]]=ggplot(datimp, 
+                    aes(x=forcats::fct_reorder(vars_signif,mean), y= mean,color=basis)) +
+    geom_point(size=2)+
+    geom_errorbar(aes(ymin=lower, ymax=upper), width=.3)+
     coord_flip()+
-    ylab("importance")+
-    xlab("")+
-    scale_fill_manual(values=c(col_DFO,col_DFO_WD,col_WD))+
-    theme(legend.position="none")
+    scale_color_manual(values=datimp$colors,breaks=datimp$basis)+
+    theme(legend.position="none")+
+    ylab("importance")+xlab("")
   for(i in 1:nrow(datimp)){
-    if(names(gg_p)[i]=="local"){
-      dat=gg_p[[i]]
-      dat=tibble::tibble(y=gg_p[[i]][,1],
-                         x=gg_p[[i]][,2]) %>% 
+    indvar=which(names(gg_p)==datimp$vars[i])
+    if(datimp$vars[i]=="local"){
+      dat=gg_p[[indvar]]
+      dat=tibble::tibble(y=gg_p[[indvar]][,1],
+                         x=gg_p[[indvar]][,2]) %>% 
         mutate(x=case_when(x==0~FALSE,
                            x==1~TRUE))
       plots[[i+1]]=ggplot(dat, aes(x=x,y=y))+
         geom_boxplot(fill=datimp$colors[i])
     }else{
-      dat=gg_p[[i]] %>% as.data.frame()
+      dat=gg_p[[indvar]] %>% as.data.frame()
       colnames(dat)=c("y","x","se")
       plots[[i+1]]=ggplot(dat, aes(x=x,y=y))+
         geom_path(col=datimp$colors[i])+
@@ -75,7 +72,7 @@ plot_random_forest=function(response, remove=NULL){
         geom_line(aes(x=x,y=y-se),col="grey")+
         geom_line(aes(x=x,y=y+se),col="grey")
     }
-    if(names(gg_p)[i] %in% c("population", 
+    if(datimp$vars[i] %in% c("population", 
                              "length",
                              "density",
                              "deathtoll",
