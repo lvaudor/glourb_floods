@@ -1,35 +1,7 @@
-wp_segments=readRDS("data/wp_segments.RDS")
-tib_classes=wp_segments %>%
-  select(class,class_name,color) %>%
-  unique()
-tib_count_class=wp_segments %>% 
-  group_by(article,class_name) %>% 
-  tally()
-tib=crossing(wp_pages %>% select(article) %>% unique(),
-             tib_classes %>% select(class_name)) %>% 
-  left_join(tib_count_class,by=c("article","class_name")) %>% 
-  mutate(n=replace_na(n,0)) %>% 
-  group_by(article) %>% 
-  mutate(ntot=sum(n)) %>% 
-  ungroup() %>% 
-  mutate(ntotcat=cut(ntot,breaks=quantile(ntot,seq(0,1,by=0.25))),
-         prop=n/ntot) %>%
-  ungroup() %>% 
-  na.omit()
 
-
-
-tiblarge=tib %>% 
-  mutate(prop=n/ntot) %>% 
-  select(article,class_name,prop) %>% 
-  na.omit() %>% 
-  pivot_wider(names_from=class_name,values_from=prop)
-tiblarge=left_join(tiblarge,
-                   wp_pages_complete %>%
-                     select(article, length,curation,deathtoll,
-                            HDI,year,local,population,density,mean_views_f3months))
-  datarf=tiblarge %>%
+datarf=tiblarge %>%
     mutate(complex=anticipation + governance + hydrology) %>% 
+    unique() %>% 
   select(local,
          year,
          curation,
@@ -48,9 +20,28 @@ tiblarge=left_join(tiblarge,
     as.data.frame()
   myrf=rfsrc(response~., 
              data=datarf,
-             importance=TRUE,nodesize=20)
-  var_importance <- var.select(myrf,method="md", verbose=FALSE)
-  var_import= var_importance$varselect %>%  rownames_to_column()%>% as_tibble() %>% arrange(depth)
+             importance=TRUE,
+             nodesize=10)
+  smp.o <- subsample(myrf)
+  oo <- extract.subsample(smp.o, alpha = 0.001)
+  datimp= oo$var.jk.sel.Z %>%
+    rownames_to_column("vars") %>%
+    mutate(signif_og=signif) %>% 
+    mutate(signif=signif_stars(pvalue)) %>% 
+    mutate(basis=case_when(vars %in% c("length",
+                                       "curation",
+                                       "mean_views_f3months") ~"web",
+                           vars %in% c("local","year")~"real world and web",
+                           TRUE~"real world")) %>% 
+    mutate(colors=case_when(basis=="web"~col_WD,
+                            basis=="real world"~col_DFO,
+                            basis=="real world and web"~col_DFO_WD))
+    
+  ggplot(datimp, aes(x=forcats::fct_reorder(vars,mean), y= mean,color=basis)) +
+    geom_point(size=2)+
+    geom_errorbar(aes(ymin=lower, ymax=upper), width=.3)+
+    coord_flip()+
+    scale_color_manual(values=datimp$colors,breaks=datimp$basis)
   partial <- plot.variable(myrf,
                            xvar = var_import$rowname,
                            partial = TRUE, sorted = FALSE,
@@ -109,5 +100,4 @@ tiblarge=left_join(tiblarge,
                            plots[[9]],
                            labels=c("a","b","c","d","e","f","g","h","i"),
                            nrow=3,ncol=3)
-  return(result)
-}
+result

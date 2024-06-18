@@ -185,28 +185,32 @@ We have gathered and curated tables of data from both Wikidata and Wikipedia :
 
 ### Space-time framework
 
+The initial query provided **`r length(unique(wd_events$flood))` Wikidata flood events**.
+
 ```{r show_precision_coords}
-readRDS("data/precision_coords.RDS") %>% 
+tiblocs=readRDS("data/precision_coords.RDS") %>% 
   mutate(ntot=sum(n)) %>% 
   mutate(`prop(%)`=round(n/ntot*100,1)) %>% 
-  select(-ntot) %>% 
+  select(-ntot)
+tiblocs %>% 
   knitr::kable()
 ```
-
-
+In terms of spatial precision, most coordinates for floods are inferred from their locations (places where they occur such as cities, regions, and mainly countries), while few (`r tiblocs %>% filter(coords_from=="1) direct") %>% pull(starts_with("prop"))`%) come with direct coordinates.
 
 ```{r show_precision_dates}
-readRDS("data/dates_precision.RDS") %>% 
+tibdates=readRDS("data/dates_precision.RDS") %>% 
   group_by(date_from,date_precision) %>% 
   tally() %>%
   ungroup() %>% 
   mutate(ntot=sum(n)) %>% 
   mutate(`prop(%)`=round(n/ntot*100,1)) %>% 
-  select(-ntot) %>% 
+  select(-ntot)
+tibdates%>% 
   knitr::kable()
 ```
 
-The initial query provided **`r length(unique(wd_events$flood))` Wikidata flood events**. In terms of spatial precision, most coordinates are inferred from either variable country or variable location (the major part of provided locations being countries too). The date of most events is documented either directly or through the label of the event. Most events' dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.
+
+The date of most events is documented either directly or through the label of the event. Most events' dates are provided with day precision but an important proportion (about one third) is provided with only annual precision.
 
 ### Comparison to DFO data
 
@@ -607,14 +611,17 @@ figure
 res=readRDS("data/res_rainette_wp.RDS")
 corpus=readRDS("data/corpus.RDS")
 dtm=readRDS("data/dtm.RDS")
-
+wp_segments=readRDS("data/wp_segments.RDS")
+tib_classes=wp_segments %>%
+  select(class,class_name,color) %>%
+  unique() %>% 
+  arrange(class) %>% 
+  na.omit()
 #rainette_explor(res,dtm,corpus)
 rainette_plot(
   res, dtm,k=6,
-  cluster_label=c("relief", "governance","weather",
-                  "anticipation","hydrology","damage"),
-  colors=c("#e14774","#ffc847","#5f2ad3",
-           "#16968d","#6b7edd","#ff4646")
+  cluster_label=as.vector(tib_classes$class_name),
+  colors=tib_classes$color
 )
 ```
 
@@ -624,10 +631,8 @@ rainette_plot(
 #| label: fig-topic_per_length
 #| fig-cap: "---" 
 #| 
-wp_segments=readRDS("data/wp_segments.RDS")
-tib_classes=wp_segments %>%
-  select(class,class_name,color) %>%
-  unique()
+
+
 tib_count_class=wp_segments %>% 
   group_by(article,class_name) %>% 
   tally()
@@ -750,60 +755,65 @@ We expect curation to be linked to the characteristics of the articles and the e
 ```{r, fig.width=10,fig.height=8, message=FALSE, warning=FALSE}
 #| label: fig-curation_causes
 #| fig-cap: "---"
-plot_random_forest("curation",remove="mean_views_f3months")
+datarf=wp_pages_complete %>% 
+      select(article,
+             local,
+           year,
+           curation,
+           length,
+           deathtoll,
+           HDI,
+           population,
+           density,
+           mean_views_f3months)
+plot_random_forest(data=datarf,
+                   response="curation",
+                   remove="mean_views_f3months")
 ```
 
 @fig-curation_causes *Links between curation of Wikipedia articles and a set of articles' descriptors (fushia), events' descriptors (green) and mixed descriptors (brown) assessed through a random forest regression. a) shows the relative importance of the descriptors in the prediction. The subsequent graphics show the partial effect of the descriptors on curation*
 
 @fig-curation_causes .a shows that the level of curation of an article is primarily linked to other characteristics of the page, in particular the length of the article, and the article being written in an language local to the event. It is also linked to characteristics of the event, mainly year, HDI, density and deathtoll, and less importantly so to total population of the country where the event occurred. @fig-curation_causes .b shows that curation is positively correlated to articles length for articles below a certain size and then negatively for longer ones, possibly indicating that curation effort is focused on articles beyond a certain size (1000 to 10000 signs) but tend to be lower for the largest articles. Curation depends largely on the events' year of occurrence. Curation tend to be lower for events before 2000, probably due to the difficulty of providing sources (as urls mainly) for all statements, and increases rapidly after 2000, possibly due to the combination of an increase of accessible numerical sources and more enforcement of editing standards. Contrary to our expectation, curation is lower in languages local to the event. This could be due to a larger proportion of edits being done by local people motivated by a different set of goals compared to frequent Wikipedia contributors (e.g., aiming to add vernacular content rather than improving pre-existing content). HDI is the next most important explanatory variable, with higher levels corresponding to less curation, as we surmised, although there is quite a high variation of curation for the highest HDIs, possibly due to these representing few languages and thus being affected by Wikipedia language editions with varying standards. As expected, articles are all the more curated that the event's deathtoll is important, which reflects the fact that the level of scrutiny of Wikipedia editors on pages is correlated to the actual event's social impact. The density of the country where the event occurred is also positively correlated to the level of curation, while total population is negatively correlated. This might seem slightly contradictory with the fact that curation is lower for local events in the sense that editors being potentially directly affected by the event does not seem to favor curation. Hence this could actually reflect the fact that editors living in densely populated areas are more likely to be frequent Wikipedia contributors and thus more likely to be familiar with Wikipedia's editing standards.
 
-We expect that the level of curation of an article will be correlated to the topics addressed in the article. We hypothesize that higher-quality articles will correspond to a higher level of curation and address topics which necessitate a deeper level of analysis (such as anticipation, governance, and hydrology) in higher proportions.
+We expect that the level of curation of an article will be correlated to the topics addressed in the article. We hypothesize that higher-quality articles will correspond to a higher level of curation and address topics which necessitate a deeper level of analysis (such as anticipation, governance, and hydrology) in higher proportions. We also expect higher-impacts events (in terms of deathtoll for instance) to cause this proportion to be higher, with complex issues around responsibility, causes, and adequacy of preventive measures only gaining attention when the damage is significant. To explore this relationship we sum the proportion in which these topics are addressed in each article and run a random forest regression model explaining this complex topics proportion. 
 
-```{r curation_topics,fig.width=7,fig.height=5}
-#| label: fig-curation_topics
+```{r, fig.width=10,fig.height=8, message=FALSE, warning=FALSE}
+#| label: fig-complex_topics
 #| fig-cap: "---"
-
-tib_classes=wp_segments %>% select(class,class_name,color) %>% unique()
+wp_segments=readRDS("data/wp_segments.RDS")
+tib_classes=wp_segments %>%
+  select(class,class_name,color) %>%
+  unique()
 tib_count_class=wp_segments %>% 
   group_by(article,class_name) %>% 
   tally()
-tib=crossing(wp_pages %>% select(article,curation) %>%
-               filter(!is.na(curation)) %>%  unique(),
+tib=crossing(wp_pages %>% select(article) %>% unique(),
              tib_classes %>% select(class_name)) %>% 
   left_join(tib_count_class,by=c("article","class_name")) %>% 
   mutate(n=replace_na(n,0)) %>% 
   group_by(article) %>% 
   mutate(ntot=sum(n)) %>% 
   ungroup() %>% 
-  mutate(highcuration=cut(curation,
-                          c(-1,quantile(curation,0.66666),1),
-                          labels=c("FALSE","TRUE")),
-         prop=n/ntot) %>%
-  ungroup() %>% 
-  na.omit()
-
-tib_summary=calc_tib_summary(tib,
-                             group1=class_name,
-                             group2=highcuration,
-                             y=prop,
-                             d1name=NULL,
-                             d2name=NULL)
-ggplot(tib,aes(x=class_name,y=prop))+
-  geom_boxplot(aes(fill=class_name,color=highcuration))+
-  scale_fill_manual(breaks=tib_classes$class_name, values=tib_classes$color)+
-  scale_color_manual(values=c(col_DFO,col_WD))+
-  coord_flip()+
-  geom_text(data=tib_summary %>% select(group1,group2,label_group2) %>% unique(),
-            aes(x=group1,group=group2, y=-0.25,label=label_group2),
-             hjust=0,
-            position=position_dodge(width=0.8))+
-  guides(fill = FALSE)+
-  xlab("")
+  mutate(ntotcat=cut(ntot,breaks=quantile(ntot,seq(0,1,by=0.25))),
+         prop=n/ntot) %>%  
+  select(article,class_name,prop) %>% 
+  na.omit() %>% 
+  pivot_wider(names_from=class_name,values_from=prop) %>% 
+  unique() %>% 
+  mutate(complex_topics=anticipation+governance+hydrology) %>% 
+  select(article,complex_topics)
+datarf=datarf %>% 
+  left_join(tib,by="article")
+plot_random_forest(data=datarf,
+                   response="complex_topics",
+                   remove="mean_views_f3months")
 ```
 
-@fig-curation_topics*:* *Proportion of topics in each article according to its curation level. We classified articles into two categories representing the 33% most curated articles (high curation) vs all other articles. For each class we tested the difference in proportion based on a Wilcoxon rank test. The symbols correspond to p-values with `.`:p\<0.1, `*`:p\<0.05, `**`:p\<0.01, `***`:p\<0.001).*
 
-@fig-curation_topics shows that, contrary to our hypothesis, articles with high levels of curation tend to address topics such as relief, hydrology and governance in lower proportions. This hints at Wikipedia's curation process actually tending to lower the proportion in which these topics appear (for instance through the suppression of unchecked or debatable statements).
+@fig-curation_topics *Links between proportion of complex topics in the Wikipedia articles and a set of articles' descriptors (fushia), events' descriptors (green) and mixed descriptors (brown) assessed through a random forest regression. a) shows the relative importance of the descriptors in the prediction. The subsequent graphics show the partial effect of the descriptors on the proportion*
+
+
+@fig-curation_topics shows that the primary explanation to the proportion in which complex topics are addressed in the article is the length of the article (as we had already surmised from @fig-topic_per_length). The second one is the year of the event, with a high proportion of complex topics in the articles reporting older, historical events. That proportion decreases greatly from 1970 to 2015 and then starts increasing again, maybe due to increasing standards in the reporting of events. The proportion of complex topics addressed is also positively correlated to HDI. The proportion of complex topics is positively correlated to deathtoll for deathtolls up to 80, but negatively so beyond, reflecting that up to a certain point the discussion of causes and responsibility is increased by the event's damage severity but for higher deathtolls the narration of the event's unfolding in terms of weather and damage takes precedence. Contrary to our hypothesis also, articles with high levels of curation tend to address complex topics in lower proportions. This hints at Wikipedia's curation process actually tending to lower the proportion in which these topics appear (for instance through the suppression of unchecked or debatable statements). The effects of population and population density is difficult to interpret, as they probably result both from the number of people impacted and the variations in the standards of the people contributing the articles. The proportion of complex topics is lower for articles written in a local language, maybe reflecting the fact that providing documented statements about complex, potentially controversial topics surrounding floods is more difficult when one has more personal involvement and possibly less hindsight on an event.
 
 ### Number of views
 
@@ -816,12 +826,12 @@ We expect the short-term number of views of an article to be dependent of some o
 ```{r,fig.width=6,fig.height=8}
 #| label: fig-views
 #| fig-cap: "---"
-wp_pages_complete=wp_pages_complete %>% 
-  filter(year>=2015)
-plot_random_forest("mean_views_f3months")
+
+plot_random_forest(data=datarf %>% filter(year>=2015),
+                   response="mean_views_f3months")
 ```
 
-@fig-views*:* Links between short-term number of views of Wikipedia articles (during the 3 months following their creation) and a set of articles' descriptors (fushia), events' descriptors (green) and mixed descriptors (brown) assessed through a random forest regression. a) shows the relative importance of the descriptors in the prediction. The subsequent graphics show the partial effect of the descriptors on response.
+@fig-views:*Links between short-term number of views of Wikipedia articles (during the 3 months following their creation) and a set of articles' descriptors (fushia), events' descriptors (green) and mixed descriptors (brown) assessed through a random forest regression. a) shows the relative importance of the descriptors in the prediction. The subsequent graphics show the partial effect of the descriptors on response.*
 
 @fig-views .a shows that the short-term number of views of an article is most importantly correlated to curation, though not in the way we expected since highest number of views correspond to low levels of curation. As short-term number of views is also positively linked to article length, this could be interpreted as a sign that quantity of content (rather than quality) is the factor behind the number of views, especially shortly after a crisis, and that curation effort is not particularly focused on the articles generating the most views. The short-term number of views is also, as we expected, positively correlated to the events' deathtolls. The link to HDI is a bit more difficult to interpret with lowest and highest HDIs corresponding to the most views (independently of e.g. population density or deathtoll). We suspect the high number of views for lowest HDI could be due to e.g. Non-Governmental Organizations channelling foreign and digital-oriented attention to flood events in very vulnerable areas. The short-term number of views tends to increase over the years, and is higher for articles written in a local language, which was to be expected. The effect of population density is difficult to interpret, while total population is positively correlated to the short-term number of view, hinting at the sheer volume of viewers being linked to the size of national public audience. 
 
