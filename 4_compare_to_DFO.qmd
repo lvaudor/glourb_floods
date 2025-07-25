@@ -1,0 +1,85 @@
+
+```{r setup, warnings=FALSE, message=FALSE}
+library(tidyverse)
+countries=readRDS("data/transitory/countries.RDS")
+wp_pages=readRDS("data/wp_pages.RDS")
+```
+
+The correspondence between floods WD IDs and DFO IDs
+
+```{r}
+wm_dfo_corr=readRDS("data/wm_dfo_corr.RDS") %>%
+  select(flood,floodcorr) %>% 
+  sf::st_drop_geometry()
+```
+
+The DFO data with columns renamed for comparison
+
+```{r} 
+dfo_comp=readRDS("data/dfo_comp.RDS") %>%
+  mutate(flood_dfo=flood) %>%
+  select(-flood,-flood_label) %>% 
+  sf::st_drop_geometry() %>% 
+  # add WD identifier when available
+  left_join(wm_dfo_corr,
+            by=c("flood_dfo"="floodcorr")) %>% 
+  mutate(deathtoll_dfo=deathtoll,
+         country_label_dfo=country_label) %>% 
+  select(-start,-end,-date,-deathtoll,-country_label) %>%
+  left_join(countries %>% select(country_label,HDI) %>% unique(),
+            by=c("country_label_dfo"="country_label"),
+            relationship="many-to-many") 
+```
+
+
+
+```{r}
+wm_dfo_comparison=readRDS("data/wd_events.RDS") %>% 
+  left_join(countries %>% select(country,HDI),"country",relationship = "many-to-many") %>% 
+  mutate(HDI_wd=HDI) %>% 
+  select(-HDI) %>% 
+  unique() %>% 
+  full_join(dfo_comp,by="flood",
+            relationship = "many-to-many")
+```
+
+
+```{r}
+flood_lengths_local=wp_pages %>%
+  unique() %>% 
+  select(flood, length, local) %>% 
+  group_by(flood) %>%
+  summarise(total_length=sum(length),
+            local_length=sum(length[which(local==TRUE)])) %>%
+  mutate(prop_local=local_length/total_length) %>%
+  ungroup()
+```
+
+
+```{r}
+wm_dfo_comparison=wm_dfo_comparison %>% 
+  full_join(flood_lengths_local,by="flood") %>% 
+  mutate(HDI=case_when(is.na(HDI)~HDI_wd,
+                       TRUE~HDI)) %>% 
+  mutate(HDI_class=cut(HDI,
+                      quantile(countries$HDI,seq(0,1,by=0.25),
+                               na.rm=TRUE),
+                      include.lowest=TRUE))%>% 
+  mutate(in_data=case_when(is.na(flood) & !is.na(flood_dfo)~"dfo",
+                           !is.na(flood) & is.na(flood_dfo)~"wd",
+                           !is.na(flood) & !is.na(flood_dfo)~"in_both")) 
+```
+
+
+Are deathtolls provided through Wikidata sourced? 
+```{r}
+complement_wd_events=spq_init() %>%
+  spq_prefix(prefixes=c(prov="http://www.w3.org/ns/prov#")) %>%
+  spq_add("?flood wdt:P31/wdt:P279* wd:Q8068") %>%
+  spq_add("?flood p:P1120 ?statement") %>%
+  spq_add("?statement prov:wasDerivedFrom ?deathtoll_source") %>%
+  spq_perform(replace_prefixes=TRUE)
+wm_dfo_comparison=wm_dfo_comparison %>%
+  left_join(complement_wd_events,by="flood")
+saveRDS(wm_dfo_comparison %>% select(-statement, -HDI_wd),"data/wm_dfo_comparison.RDS")
+```

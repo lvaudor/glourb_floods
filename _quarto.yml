@@ -1,40 +1,11 @@
-website:
+project:
   title: "glourb_floods"
 
-  navbar:
-    left:
-      - href: index.qmd
-        text: Article
-      - href: about.qmd
-        text: About
-      - href: 2_use_wikipedia.qmd
-        text: Methods 1
-      - href: 3_curate_wikidata.qmd
-        text: Methods 2
-      - href: 4_text_analysis.qmd
-        text: Methods 3
-
-
-bibliography: floods.bib
-
-format:
-  html:
-    css: styles.scss
-    theme: cosmo
-    toc: true
-    toc-depth: 2
-    code-fold: true
-
-
-editor: visual
+format: "docx"
 
 execute:
   echo: false
   warning: false
   message: false
-# 
-# 
-# project:
-#   title: "glourb_floods"
-# 
-# format: "odt"
+  
+bibliography: floods.bib

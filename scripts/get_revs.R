@@ -1,3 +1,11 @@
+#' get information about the revisions of the article
+#'
+#' @param title 
+#' @param lang 
+#' @return a tibble with information about the articles' revisions (id,timestamp,minor,size,comment,delta,user_id,user_name)
+#' @export
+#'
+#' @examples
 get_revs=function(lang, title){
   f=function(x){
     ind=which(map_lgl(x,is.null))

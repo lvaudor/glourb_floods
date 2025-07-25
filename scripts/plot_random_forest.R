@@ -2,23 +2,27 @@ library(ggRandomForests)
 library(randomForestSRC)
 
 plot_random_forest=function(data, response, remove=NULL){
-  
+  # format data as datarf without id and NAs
   datarf=data %>% 
     select(-article) %>% 
     na.omit() %>% 
     unique()
-
-  
+  # isolate response variable
   ind=which(colnames(datarf)==response)
   colnames(datarf)[ind]="response"
+  # remove some columns if explicitly asked through argument
   if(!is.null(remove)){
     datarf=datarf[,which(!(colnames(datarf) %in% remove))]
   }
   datarf= datarf %>% 
     na.omit() %>%
     as.data.frame()
+  # run random forest model
   myrf=rfsrc(response~., 
-             data=datarf,importance=TRUE,nodesize=20)
+             data=datarf,
+             importance=TRUE,
+             nodesize=20)
+  print(myrf)
   smp.o <- subsample(myrf,verbose=FALSE)
   oo <- extract.subsample(smp.o, alpha = 0.001)
   datimp= oo$var.jk.sel.Z %>%
@@ -39,7 +43,8 @@ plot_random_forest=function(data, response, remove=NULL){
 
   partial <- plot.variable(myrf,
                            xvar = datimp$vars,
-                           partial = TRUE, sorted = FALSE,
+                           partial = TRUE, 
+                           sorted = FALSE,
                            show.plots = FALSE)
   gg_p <- gg_partial(partial)
   
